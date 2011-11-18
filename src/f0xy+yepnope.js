@@ -584,6 +584,7 @@ var docElement            = doc.documentElement,
 		@class
 */ 
 
+/** @namespace */
 var f0xy = (function(){
 
 	// If Array.indexOf is not defined, let's define it.
@@ -616,10 +617,10 @@ var f0xy = (function(){
 	* @param			{Boolean}			autoCreate			Whether or not to create a blank object if the namespace does not yet exist.
 	* @param			{Object}				[classes]			An object of class definitions which will be added to the namespace.
 	* @returns		{Object}										The object that represents the fully qualified namespace passed in as the first argument.
-	* @ignore
+	* @private
 	*/
 
-	_namespace = function(identifier, autoCreate, classes){
+	_f0xy.namespace = function(identifier, autoCreate, classes){
 		classes = classes || false;
 		var ns = window;
 
@@ -682,7 +683,7 @@ var f0xy = (function(){
 	var _f0xy = {};
 
 	/**
-	* Configure f0xy. Call to update the base class path, or to change the default the separator (".").
+	* Configure f0xy. Call to update the base class path, or to change the default separator (".").
 	* 
 	* @public
 	* @param		 {String}			[separator="."]		Namespace separator
@@ -692,6 +693,7 @@ var f0xy = (function(){
 	_f0xy.configure = function(class_path, separator){
 		_class_path = class_path || _class_path;
 		_separator = separator || _separator;
+		_class_path = (_class_path.lastIndexOf("/") === _class_path.length-1) ? _class_path : _class_path + "/";
 	}
 
 	/**
@@ -702,8 +704,8 @@ var f0xy = (function(){
 	* @returns		{Object|Boolean}							The object that represents the identifier or False if it has not yet been defined.
 	*/
 
-	_foxy.get = function(identifier){
-		return _namespace(identifier, false);
+	_f0xy.get = function(identifier){
+		return _f0xy.namespace(identifier, false);
 	}
 
 	/**
@@ -714,8 +716,8 @@ var f0xy = (function(){
 	* @param			{Object}				[classes]			An object of class definitions which will be added to the namespace
 	* @returns		{Object}										The object that represents the namespace passed in as the first argument.
 	*/
-	_foxy.define = function(identifier, classes){
-		return _namespace(identifier, true, classes);
+	_f0xy.define = function(identifier, classes){
+		return _f0xy.namespace(identifier, true, classes);
 	}
 
 	/**
@@ -746,7 +748,7 @@ var f0xy = (function(){
 
 	_f0xy.isClass = function(identifier){
 		
-		identifier = _namespace(identifier, false);
+		identifier = _f0xy.namespace(identifier, false);
 		
 		if(typeof identifier === "object" || typeof identifier === "function"){
 			return identifier.isClass;
@@ -768,7 +770,7 @@ var f0xy = (function(){
 	_f0xy.extend = function(identifier, obj){
 		
 		// If the Class exists and is a f0xy class, then return the extended object.
-		if(_foxy.isClass(identifier)){
+		if(_f0xy.isClass(identifier)){
 			obj = identifierClass.extend(obj);			
 		}
 		else{
@@ -791,7 +793,7 @@ var f0xy = (function(){
 	* Identifiers can contain the* wildcard character as its last segment (eg: com.test.*) 
 	* which will import all Classes under the given namespace.
 	*
-	* @see 		foxy.unuse
+	* @see 		f0xy.unuse
 	* @public
 	* @param	 	{String|Array}		identifiers		The fully qualfiied name(s) to import into the global namespace.
 	*/
@@ -870,6 +872,9 @@ var f0xy = (function(){
 			classes = new Array(classes);
 		}
 
+		// If the file is not absolute, prepend the class_path
+		file = (!new RegExp("(http://|/)[^ :]+").test(file)) ? _class_path + file : file;
+
 		for(var i = 0; i < classes.length; i ++){
 			_classMappings[classes[i]] = file;
 		}
@@ -924,10 +929,10 @@ var f0xy = (function(){
 						var className	= packageArray.splice(packageArray.length-1, 1);
 						var namespace = packageArray.join(_separator);
 						
-						var packageObj = _f0xy.namespace(namespace);
+						var packageObj = _f0xy.get(namespace, false);
 						
 						if(typeof packageObj[className].superClassIdentifier !== "undefined"){
-							var superClass = _f0xy.namespace(packageObj[className].superClassIdentifier);
+							var superClass = _f0xy.get(packageObj[className].superClassIdentifier, false);
 							if(superClass.isClass){
 								
 								var dependencies = packageObj[className].dependencies;
@@ -957,7 +962,7 @@ var f0xy = (function(){
 								break;
 							}
 
-							var obj = _f0xy.namespace(_loadQueues[i].classes[j]);
+							var obj = _f0xy.get(_loadQueues[i].classes[j], false);
 							
 							if(obj.dependencies){
 								for(var k = 0; k < obj.dependencies.length; k ++){
@@ -997,7 +1002,7 @@ var f0xy = (function(){
 
 	// ## f0xy Base Class.
 	// f0xy.Class is the ONLY Class to extend this directly, do not directly extend this Class.
-	_foxy.$$__BaseClass__$$ = (function(doInitialize){
+	_f0xy.$$__BaseClass__$$ = (function(doInitialize){
 		
 		// The base Class implementation (does nothing)
 		var _BaseClass = function(){};
@@ -1062,7 +1067,7 @@ var f0xy = (function(){
 
 })();
 
-f0xy.namespace("f0xy", {
+f0xy.define("f0xy", {
 
 	/** @lends f0xy.Class#*/
 
