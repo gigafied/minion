@@ -1,12 +1,12 @@
-### RosyJS - Simple JS Inheritance
+### xTendJS - Simple JS Inheritance
 
-The goal of RosyJS is to provide simple, easy-to-implement inheritance support for JavaScript.
+The goal of xTendJS is to provide simple, easy-to-implement inheritance support for JavaScript.
 
-RosyJS does all this, all while sporting a footpring of 3.1k (or an additional 1.6k if you are already using Modernizr or YepNope in your project).
+xTendJS does all this, all while sporting a footprint of 3.1k (or an additional 1.6k if you are already using Modernizr or yepnope in your project).
 
-RosyJS was inspired by NamespaceJS: https://github.com/maximebf/Namespace.js and John Resig's "SImple JavaScript Inheritance": http://ejohn.org/blog/simple-javascript-inheritance/
+xTendJS was inspired by NamespaceJS: https://github.com/maximebf/Namespace.js and John Resig's "Simple JavaScript Inheritance": http://ejohn.org/blog/simple-javascript-inheritance/
 
-### What RosyJS brings to the table:
+### What xTendJS brings to the table:
 
 - The concepts of classes + inheritance to JavaScript.
 - Namespace management.
@@ -15,4 +15,4 @@ RosyJS was inspired by NamespaceJS: https://github.com/maximebf/Namespace.js and
 
 ### License
 
-See rosy.js
+See xtend.js
