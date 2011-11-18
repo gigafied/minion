@@ -17,6 +17,10 @@ f0xy was mainly influenced by:
 - Asynchronous loading of dependencies.
 
 
+### Documentation
+
+JSDocs available at: http://gigafied.github.com/f0xy/docs/
+
 ### License
 
 See src/f0xy.js
