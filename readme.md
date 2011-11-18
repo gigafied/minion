@@ -1,12 +1,16 @@
-### xTendJS - Simple JS Inheritance
+### f0xy - AMD inspired Classy JavaScript
 
-The goal of xTendJS is to provide simple, easy-to-implement inheritance support for JavaScript.
+The goal of f0xy is to provide AMD like simple, easy-to-implement inheritance and class support for JavaScript.
 
-xTendJS does all this, all while sporting a footprint of 3.1k (or an additional 1.6k if you are already using Modernizr or yepnope in your project).
+f0xy does all this, all while sporting a tiny footprint of 3.1k (or an additional 1.6k if you are already using Modernizr or yepnope in your project).
 
-xTendJS was inspired by NamespaceJS: https://github.com/maximebf/Namespace.js and John Resig's "Simple JavaScript Inheritance": http://ejohn.org/blog/simple-javascript-inheritance/
+f0xy was mainly influenced by:
 
-### What xTendJS brings to the table:
+- NamespaceJS: https://github.com/maximebf/Namespace.js
+- John Resig's "Simple JavaScript Inheritance": http://ejohn.org/blog/simple-javascript-inheritance/
+- The AMD Pattern
+
+### What f0xy brings to the table:
 
 - The concepts of classes + inheritance to JavaScript.
 - Namespace management.
@@ -15,4 +19,4 @@ xTendJS was inspired by NamespaceJS: https://github.com/maximebf/Namespace.js an
 
 ### License
 
-See xtend.js
+See src/f0xy.js

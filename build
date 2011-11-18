@@ -1,7 +1,7 @@
 #! /bin/sh
 #rm -rf docs
-rm src/xtend+yepnope.js
-cat src/yepnope.js src/xtend.js >> src/xtend+yepnope.js
-uglifyjs -o bin/xtend.min.js -nc src/xtend.js
-uglifyjs -o bin/xtend+yepnope.min.js -nc src/xtend+yepnope.js
-lib/node-jsdoc-toolkit/app/run.js -c=lib/xtend.jsdoc.conf
+rm src/f0xy+yepnope.js
+cat src/yepnope.js src/f0xy.js >> src/f0xy+yepnope.js
+uglifyjs -o bin/f0xy.min.js -nc src/f0xy.js
+uglifyjs -o bin/f0xy+yepnope.min.js -nc src/f0xy+yepnope.js
+lib/node-jsdoc-toolkit/app/run.js -c=lib/f0xy.jsdoc.conf

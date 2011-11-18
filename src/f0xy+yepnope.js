@@ -549,7 +549,7 @@ var docElement            = doc.documentElement,
 
 @fileOverview
 
-	<h4>xTend JS - Simple JS Inheritance</h4>
+	<h4>f0xy - AMD inspired Classy JavaScript</h4>
 
 	<p>Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -579,13 +579,12 @@ var docElement            = doc.documentElement,
 
 
 /**
-		Global Static xTend Class with static methods.
+		Global Static f0xy Class with static methods.
 		@static
 		@class
  */ 
 
-
-var xTend = (function(){
+var f0xy = (function(){
 
 	// If Array.indexOf is not defined, let's define it.
 	Array.prototype.indexOf = Array.prototype.indexOf || function(o,i){for(var j=this.length,i=i<0?i+j<0?0:i+j:i||0;i<j&&this[i]!==o;i++);return j<=i?-1:i}
@@ -609,20 +608,20 @@ var xTend = (function(){
 	var _origWindowNS = {};
 
 	/**
-	* @exports _xtend as xTend 
+	* @exports _f0xy as f0xy 
 	* @class
 	*/
-	var _xtend = {};
+	var _f0xy = {};
 
 	/**
-	 * Configure xTend. Not necessary, unless you want to change the default class path or Namespace separator.
+	 * Configure f0xy. Not necessary, unless you want to change the default class path or Namespace separator.
 	 * 
 	 * @public
 	 * @param		 {String}			[separator="."]		Namespace separator
 	 * @param		 {String}			[class_path="js/"]	The root path of all your classes. Can be absolute or relative.
 	 */
 
-	_xtend.configure = function(separator, class_path){
+	_f0xy.configure = function(separator, class_path){
 		_separator = separator || _separator;
 		_class_path = class_path || _class_path;
 	}
@@ -635,7 +634,7 @@ var xTend = (function(){
 	 * @returns		 {String}									The URL of the package/class.
 	 */
 
-	_xtend.getIdentifierURL = function(identifier) {
+	_f0xy.getIdentifierURL = function(identifier) {
 		
 		if(_classMappings[identifier]){
 			return _classMappings[identifier];
@@ -645,7 +644,7 @@ var xTend = (function(){
 	}
 
 	/**
-	 * Checks to see whether the given identifier or Class is a xtend class. (Checks for .isClass)<br>
+	 * Checks to see whether the given identifier or Class is a f0xy class. (Checks for .isClass)<br>
 	 * NOTE: Classes that have not yet loaded all of their dependencies, will return FALSE for this check.
 	 *
 	 * @public
@@ -653,7 +652,7 @@ var xTend = (function(){
 	 * @returns		{Boolean}									Whether or not this is a Class.
 	 */
 
-	_xtend.isClass = function(identifier){
+	_f0xy.isClass = function(identifier){
 		
 		if(typeof identifier === "string"){
 			var parts = identifier.split(_separator);
@@ -687,7 +686,7 @@ var xTend = (function(){
 	 * @returns		{Object}										The object that represents the namespace passed in as the first argument.
 	 */
 
-	_xtend.namespace = function(namespace, classes){
+	_f0xy.namespace = function(namespace, classes){
 		classes = classes || false;
 		var ns = window;
 
@@ -717,7 +716,7 @@ var xTend = (function(){
 				
 				for(var className in classes){
 					if(className !== "requires"){
-						if(!_xtend.isClass(classes[className])){
+						if(!_f0xy.isClass(classes[className])){
 							classes[className].dependencies = classes.requires;
 							classes[className].nsID = namespace;
 							classes[className].ns = ns;
@@ -733,7 +732,7 @@ var xTend = (function(){
 						ns[className] = classes[className];
 					}
 				}
-				_xtend.require(classes.requires, function(){});
+				_f0xy.require(classes.requires, function(){});
 			}
 		}
 
@@ -741,7 +740,7 @@ var xTend = (function(){
 	}
 
 	/**
-	 * Extends a given class asynchronously.
+	 * extends a given class asynchronously.
 	 *
 	 * @public
 	 * @param		 {String}			identifier			The fully qualified class name of the class you want to extend.
@@ -749,7 +748,7 @@ var xTend = (function(){
 	 * @returns		 {Object}									The extended Class, or, if the Class to be extended has yet to be loaded in, the original Object with a few more properties.
 	 */ 
 
-	_xtend.extend = function(identifier, obj){
+	_f0xy.extend = function(identifier, obj){
 	 
 		// Let's check to see if the Class is already defined...
 		var parts = identifier.split(_separator);
@@ -764,7 +763,7 @@ var xTend = (function(){
 			identifierClass = identifierClass[parts[j]];
 		}
 		
-		// If the Class exists and is a xTend class, then return the extended object.
+		// If the Class exists and is a f0xy class, then return the extended object.
 		if(identifierClass.isClass){
 			obj = identifierClass.extend(obj);			
 		}
@@ -787,19 +786,19 @@ var xTend = (function(){
 	 * If not, the targeted namespace will be imported (ie. if com.test is imported, the test object 
 	 * will now be global).
 	 * 
-	 * Only use xTend.use() if you know the Class/package has already been defined (loaded).
-	 * Because xTend.use() imports objects/namespaces into the global namespace (window),
-	 * it is highly recommended that you call xTend.unuse() to clean up afterwards.
+	 * Only use f0xy.use() if you know the Class/package has already been defined (loaded).
+	 * Because f0xy.use() imports objects/namespaces into the global namespace (window),
+	 * it is highly recommended that you call f0xy.unuse() to clean up afterwards.
 	 *
-	 * xTend.unuse() is automatically called after every Class method.
+	 * f0xy.unuse() is automatically called after every Class method.
 	 *
 	 * @public
 	 * @param	 {String|Array}		identifier		The namespace as a String or an Array of namespaces
 	 */
 	 
-	_xtend.use = function(identifier){
+	_f0xy.use = function(identifier){
 		
-		xTend.unuse(identifier);
+		f0xy.unuse(identifier);
 
 		var identifiers;
 
@@ -815,7 +814,7 @@ var xTend = (function(){
 			
 			var parts = identifier.split(_separator);
 			var target = parts.pop();
-			var ns = _xtend.namespace(parts.join(_separator));
+			var ns = _f0xy.namespace(parts.join(_separator));
 			
 			if (target === '*') {
 				// imports all objects from the identifier, can't use include() in that case
@@ -836,7 +835,7 @@ var xTend = (function(){
 
 
 	/**
-	 * The opposite of xTend.use() (who would'a thunk it!!)
+	 * The opposite of f0xy.use() (who would'a thunk it!!)
 	 *
 	 * This method is automatically called after every Class method.
 	 *
@@ -844,7 +843,7 @@ var xTend = (function(){
 	 * @param	 {String|Array}		identifier		The namespace as a String or an Array of namespaces
 	 */
 
-	_xtend.unuse = function(identifier){
+	_f0xy.unuse = function(identifier){
 
 		identifier = identifier || "*";
 		var identifiers;
@@ -885,12 +884,12 @@ var xTend = (function(){
 
 
 	/**
-	 * Tells xTend that x file provides these Class definitions.
+	 * Tells f0xy that x file provides these Class definitions.
 	 * Where x file = filePath and classes is an aray of the Classes that xFile defines.
 	 * Useful in cases where you group specific things into minfiied js files.
 	 *
-	 * xTend.provides can load the file right away, by passing doLoad as true, and a callback function.
-	 * Otherwise, it just maps the classes to the filePath for any subsequent calls to xTend.require() which might refer
+	 * f0xy.provides can load the file right away, by passing doLoad as true, and a callback function.
+	 * Otherwise, it just maps the classes to the filePath for any subsequent calls to f0xy.require() which might refer
 	 * to said classes.
 	 *
 	 * @public
@@ -898,7 +897,7 @@ var xTend = (function(){
 	 * @param	 {String|Array}			identifier		The namespace as a {String} or an {Array} of namespaces
 	 */
 
-	_xtend.provides = function(filePath, classes, doLoad, callback){
+	_f0xy.provides = function(filePath, classes, doLoad, callback){
 
 		// If classes is a String, create an array
 		if(typeof(classes) !== 'object' && !classes.sort){
@@ -910,7 +909,7 @@ var xTend = (function(){
 		}
 
 		if(doLoad){
-			_xtend.require(classes, callback);
+			_f0xy.require(classes, callback);
 		}
 	}
 
@@ -923,7 +922,7 @@ var xTend = (function(){
 	 * @param	 {Function}				completeFunc			The function to call once all classes (and their dependencies) have been included/loaded.
 	 */
 
-	_xtend.require = function(classes, completeFunc){
+	_f0xy.require = function(classes, completeFunc){
 
 		if(typeof classes === "string"){classes = [classes];}
 		
@@ -932,9 +931,9 @@ var xTend = (function(){
 		for(var i = 0; i < classes.length; i ++){
 			var identifier = classes[i];
 
-			if((_loadedClasses.indexOf(identifier) === -1) && !_xtend.isClass(identifier)){	
+			if((_loadedClasses.indexOf(identifier) === -1) && !_f0xy.isClass(identifier)){	
 				_loadedClasses.push(identifier);
-				classFiles.push(_xtend.getIdentifierURL(identifier));
+				classFiles.push(_f0xy.getIdentifierURL(identifier));
 			}
 		}
 
@@ -958,10 +957,10 @@ var xTend = (function(){
 						var className	= packageArray.splice(packageArray.length-1, 1);
 						var namespace = packageArray.join(_separator);
 						
-						var packageObj = _xtend.namespace(namespace);
+						var packageObj = _f0xy.namespace(namespace);
 						
 						if(typeof packageObj[className].superClassIdentifier !== "undefined"){
-							var superClass = _xtend.namespace(packageObj[className].superClassIdentifier);
+							var superClass = _f0xy.namespace(packageObj[className].superClassIdentifier);
 							if(superClass.isClass){
 								
 								var dependencies = packageObj[className].dependencies;
@@ -986,12 +985,12 @@ var xTend = (function(){
 						
 						for(var j = 0; j < _loadQueues[i].classes.length; j ++){
 							
-							if(!_xtend.isClass(_loadQueues[i].classes[j])){
+							if(!_f0xy.isClass(_loadQueues[i].classes[j])){
 								dependenciesLoaded = false;
 								break;
 							}
 
-							var obj = _xtend.namespace(_loadQueues[i].classes[j]);
+							var obj = _f0xy.namespace(_loadQueues[i].classes[j]);
 							
 							if(obj.dependencies){
 								for(var k = 0; k < obj.dependencies.length; k ++){
@@ -1018,12 +1017,12 @@ var xTend = (function(){
 		}
 	}
 
-	return _xtend;
+	return _f0xy;
 
 })();
 
 /**
-	The xTend Base Class
+	The f0xy Base Class
 	Simple JavaScript Inheritance
 
 	Taken from: http://ejohn.org/blog/simple-javascript-inheritance/
@@ -1033,10 +1032,10 @@ var xTend = (function(){
 	@private
  */ 
 
-xTend.namespace("org.xtendjs", {
+f0xy.namespace("org.f0xy", {
 	
-	// ## xTend Base Class.
-	// org.xtendjs.Class is the ONLY Class to extend this directly, do not directly extend this Class.
+	// ## f0xy Base Class.
+	// org.f0xy.Class is the ONLY Class to extend this directly, do not directly extend this Class.
 	$$__BaseClass__$$ : (function(doInitialize){
 		
 		// The base Class implementation (does nothing)
@@ -1067,7 +1066,7 @@ xTend.namespace("org.xtendjs", {
 						var ret = fn.apply(this, arguments);
 						this._super = null;
 						delete this._super;					 
-						xTend.unuse();
+						f0xy.unuse();
 					};
 				}(name, obj[name])) : obj[name];
 			}
@@ -1099,15 +1098,15 @@ xTend.namespace("org.xtendjs", {
 	})()
 });
 
-xTend.namespace("org.xtendjs", {
+f0xy.namespace("org.f0xy", {
 
-	/** @lends org.xtendjs.Class# */
+	/** @lends org.f0xy.Class# */
 
-	Class : xTend.extend("org.xtendjs.$$__BaseClass__$$", {
+	Class : f0xy.extend("org.f0xy.$$__BaseClass__$$", {
 
 		/** 
 		*
-		* The base xTend Class. All Classes are required to be descendants
+		* The base f0xy Class. All Classes are required to be descendants
 		* of this class, either directly, or indirectly.
 		*
 		* @constructs 
@@ -1118,13 +1117,13 @@ xTend.namespace("org.xtendjs", {
 
 		/** 
 		* Imports all the dependencies (determined by what is in the "requires" array and what Class this Class extends) to the global namespace temporarily.
-		* Basically, it just does: <code>xTend.use(this.dependencies);</code>
+		* Basically, it just does: <code>f0xy.use(this.dependencies);</code>
 		*
-		* @see xTend.use
+		* @see f0xy.use
 		*/
 		import_dependencies : function(){
 			if(this.dependencies){
-				xTend.use(this.dependencies)
+				f0xy.use(this.dependencies)
 			}
 		},
 
