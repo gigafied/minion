@@ -1,0 +1,665 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf8" />
+		<meta name="generator" content="JsDoc Toolkit" />
+		
+		<title>JsDoc Reference - xTend</title>
+
+        <link rel="stylesheet" href="../static/default.css" type="text/css" media="screen" charset="utf-8" />
+	</head>
+
+	<body>
+<!-- ============================== header ================================= -->	
+		<!-- begin static/header.html -->
+		<div id="header">
+</div>
+		<!-- end static/header.html -->
+
+        
+
+<!-- ============================== classes index ============================ -->
+		<div id="index">
+            <div id="docs">
+                
+            </div>
+			
+<h2>Index</h2>
+<ul class="classList">
+  <li><a href="../files.html">File Index</a></li>
+  <li><a href="../index.html">Class Index</a></li>
+  <li><a href="../symbolindex.html">Symbol Index</a></li>
+</ul>
+<h2>Classes</h2>
+<ul class="classList">
+	
+	<li></li>
+	
+	<li><a href="../symbols/org.xtendjs.Class.html">org.xtendjs.Class</a></li>
+	
+	<li><a href="../symbols/xTend.html">xTend</a></li>
+	
+</ul>
+
+		</div>
+		
+        <div id="symbolList">
+           <!-- constructor list -->
+           
+             <h3>
+                 Namespace 
+             </h3>
+             <ul>
+                <li >
+                  <a href="../symbols/xTend.html">xTend</a>
+                </li>
+             </ul>
+           
+           <!-- end constructor list -->
+
+           <!-- properties list -->
+           
+           
+           <!-- end properties list -->
+
+           <!-- function summary -->
+           
+           
+             <h3>Functions</h3>
+             <ul>
+               
+                   <li>
+                        <a href="../symbols/xTend.html#.configure">configure</a>
+                    </li>
+               
+                   <li>
+                        <a href="../symbols/xTend.html#.extend">extend</a>
+                    </li>
+               
+                   <li>
+                        <a href="../symbols/xTend.html#.getIdentifierURL">getIdentifierURL</a>
+                    </li>
+               
+                   <li>
+                        <a href="../symbols/xTend.html#.isClass">isClass</a>
+                    </li>
+               
+                   <li>
+                        <a href="../symbols/xTend.html#.namespace">namespace</a>
+                    </li>
+               
+                   <li>
+                        <a href="../symbols/xTend.html#.provides">provides</a>
+                    </li>
+               
+                   <li>
+                        <a href="../symbols/xTend.html#.require">require</a>
+                    </li>
+               
+                   <li>
+                        <a href="../symbols/xTend.html#.unuse">unuse</a>
+                    </li>
+               
+                   <li>
+                        <a href="../symbols/xTend.html#.use">use</a>
+                    </li>
+               
+             </ul>
+           
+           <!-- end function summary -->
+
+           <!-- events summary -->
+           
+           
+           <!-- end events summary -->
+        </div>
+
+		<div id="content">
+<!-- ============================== class title ============================ -->
+			<h1 class="classTitle">
+				Namespace xTend
+			</h1>
+
+<!-- ============================== class summary ========================== -->			
+			<p class="description">
+				
+				
+			
+				
+				
+				
+					<br /><i>Defined in: </i> <a href="../symbols/src/src_xtend.js.html">xtend.js</a>.
+				
+			</p>
+
+<!-- ============================== constructor details ==================== -->		
+			
+			<div class="details"><a name="constructor"> </a>
+				<div class="sectionTitle">
+					Namespace Detail
+				</div>
+				
+				<div class="fixedFont">
+						<b>xTend</b>
+				</div>
+				
+				<div class="description">
+					<p>Global Static xTend Class with static methods.</p>
+					
+				</div>
+				
+				
+				
+				
+					
+					
+					
+					
+					
+					
+					
+
+			</div>
+			
+
+<!-- ============================== field details ========================== -->		
+			
+
+<!-- ============================== method details ========================= -->		
+			
+              <div class="details">
+				<div class="sectionTitle">
+					Method Detail
+				</div>
+				
+                  <div class="member">
+					<a name=".configure"> </a>
+					<div class="fixedFont">
+                      <div class="modifiers">&lt;static&gt; 
+                      </div>
+					
+					<span class="light">xTend.</span><b>configure</b>(separator, class_path)
+					
+
+					</div>
+					<div class="description">
+						<p>Configure xTend. Not necessary, unless you want to change the default class path or Namespace separator.</p>
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{String}</span> <b>separator</b>
+										<i>Optional<br>Default Value: "."</i>
+									</code>
+								</dt>
+								<dd>Namespace separator</dd>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{String}</span> <b>class_path</b>
+										<i>Optional<br>Default Value: "js/"</i>
+									</code>
+								</dt>
+								<dd>The root path of all your classes. Can be absolute or relative.</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+                  </div>
+				
+                  <div class="member">
+					<a name=".extend"> </a>
+					<div class="fixedFont">
+                      <div class="modifiers">&lt;static&gt; 
+                      </div>
+					
+					<span class="light">xTend.</span><b>extend</b>(identifier, obj)
+					<span class="light"> : {Object}</span>
+
+					</div>
+					<div class="description">
+						<p>Extends a given class asynchronously.</p>
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{String}</span> <b>identifier</b>
+										
+									</code>
+								</dt>
+								<dd>The fully qualified class name of the class you want to extend.</dd>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{Object}</span> <b>obj</b>
+										
+									</code>
+								</dt>
+								<dd>A Class Object</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Object}</span> The extended Class, or, if the Class to be extended has yet to be loaded in, the original Object with a few more properties.</dd>
+							
+							</dl>
+						
+						
+						
+
+                  </div>
+				
+                  <div class="member">
+					<a name=".getIdentifierURL"> </a>
+					<div class="fixedFont">
+                      <div class="modifiers">&lt;static&gt; 
+                      </div>
+					
+					<span class="light">xTend.</span><b>getIdentifierURL</b>(identifier)
+					<span class="light"> : {String}</span>
+
+					</div>
+					<div class="description">
+						<p>Gets the URL for a given identifier.</p>
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{String}</span> <b>identifier</b>
+										
+									</code>
+								</dt>
+								<dd>The namespace identifier</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> The URL of the package/class.</dd>
+							
+							</dl>
+						
+						
+						
+
+                  </div>
+				
+                  <div class="member">
+					<a name=".isClass"> </a>
+					<div class="fixedFont">
+                      <div class="modifiers">&lt;static&gt; 
+                      </div>
+					
+					<span class="light">xTend.</span><b>isClass</b>(identifier)
+					<span class="light"> : {Boolean}</span>
+
+					</div>
+					<div class="description">
+						<p>Checks to see whether the given identifier or Class is a xtend class. (Checks for .isClass)<br>
+NOTE: Classes that have not yet loaded all of their dependencies, will return FALSE for this check.</p>
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{String|Object}</span> <b>identifier</b>
+										
+									</code>
+								</dt>
+								<dd>The namespace identifier, the Class or an instance of the class.</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Boolean}</span> Whether or not this is a Class.</dd>
+							
+							</dl>
+						
+						
+						
+
+                  </div>
+				
+                  <div class="member">
+					<a name=".namespace"> </a>
+					<div class="fixedFont">
+                      <div class="modifiers">&lt;static&gt; 
+                      </div>
+					
+					<span class="light">xTend.</span><b>namespace</b>(namespace, classes)
+					<span class="light"> : {Object}</span>
+
+					</div>
+					<div class="description">
+						<p>Gets the namespace/Class, or creates it if it does not exist. Also optionally creates Objects in the specified namepsace.</p>
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{String}</span> <b>namespace</b>
+										
+									</code>
+								</dt>
+								<dd>The namespace/package as a {String}</dd>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{Object}</span> <b>classes</b>
+										<i>Optional</i>
+									</code>
+								</dt>
+								<dd>An object of class definitions which will be added to the namespace</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Object}</span> The object that represents the namespace passed in as the first argument.</dd>
+							
+							</dl>
+						
+						
+						
+
+                  </div>
+				
+                  <div class="member">
+					<a name=".provides"> </a>
+					<div class="fixedFont">
+                      <div class="modifiers">&lt;static&gt; 
+                      </div>
+					
+					<span class="light">xTend.</span><b>provides</b>(filePath, identifier, doLoad, callback)
+					
+
+					</div>
+					<div class="description">
+						<p>Tells xTend that x file provides these Class definitions.
+Where x file = filePath and classes is an aray of the Classes that xFile defines.
+Useful in cases where you group specific things into minfiied js files.</p>
+
+<p>xTend.provides can load the file right away, by passing doLoad as true, and a callback function.
+Otherwise, it just maps the classes to the filePath for any subsequent calls to xTend.require() which might refer
+to said classes.</p>
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{String}</span> <b>filePath</b>
+										
+									</code>
+								</dt>
+								<dd>The path to the JS file.</dd>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{String|Array}</span> <b>identifier</b>
+										
+									</code>
+								</dt>
+								<dd>The namespace as a {String} or an {Array} of namespaces</dd>
+							
+								<dt>
+									<code>
+										<b>doLoad</b>
+										
+									</code>
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<code>
+										<b>callback</b>
+										
+									</code>
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+                  </div>
+				
+                  <div class="member">
+					<a name=".require"> </a>
+					<div class="fixedFont">
+                      <div class="modifiers">&lt;static&gt; 
+                      </div>
+					
+					<span class="light">xTend.</span><b>require</b>(classes, completeFunc)
+					
+
+					</div>
+					<div class="description">
+						<p>Imports the packages/classes for a given identifier. Loads them if neccessary and includes them in the global namespace.</p>
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{String|Array}</span> <b>classes</b>
+										
+									</code>
+								</dt>
+								<dd>The class(es) to load/include.</dd>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{Function}</span> <b>completeFunc</b>
+										
+									</code>
+								</dt>
+								<dd>The function to call once all classes (and their dependencies) have been included/loaded.</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+                  </div>
+				
+                  <div class="member">
+					<a name=".unuse"> </a>
+					<div class="fixedFont">
+                      <div class="modifiers">&lt;static&gt; 
+                      </div>
+					
+					<span class="light">xTend.</span><b>unuse</b>(identifier)
+					
+
+					</div>
+					<div class="description">
+						<p>The opposite of xTend.use() (who would'a thunk it!!)</p>
+
+<p>This method is automatically called after every Class method.</p>
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{String|Array}</span> <b>identifier</b>
+										
+									</code>
+								</dt>
+								<dd>The namespace as a String or an Array of namespaces</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+                  </div>
+				
+                  <div class="member">
+					<a name=".use"> </a>
+					<div class="fixedFont">
+                      <div class="modifiers">&lt;static&gt; 
+                      </div>
+					
+					<span class="light">xTend.</span><b>use</b>(identifier)
+					
+
+					</div>
+					<div class="description">
+						<p>Imports properties from the specified namespace to the global space (ie. under window)</p>
+
+<p>The identifier {String} can contain the * wildcard character as its last segment (eg: com.test.*) 
+which will import all properties from the namespace.</p>
+
+<p>If not, the targeted namespace will be imported (ie. if com.test is imported, the test object 
+will now be global).</p>
+
+<p>Only use xTend.use() if you know the Class/package has already been defined (loaded).
+Because xTend.use() imports objects/namespaces into the global namespace (window),
+it is highly recommended that you call xTend.unuse() to clean up afterwards.</p>
+
+<p>xTend.unuse() is automatically called after every Class method.</p>
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<code>
+										<span class="light fixedFont">{String|Array}</span> <b>identifier</b>
+										
+									</code>
+								</dt>
+								<dd>The namespace as a String or an Array of namespaces</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+                  </div>
+				
+              </div>
+			
+			
+<!-- ============================== event details ========================= -->		
+			
+			<hr />
+		</div>
+
+		
+<!-- ============================== footer ================================= -->
+		<div class="fineprint" style="clear:both;text-align:center">
+			
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Thu Nov 17 2011 19:21:00 GMT-0800 (PST)
+		</div>
+	</body>
+</html>
