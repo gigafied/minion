@@ -3,10 +3,7 @@
 
 @fileOverview
 
-	<h4>Rosy JS - Simple JS Inheritance</h4>
-	<span>RED Interactive Agency</span>
-
-	<p>Copyright (c) 2011 by RED Interactive Agency</p>
+	<h4>xTend JS - Simple JS Inheritance</h4>
 
 	<p>Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -27,20 +24,22 @@
 	THE SOFTWARE.</p>
 	
 	Inspired by NamespaceJS: https://github.com/maximebf/Namespace.js
-		
-	@version 2.0.1
 
-	@requires yepnope-1.0.2+ (or Modernizr 2 w/ Modernizr.load)
+	@ author Taka Kojima (taka@gigafied.com)
+	@ version 2.0.1
+
+	@ requires yepnope-1.0.2+ (or Modernizr 2 w/ Modernizr.load)
 */
 
 
 /**
-		Global Static Rosy Class with static methods.
+		Global Static xTend Class with static methods.
 		@static
 		@class
  */ 
 
-var Rosy = (function(){
+
+var xTend = (function(){
 
 	// If Array.indexOf is not defined, let's define it.
 	Array.prototype.indexOf = Array.prototype.indexOf || function(o,i){for(var j=this.length,i=i<0?i+j<0?0:i+j:i||0;i<j&&this[i]!==o;i++);return j<=i?-1:i}
@@ -64,20 +63,20 @@ var Rosy = (function(){
 	var _origWindowNS = {};
 
 	/**
-	* @exports _rosy as Rosy 
+	* @exports _xtend as xTend 
 	* @class
 	*/
-	var _rosy = {};
+	var _xtend = {};
 
 	/**
-	 * Configure Rosy. Not necessary, unless you want to change the default class path or Namespace separator.
+	 * Configure xTend. Not necessary, unless you want to change the default class path or Namespace separator.
 	 * 
 	 * @public
 	 * @param		 {String}			[separator="."]		Namespace separator
 	 * @param		 {String}			[class_path="js/"]	The root path of all your classes. Can be absolute or relative.
 	 */
 
-	_rosy.configure = function(separator, class_path){
+	_xtend.configure = function(separator, class_path){
 		_separator = separator || _separator;
 		_class_path = class_path || _class_path;
 	}
@@ -90,7 +89,7 @@ var Rosy = (function(){
 	 * @returns		 {String}									The URL of the package/class.
 	 */
 
-	_rosy.getIdentifierURL = function(identifier) {
+	_xtend.getIdentifierURL = function(identifier) {
 		
 		if(_classMappings[identifier]){
 			return _classMappings[identifier];
@@ -100,7 +99,7 @@ var Rosy = (function(){
 	}
 
 	/**
-	 * Checks to see whether the given identifier or Class is a rosy class. (Checks for .isClass)<br>
+	 * Checks to see whether the given identifier or Class is a xtend class. (Checks for .isClass)<br>
 	 * NOTE: Classes that have not yet loaded all of their dependencies, will return FALSE for this check.
 	 *
 	 * @public
@@ -108,7 +107,7 @@ var Rosy = (function(){
 	 * @returns		{Boolean}									Whether or not this is a Class.
 	 */
 
-	_rosy.isClass = function(identifier){
+	_xtend.isClass = function(identifier){
 		
 		if(typeof identifier === "string"){
 			var parts = identifier.split(_separator);
@@ -142,7 +141,7 @@ var Rosy = (function(){
 	 * @returns		{Object}										The object that represents the namespace passed in as the first argument.
 	 */
 
-	_rosy.namespace = function(namespace, classes){
+	_xtend.namespace = function(namespace, classes){
 		classes = classes || false;
 		var ns = window;
 
@@ -172,7 +171,7 @@ var Rosy = (function(){
 				
 				for(var className in classes){
 					if(className !== "requires"){
-						if(!_rosy.isClass(classes[className])){
+						if(!_xtend.isClass(classes[className])){
 							classes[className].dependencies = classes.requires;
 							classes[className].nsID = namespace;
 							classes[className].ns = ns;
@@ -188,7 +187,7 @@ var Rosy = (function(){
 						ns[className] = classes[className];
 					}
 				}
-				_rosy.require(classes.requires, function(){});
+				_xtend.require(classes.requires, function(){});
 			}
 		}
 
@@ -204,7 +203,7 @@ var Rosy = (function(){
 	 * @returns		 {Object}									The extended Class, or, if the Class to be extended has yet to be loaded in, the original Object with a few more properties.
 	 */ 
 
-	_rosy.extend = function(identifier, obj){
+	_xtend.extend = function(identifier, obj){
 	 
 		// Let's check to see if the Class is already defined...
 		var parts = identifier.split(_separator);
@@ -219,7 +218,7 @@ var Rosy = (function(){
 			identifierClass = identifierClass[parts[j]];
 		}
 		
-		// If the Class exists and is a Rosy class, then return the extended object.
+		// If the Class exists and is a xTend class, then return the extended object.
 		if(identifierClass.isClass){
 			obj = identifierClass.extend(obj);			
 		}
@@ -242,19 +241,19 @@ var Rosy = (function(){
 	 * If not, the targeted namespace will be imported (ie. if com.test is imported, the test object 
 	 * will now be global).
 	 * 
-	 * Only use Rosy.use() if you know the Class/package has already been defined (loaded).
-	 * Because Rosy.use() imports objects/namespaces into the global namespace (window),
-	 * it is highly recommended that you call Rosy.unuse() to clean up afterwards.
+	 * Only use xTend.use() if you know the Class/package has already been defined (loaded).
+	 * Because xTend.use() imports objects/namespaces into the global namespace (window),
+	 * it is highly recommended that you call xTend.unuse() to clean up afterwards.
 	 *
-	 * Rosy.unuse() is automatically called after every Class method.
+	 * xTend.unuse() is automatically called after every Class method.
 	 *
 	 * @public
 	 * @param	 {String|Array}		identifier		The namespace as a String or an Array of namespaces
 	 */
 	 
-	_rosy.use = function(identifier){
+	_xtend.use = function(identifier){
 		
-		Rosy.unuse(identifier);
+		xTend.unuse(identifier);
 
 		var identifiers;
 
@@ -270,7 +269,7 @@ var Rosy = (function(){
 			
 			var parts = identifier.split(_separator);
 			var target = parts.pop();
-			var ns = _rosy.namespace(parts.join(_separator));
+			var ns = _xtend.namespace(parts.join(_separator));
 			
 			if (target === '*') {
 				// imports all objects from the identifier, can't use include() in that case
@@ -291,7 +290,7 @@ var Rosy = (function(){
 
 
 	/**
-	 * The opposite of Rosy.use() (who would'a thunk it!!)
+	 * The opposite of xTend.use() (who would'a thunk it!!)
 	 *
 	 * This method is automatically called after every Class method.
 	 *
@@ -299,7 +298,7 @@ var Rosy = (function(){
 	 * @param	 {String|Array}		identifier		The namespace as a String or an Array of namespaces
 	 */
 
-	_rosy.unuse = function(identifier){
+	_xtend.unuse = function(identifier){
 
 		identifier = identifier || "*";
 		var identifiers;
@@ -340,12 +339,12 @@ var Rosy = (function(){
 
 
 	/**
-	 * Tells Rosy that x file provides these Class definitions.
+	 * Tells xTend that x file provides these Class definitions.
 	 * Where x file = filePath and classes is an aray of the Classes that xFile defines.
 	 * Useful in cases where you group specific things into minfiied js files.
 	 *
-	 * Rosy.provides can load the file right away, by passing doLoad as true, and a callback function.
-	 * Otherwise, it just maps the classes to the filePath for any subsequent calls to Rosy.require() which might refer
+	 * xTend.provides can load the file right away, by passing doLoad as true, and a callback function.
+	 * Otherwise, it just maps the classes to the filePath for any subsequent calls to xTend.require() which might refer
 	 * to said classes.
 	 *
 	 * @public
@@ -353,7 +352,7 @@ var Rosy = (function(){
 	 * @param	 {String|Array}			identifier		The namespace as a {String} or an {Array} of namespaces
 	 */
 
-	_rosy.provides = function(filePath, classes, doLoad, callback){
+	_xtend.provides = function(filePath, classes, doLoad, callback){
 
 		// If classes is a String, create an array
 		if(typeof(classes) !== 'object' && !classes.sort){
@@ -365,7 +364,7 @@ var Rosy = (function(){
 		}
 
 		if(doLoad){
-			_rosy.require(classes, callback);
+			_xtend.require(classes, callback);
 		}
 	}
 
@@ -378,7 +377,7 @@ var Rosy = (function(){
 	 * @param	 {Function}				completeFunc			The function to call once all classes (and their dependencies) have been included/loaded.
 	 */
 
-	_rosy.require = function(classes, completeFunc){
+	_xtend.require = function(classes, completeFunc){
 
 		if(typeof classes === "string"){classes = [classes];}
 		
@@ -387,9 +386,9 @@ var Rosy = (function(){
 		for(var i = 0; i < classes.length; i ++){
 			var identifier = classes[i];
 
-			if((_loadedClasses.indexOf(identifier) === -1) && !_rosy.isClass(identifier)){	
+			if((_loadedClasses.indexOf(identifier) === -1) && !_xtend.isClass(identifier)){	
 				_loadedClasses.push(identifier);
-				classFiles.push(_rosy.getIdentifierURL(identifier));
+				classFiles.push(_xtend.getIdentifierURL(identifier));
 			}
 		}
 
@@ -413,10 +412,10 @@ var Rosy = (function(){
 						var className	= packageArray.splice(packageArray.length-1, 1);
 						var namespace = packageArray.join(_separator);
 						
-						var packageObj = _rosy.namespace(namespace);
+						var packageObj = _xtend.namespace(namespace);
 						
 						if(typeof packageObj[className].superClassIdentifier !== "undefined"){
-							var superClass = _rosy.namespace(packageObj[className].superClassIdentifier);
+							var superClass = _xtend.namespace(packageObj[className].superClassIdentifier);
 							if(superClass.isClass){
 								
 								var dependencies = packageObj[className].dependencies;
@@ -441,12 +440,12 @@ var Rosy = (function(){
 						
 						for(var j = 0; j < _loadQueues[i].classes.length; j ++){
 							
-							if(!_rosy.isClass(_loadQueues[i].classes[j])){
+							if(!_xtend.isClass(_loadQueues[i].classes[j])){
 								dependenciesLoaded = false;
 								break;
 							}
 
-							var obj = _rosy.namespace(_loadQueues[i].classes[j]);
+							var obj = _xtend.namespace(_loadQueues[i].classes[j]);
 							
 							if(obj.dependencies){
 								for(var k = 0; k < obj.dependencies.length; k ++){
@@ -473,12 +472,12 @@ var Rosy = (function(){
 		}
 	}
 
-	return _rosy;
+	return _xtend;
 
 })();
 
 /**
-	The Rosy Base Class
+	The xTend Base Class
 	Simple JavaScript Inheritance
 
 	Taken from: http://ejohn.org/blog/simple-javascript-inheritance/
@@ -488,10 +487,10 @@ var Rosy = (function(){
 	@private
  */ 
 
-Rosy.namespace("org.rosyjs", {
+xTend.namespace("org.xtendjs", {
 	
-	// ## Rosy Base Class.
-	// org.rosyjs.Class is the ONLY Class to extend this directly, do not directly extend this Class.
+	// ## xTend Base Class.
+	// org.xtendjs.Class is the ONLY Class to extend this directly, do not directly extend this Class.
 	$$__BaseClass__$$ : (function(doInitialize){
 		
 		// The base Class implementation (does nothing)
@@ -522,7 +521,7 @@ Rosy.namespace("org.rosyjs", {
 						var ret = fn.apply(this, arguments);
 						this._super = null;
 						delete this._super;					 
-						Rosy.unuse();
+						xTend.unuse();
 					};
 				}(name, obj[name])) : obj[name];
 			}
@@ -554,15 +553,15 @@ Rosy.namespace("org.rosyjs", {
 	})()
 });
 
-Rosy.namespace("org.rosyjs", {
+xTend.namespace("org.xtendjs", {
 
-	/** @lends org.rosyjs.Class# */
+	/** @lends org.xtendjs.Class# */
 
-	Class : Rosy.extend("org.rosyjs.$$__BaseClass__$$", {
+	Class : xTend.extend("org.xtendjs.$$__BaseClass__$$", {
 
 		/** 
 		*
-		* The base Rosy Class. All Classes are required to be descendants
+		* The base xTend Class. All Classes are required to be descendants
 		* of this class, either directly, or indirectly.
 		*
 		* @constructs 
@@ -573,13 +572,13 @@ Rosy.namespace("org.rosyjs", {
 
 		/** 
 		* Imports all the dependencies (determined by what is in the "requires" array and what Class this Class extends) to the global namespace temporarily.
-		* Basically, it just does: <code>Rosy.use(this.dependencies);</code>
+		* Basically, it just does: <code>xTend.use(this.dependencies);</code>
 		*
-		* @see Rosy.use
+		* @see xTend.use
 		*/
 		import_dependencies : function(){
 			if(this.dependencies){
-				Rosy.use(this.dependencies)
+				xTend.use(this.dependencies)
 			}
 		},
 

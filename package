@@ -1,7 +1,0 @@
-#! /bin/sh
-#rm -rf docs
-rm rosy+yepnope.js
-cat yepnope.js rosy.js >> rosy+yepnope.js
-uglifyjs -o rosy.min.js -nc rosy.js
-uglifyjs -o rosy+yepnope.min.js -nc rosy+yepnope.js
-node-jsdoc-toolkit/app/run.js -c=rosy.jsdoc.conf
