@@ -61,6 +61,27 @@ var f0xy = (function(){
 	var _loadQueues = [];
 	var _extendQueue = [];
 	var _origWindowNS = {};
+	var _waitingOnDependencies = [];
+
+	/**
+	* @exports _f0xy as f0xy 
+	* @class
+	*/
+	var _f0xy = {};
+
+	/**
+	* Configure f0xy. Call to update the base class path, or to change the default separator (".").
+	* 
+	* @public
+	* @param		 {String}			[separator="."]		Namespace separator
+	* @param		 {String}			[class_path="js/"]	The root path of all your classes. Can be absolute or relative.
+	*/
+
+	_f0xy.configure = function(class_path, separator){
+		_class_path = (typeof class_path === "string") ? class_path : _class_path;
+		_separator = separator || _separator;
+		_class_path = (_class_path.lastIndexOf("/") === _class_path.length-1) ? _class_path : _class_path + "/";
+	}
 
 	/**
 	* Used by f0xy.get() and f0xy.define(). 
@@ -95,60 +116,54 @@ var f0xy = (function(){
 		else if(typeof identifier === "object"){ns = identifier;}
 
 		if(classes !== false){
+
+			if(!classes.require){classes.require = [];}
 			
-			for(var className in classes){
-				if(classes[className].superClassIdentifier){
-					if(!classes.require){classes.require = [];}
-					classes.require.push(classes[className].superClassIdentifier);
-					if(_extendQueue.indexOf(identifier + _separator + className) === -1){
-						_extendQueue.push(identifier + _separator + className);
-					}
-				}
-			}
-
-			if("require" in classes && classes.require.length > 0){
+			for(var className in classes){				
 				
-				for(var className in classes){
+				var qualifiedName = identifier + _separator + className;
 
-					if(className !== "require"){
+				if(classes[className].extendedFrom){
+					classes.require.push(classes[className].extendedFrom);
+				}
 
-						var addTo = (_f0xy.isClass(classes[className])) ? classes[className].prototype : classes[className];
-						
-						addTo.dependencies = classes.require;
-						addTo.nsID = identifier;
-						addTo.ns = ns;
-						addTo.className = className;
-
-						ns[className] = classes[className];
+				if(classes[className].superClassIdentifier){					
+					if(_extendQueue.indexOf(qualifiedName) === -1){
+						_extendQueue.push(qualifiedName);
 					}
 				}
 
-				_f0xy.require(classes.require);
+				if(className !== "require"){
+					
+					var c = classes[className];
+
+					c.nsID = identifier;
+					c.ns = ns;
+					c.className = className;
+
+					if("require" in classes && classes.require.length > 0){
+						c.dependencies = ((c.dependencies) ? c.dependencies : []).concat(classes.require);
+
+						_f0xy.require(classes.require);
+					}
+
+					if(_f0xy.isClass(c)){
+						c.prototype.nsID = identifier;
+						c.prototype.ns = ns;
+						c.className = className;
+
+						if("require" in classes && classes.require.length > 0){
+							c.prototype.dependencies = ((c.prototype.dependencies) ? c.prototype.dependencies : []).concat(classes.require);
+						}
+					}
+
+					ns[className] = c;
+				}
 			}
 		}
 
 		return ns;
 	}	
-
-	/**
-	* @exports _f0xy as f0xy 
-	* @class
-	*/
-	var _f0xy = {};
-
-	/**
-	* Configure f0xy. Call to update the base class path, or to change the default separator (".").
-	* 
-	* @public
-	* @param		 {String}			[separator="."]		Namespace separator
-	* @param		 {String}			[class_path="js/"]	The root path of all your classes. Can be absolute or relative.
-	*/
-
-	_f0xy.configure = function(class_path, separator){
-		_class_path = class_path || _class_path;
-		_separator = separator || _separator;
-		_class_path = (_class_path.lastIndexOf("/") === _class_path.length-1) ? _class_path : _class_path + "/";
-	}
 
 	/**
 	* Gets the object by it's fully qualified identifier.
@@ -202,9 +217,11 @@ var f0xy = (function(){
 
 	_f0xy.isClass = function(identifier){
 		
-		identifier = _f0xy.namespace(identifier, false);
+		if(typeof identifier !== "object" && typeof identifier !== "function"){
+			identifier = _f0xy.namespace(identifier, false);
+		}
 		
-		if(typeof identifier === "object" || typeof identifier === "function"){
+		if(identifier){
 			return identifier.isClass;
 		}
 
@@ -225,7 +242,7 @@ var f0xy = (function(){
 		
 		// If the Class exists and is a f0xy class, then return the extended object.
 		if(_f0xy.isClass(identifier)){
-			obj = identifierClass.extend(obj);			
+			obj = _f0xy.get(identifier).extend(obj);			
 		}
 		else{
 			obj.superClassIdentifier = identifier;
@@ -338,6 +355,73 @@ var f0xy = (function(){
 		}
 	}
 
+	/** @private */
+	_f0xy.checkExtendQueue = function(){
+
+		for(var i = _extendQueue.length - 1; i >= 0; i --){
+			
+			var packageArray = _extendQueue[i].split(_separator);
+			var className	= packageArray.splice(packageArray.length-1, 1);
+			var namespace = packageArray.join(_separator);
+			
+			var packageObj = _f0xy.get(namespace, false);
+
+			if(typeof packageObj[className].superClassIdentifier !== "undefined"){
+				var superClass = _f0xy.get(packageObj[className].superClassIdentifier, false);
+				if(superClass.isClass){
+					
+					var dependencies = packageObj[className].dependencies;
+					var scID = packageObj[className].superClassIdentifier;
+
+					packageObj[className].superClassIdentifier = null;
+					delete packageObj[className].superClassIdentifier;
+					
+					packageObj[className] = superClass.extend(packageObj[className]);
+					
+					packageObj[className].dependencies = dependencies;
+
+					_extendQueue.splice(i, 1);
+
+				}
+			}
+		}		
+	}
+
+	/** @private */
+	_f0xy.checkLoadQueue = function(){
+		for(var i = _loadQueues.length -1; i >= 0; i --){
+			var queue = _loadQueues[i];
+			var dependenciesLoaded = true;
+			
+			for(var j = 0; j < _loadQueues[i].classes.length; j ++){
+				/*	
+				if(!_f0xy.isClass(_loadQueues[i].classes[j])){
+					dependenciesLoaded = false;
+					break;
+				}
+				*/
+
+				var obj = _f0xy.get(_loadQueues[i].classes[j], false);
+
+				if(obj.dependencies){
+					for(var k = 0; k < obj.dependencies.length; k ++){
+						if(_loadedClasses.indexOf(obj.dependencies[k]) === -1){
+							dependenciesLoaded = false;
+							break;
+						}
+					}
+				}
+				if(!dependenciesLoaded){break;}
+			}
+
+			if(dependenciesLoaded){
+				if(queue.complete){
+					queue.complete.call();				
+				}
+				_loadQueues.splice(i, 1);
+			}
+		}
+	}
 
 	/**
 	* Asyncrhonously loads in js files for the classes specified.
@@ -357,9 +441,8 @@ var f0xy = (function(){
 		for(var i = 0; i < classes.length; i ++){
 			var identifier = classes[i];
 
-			if((_loadedClasses.indexOf(identifier) === -1) && !_f0xy.isClass(identifier)){	
-				_loadedClasses.push(identifier);
-				classFiles.push(_f0xy.toURL(identifier));
+			if((_loadedClasses.indexOf(identifier) === -1) && !_f0xy.get(identifier)){	
+				classFiles.push(_f0xy.getURL(identifier));
 			}
 		}
 
@@ -376,72 +459,31 @@ var f0xy = (function(){
 
 				load : classFiles,
 				callback : function(){
-
-					for(var i = _extendQueue.length - 1; i >= 0; i --){
-						
-						var packageArray = _extendQueue[i].split(_separator);
-						var className	= packageArray.splice(packageArray.length-1, 1);
-						var namespace = packageArray.join(_separator);
-						
-						var packageObj = _f0xy.get(namespace, false);
-						
-						if(typeof packageObj[className].superClassIdentifier !== "undefined"){
-							var superClass = _f0xy.get(packageObj[className].superClassIdentifier, false);
-							if(superClass.isClass){
-								
-								var dependencies = packageObj[className].dependencies;
-								var scID = packageObj[className].superClassIdentifier;
-
-								packageObj[className].superClassIdentifier = null;
-								delete packageObj[className].superClassIdentifier;
-								
-								packageObj[className] = superClass.extend(packageObj[className]);
-								
-								packageObj[className].dependencies = dependencies;
-
-								_extendQueue.splice(i, 1);
-
-							}
-						}
-					}
-
-					for(var i = _loadQueues.length -1; i >= 0; i --){
-						var queue = _loadQueues[i];
-						var dependenciesLoaded = true;
-						
-						for(var j = 0; j < _loadQueues[i].classes.length; j ++){
-							
-							if(!_f0xy.isClass(_loadQueues[i].classes[j])){
-								dependenciesLoaded = false;
-								break;
-							}
-
-							var obj = _f0xy.get(_loadQueues[i].classes[j], false);
-							
-							if(obj.dependencies){
-								for(var k = 0; k < obj.dependencies.length; k ++){
-									if(_loadedClasses.indexOf(obj.dependencies[i]) === -1){
-										dependenciesLoaded = false;
-										break;
-									}
-								}
-							}
-							if(!dependenciesLoaded){break;}
-						}
-						if(dependenciesLoaded){
-							queue.complete.call();
-							_loadQueues.splice(i, 1);
-						}
-					}
+					_f0xy.checkExtendQueue();
+					_f0xy.checkLoadQueue();
+				},
+				complete: function(){
+					_loadedClasses = _loadedClasses.concat(classes);
+					_f0xy.checkExtendQueue();
+					_f0xy.checkLoadQueue();					
 				}
 			});
 		}
 
 		else{
+			_loadedClasses = _loadedClasses.concat(classes);
 
-			completeFunc.call();
+			if(completeFunc){
+				completeFunc.call();
+			}
 		}
 	}
+
+	return _f0xy;
+
+})();
+
+f0xy.define("f0xy", {
 
 	/**
 	* The f0xy Base Class
@@ -452,11 +494,13 @@ var f0xy = (function(){
 	*
 	* @class
 	* @private
+	* @ignore
 	*/ 
 
 	// ## f0xy Base Class.
 	// f0xy.Class is the ONLY Class to extend this directly, do not directly extend this Class.
-	_f0xy.$$__BaseClass__$$ = (function(doInitialize){
+
+	$$__BaseClass__$$ : (function(doInitialize){
 		
 		// The base Class implementation (does nothing)
 		var _BaseClass = function(){};
@@ -476,6 +520,11 @@ var f0xy = (function(){
 
 			// Make a deep copy of this object, removing all references that might affect other instances.
 			var _this = this;
+
+			if(prototype.dependencies){
+				obj.dependencies = obj.dependencies || [];
+				obj.dependencies = obj.dependencies.concat(prototype.dependencies);
+			}
 
 			// Copy the properties over onto the new prototype
 			for(name in obj){
@@ -510,29 +559,42 @@ var f0xy = (function(){
 			// And make this class extendable
 			Class.extend = extend;
 			Class.isClass = true;
+
+			if(obj.ns){
+				Class.ns = obj.ns;
+			}
 			
+			if(obj.nsID){
+				Class.nsID = obj.nsID;
+			}
+			
+			if(obj.className){
+				Class.className = obj.className;
+			}
+
+			if(obj.dependencies){
+				Class.dependencies = obj.dependencies;
+			}
+
 			return Class;
 		};
 		
 		return _BaseClass;
-	})();	
-
-	return _f0xy;
-
-})();
+	})()
+});
 
 f0xy.define("f0xy", {
 
-	/** @lends f0xy.Class#*/
+	/** @lends f0xy.Class# */ 
 
 	Class : f0xy.extend("f0xy.$$__BaseClass__$$", {
 
-		/** 
+		/**
 		*
 		* The base f0xy Class. All Classes are required to be descendants
 		* of this class, either directly, or indirectly.
 		*
-		* @constructs 
+		* @constructs
 		*/
 		init: function(){
 			
@@ -579,4 +641,5 @@ f0xy.define("f0xy", {
 		}
 
 	})
+
 });

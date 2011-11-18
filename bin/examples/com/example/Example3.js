@@ -1,6 +1,6 @@
-Rosy.namespace("com.example", {
+f0xy.define("com.example", {
 
-	Example : Rosy.extend("com.example.Example2", {
+	Example3 : f0xy.extend("com.example.Example2", {
 
 		test: 5,
 		test2: 6,
@@ -10,6 +10,7 @@ Rosy.namespace("com.example", {
 		},
 
 		logSomething : function(something){
+			console.log(com.example);
 			this._super(something);
 		}
 

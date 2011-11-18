@@ -1,10 +1,18 @@
 <html>
 	<head>
-		<script src="../rosy+yepnope.js"></script>
+		<script src="../../src/yepnope.js"></script>
+		<script src="../../src/f0xy.js"></script>
 		<script type="text/javascript">
-			Rosy.require("com.example.Example3", function(){
+
+			f0xy.configure("");
+			f0xy.require("com.example.Example3", function(){
 				console.log("aaa");
+
+				var test = new com.example.Example3();
+				console.log(test);
+				test.logSomething("wooot!!!");
 			});
+
 		</script>
 	</head>
 	<body>

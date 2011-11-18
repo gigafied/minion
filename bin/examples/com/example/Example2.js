@@ -1,6 +1,6 @@
-Rosy.namespace("com.example", {
+f0xy.define("com.example", {
 
-	Example : Rosy.extend("com.example.Example1", {
+	Example2 : f0xy.extend("com.example.Example1", {
 
 		test: 3,
 		test2: 4,

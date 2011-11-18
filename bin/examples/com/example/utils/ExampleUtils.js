@@ -1,4 +1,4 @@
-Rosy.namespace("com.example.utils", {
+f0xy.define("com.example.utils", {
 
 	ExampleUtils : {
 
@@ -6,5 +6,6 @@ Rosy.namespace("com.example.utils", {
 			console.log(something);
 		}
 
-	})
+	}
+
 });

@@ -1,10 +1,10 @@
-Rosy.namespace("com.example", {
+f0xy.define("com.example", {
 	
-	requires: [
+	require: [
 		"com.example.utils.ExampleUtils"
 	],
 
-	Example : Rosy.extend("org.rosyjs.Class", {
+	Example1 : f0xy.extend("f0xy.Class", {
 
 		test: 1,
 		test2: 2,
@@ -15,7 +15,7 @@ Rosy.namespace("com.example", {
 
 		logSomething : function(something){
 
-			this.import_dependencies();
+			this.use_dependencies();
 
 			ExampleUtils.log(something);
 		}
