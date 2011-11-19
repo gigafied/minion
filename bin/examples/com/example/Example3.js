@@ -10,7 +10,6 @@ f0xy.define("com.example", {
 		},
 
 		logSomething : function(something){
-			console.log(com.example);
 			this._super(something);
 		}
 

@@ -61,7 +61,6 @@ var f0xy = (function(){
 	var _loadQueues = [];
 	var _extendQueue = [];
 	var _origWindowNS = {};
-	var _waitingOnDependencies = [];
 
 	/**
 	* @exports _f0xy as f0xy 
@@ -388,7 +387,7 @@ var f0xy = (function(){
 	}
 
 	/** @private */
-	_f0xy.checkLoadQueue = function(){
+	_f0xy.checkLoadQueues = function(){
 		for(var i = _loadQueues.length -1; i >= 0; i --){
 			var queue = _loadQueues[i];
 			var dependenciesLoaded = true;
@@ -460,12 +459,12 @@ var f0xy = (function(){
 				load : classFiles,
 				callback : function(){
 					_f0xy.checkExtendQueue();
-					_f0xy.checkLoadQueue();
+					_f0xy.checkLoadQueues();
 				},
 				complete: function(){
 					_loadedClasses = _loadedClasses.concat(classes);
 					_f0xy.checkExtendQueue();
-					_f0xy.checkLoadQueue();					
+					_f0xy.checkLoadQueues();					
 				}
 			});
 		}

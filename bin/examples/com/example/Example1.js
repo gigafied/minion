@@ -6,8 +6,8 @@ f0xy.define("com.example", {
 
 	Example1 : f0xy.extend("f0xy.Class", {
 
-		test: 1,
-		test2: 2,
+		exampleVar1: 1,
+		exampleVar2: 2,
 
 		init: function(){
 			
