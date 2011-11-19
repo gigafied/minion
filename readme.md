@@ -1,4 +1,5 @@
-### f0xy - AMD inspired Classy JavaScript
+### f0xy - Foxy JavaScript Inheritance
+
 
 The goal of f0xy is to provide AMD like simple, easy-to-implement inheritance and class support for JavaScript.
 
