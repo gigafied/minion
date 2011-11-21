@@ -59,7 +59,7 @@ size: f0xy min
 
 push: core
 	git add .
-	git commit -am -c
+	git commit -am -m
 	git push origin ${BRANCH}
 
 # change pointers for submodules and update them to what is specified in jQuery
