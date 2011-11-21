@@ -65,7 +65,7 @@ size: f0xy min
 
 push: core
 ifneq (${m}, 0)
-	echo ${BRANCH}
+	@@echo ${BRANCH}
 	git add .
 	git commit -am ${m}
 	#git push origin ${BRANCH}
