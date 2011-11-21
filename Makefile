@@ -21,7 +21,6 @@ VER = $(shell cat version.txt)
 
 DATE=$(shell git log -1 --pretty=format:%ad)
 
-COMMIT_MSG = -m
 BRANCH = $(git branch)
 
 all: update_submodules core
@@ -60,7 +59,7 @@ size: f0xy min
 
 push: core
 	git add .
-	git commit -am ${COMMIT_MSG}
+	git commit -am -c
 	git push origin ${BRANCH}
 
 # change pointers for submodules and update them to what is specified in jQuery
