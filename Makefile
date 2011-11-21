@@ -28,6 +28,7 @@ BRANCH=${branch_name##refs/heads/}
 BRANCH=${branch_name:-HEAD}
 
 m=0
+b=0
 
 all: update_submodules core
 
@@ -68,13 +69,13 @@ ifneq (${b}, 0)
 ifneq (${m}, 0)
 	@@echo BRANCH
 	git add .
-	git commit -am ${m}
+	git commit -am "${m}"
 	#git push origin ${BRANCH}
 else
-	echo "You must specify a commit message. (make push b=branch m=message)"
+	@@echo "You must specify a commit message. (make push b=branch m=message)"
 endif
 else
-	echo "You must specify a branch. (make push b=branch m=message)"
+	@@echo "You must specify a branch. (make push b=branch m=message)"
 endif
 
 # change pointers for submodules and update them to what is specified in jQuery
