@@ -70,7 +70,7 @@ ifneq (${m}, 0)
 	@@echo BRANCH
 	git add .
 	git commit -am "${m}"
-	#git push origin ${BRANCH}
+	git push origin ${b}
 else
 	@@echo "You must specify a commit message. (make push b=branch m=message)"
 endif
