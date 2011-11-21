@@ -23,7 +23,9 @@ VER = $(shell cat version.txt)
 
 DATE=$(shell git log -1 --pretty=format:%ad)
 
-BRANCH = $(b=$(git symbolic-ref -q HEAD); { [ -n "$b" ] && echo ${b##refs/heads/}; } || echo HEAD)
+BRANCH=$(git symbolic-ref -q HEAD)
+BRANCH=${branch_name##refs/heads/}
+BRANCH=${branch_name:-HEAD}
 
 m=0
 
@@ -63,7 +65,7 @@ size: f0xy min
 
 push: core
 ifneq (${m}, 0)
-	@@echo ${BRANCH}
+	echo ${BRANCH}
 	git add .
 	git commit -am ${m}
 	#git push origin ${BRANCH}
