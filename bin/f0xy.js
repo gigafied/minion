@@ -1,4 +1,13 @@
-
+/*
+ * f0xy.JS v1.0
+ * http://f0xy.org
+ *
+ * (c) 2011, Taka Kojima
+ * Licensed under the MIT License
+ *
+ * Date: Fri Nov 18 19:27:19 2011 -0800
+ */
+ 
 /**
 
 @fileOverview
@@ -26,7 +35,7 @@
 	Inspired by NamespaceJS: https://github.com/maximebf/Namespace.js
 
 	@ author Taka Kojima (taka@gigafied.com)
-	@ version 2.0.1
+	@ version 1.0
 
 	@ requires yepnope-1.0.2+ (or Modernizr 2 w/ Modernizr.load)
 */
@@ -36,13 +45,15 @@
 		Global Static f0xy Class with static methods.
 		@static
 		@class
-*/ 
+*/
 
 /** @namespace */
 var f0xy = (function(){
 
+	"use strict";
+
 	// If Array.indexOf is not defined, let's define it.
-	Array.prototype.indexOf = Array.prototype.indexOf || function(o,i){for(var j=this.length,i=i<0?i+j<0?0:i+j:i||0;i<j&&this[i]!==o;i++);return j<=i?-1:i}
+	Array.prototype.indexOf = Array.prototype.indexOf || function(o,i, j){for(j=this.length,i = i < 0 ? i + j < 0 ? 0 : i + j : i || 0 ; i < j && this[i] !==o;i++){var z = "a";}return j <= i ? -1 : i;}
 
 	// If Function.bind is not defined, let's define it.
 	Function.prototype.bind = Function.prototype.bind || function(){
@@ -356,6 +367,8 @@ var f0xy = (function(){
 
 	/** @private */
 	_f0xy.checkExtendQueue = function(){
+		
+		var extendHappened = false;
 
 		for(var i = _extendQueue.length - 1; i >= 0; i --){
 			
@@ -379,11 +392,16 @@ var f0xy = (function(){
 					
 					packageObj[className].dependencies = dependencies;
 
+					extendHappened = true;
+
 					_extendQueue.splice(i, 1);
 
 				}
 			}
-		}		
+		}
+		if(extendHappened && _extendQueue.length > 0){
+			_f0xy.checkExtendQueue();
+		}
 	}
 
 	/** @private */
@@ -423,6 +441,99 @@ var f0xy = (function(){
 	}
 
 	/**
+			include.js 1.0.7
+			(c) 2011 Jérémy Barbe.
+			May be freely distributed under the MIT license.
+	*/
+
+	/**
+	* load asked file
+	* @param files array of files to be loaded
+	* @param callback general callback when all files are loaded
+	* @private 
+	*/
+	
+	_f0xy.load = function(files, callback){
+	  var doc = document, body = "body", emptyFn = function(){},
+	      cache = {}, scriptCounter = 0, time = 1;
+
+	  !files.pop&&(files=[files]);
+	  callback=callback||emptyFn;
+
+	  /**
+	   * create a script node with asked file
+	   * @param   file            the file
+	   * @param   fileCallback    the callback for the current script
+	   * @param   obj             the object loaded in file
+	   * @param   script          placeholder for the script element
+	   * @return  void
+	   */
+	  function _create(file, fileCallback, obj, script, loaded){
+	      script = doc.createElement("script");
+	      scriptCounter++;
+
+	      script.onload = script.onreadystatechange = function(e, i){
+	          i = 0, e = this.readyState || e.type;
+
+	          //seach the loaded, load or complete expression
+	          if(!e.search("load|complete") && !loaded){
+	              obj ?
+	                  //wait the javascript to be parsed to controll if object exists
+	                  (file = function(){
+	                      environment[obj] ? _countFiles(fileCallback) : setTimeout(file, time);
+	                      ++i>time&&(file=emptyFn)
+	                  })():
+	                  _countFiles(fileCallback)
+
+	              loaded = time;
+	          }
+	      };
+
+	      script.async = !0;
+	      script.src = file;
+
+	      doc[body].appendChild(script)
+	  }
+
+	  /**
+	   * count files loaded and launch callback
+	   * @param fileCallback  callback of the current file
+	   * @return void
+	   */
+	  function _countFiles(fileCallback){
+	      fileCallback();
+	      !--scriptCounter&&callback()
+	  }
+
+	  /**
+	   * parse sent script and load them
+	   * @param i             placeholder for the loops
+	   * @param script        placeholder for all scripts
+	   * @param obj           placeholder for the aksed object
+	   * @param callbackFile  placholder for the callback function
+	   * @return void
+	   */
+	  !function include(i, script, obj, callbackFile){
+	      if(!doc[body]) return setTimeout(include, time);
+
+	      script = doc.getElementsByTagName("script");
+	      callbackFile = emptyFn;
+
+	      for(i in script) script[i].src&&(cache[script[i].src]=i);
+
+	      for(i=files.length;i--;)
+	          files[i].pop?
+	              (script = files[i][0], callbackFile = files[i][1], obj = files[i][2]):
+	              (script = files[i]),
+	          cache[script] ?
+	              callbackFile():
+	              _create(script, callbackFile, obj);
+
+	      !scriptCounter&&callback()
+	  }()
+	}
+
+	/**
 	* Asyncrhonously loads in js files for the classes specified.
 	* If the classes have already been loaded, or are already defined, the callback function is invoked immediately.
 	*
@@ -454,19 +565,12 @@ var f0xy = (function(){
 			
 			_loadQueues.push(queue);
 
-			yepnope({
-
-				load : classFiles,
-				callback : function(){
-					_f0xy.checkExtendQueue();
-					_f0xy.checkLoadQueues();
-				},
-				complete: function(){
+			_f0xy.load(classFIles, function(){
 					_loadedClasses = _loadedClasses.concat(classes);
 					_f0xy.checkExtendQueue();
-					_f0xy.checkLoadQueues();					
+					_f0xy.checkLoadQueues();
 				}
-			});
+			);
 		}
 
 		else{
@@ -481,7 +585,6 @@ var f0xy = (function(){
 	return _f0xy;
 
 })();
-
 f0xy.define("f0xy", {
 
 	/**
@@ -509,8 +612,6 @@ f0xy.define("f0xy", {
 		// Create a new Class that inherits from this class
 		_BaseClass.extend = function extend(obj){
 			
-			var fnTest =	(/xyz/).test(function(){var xyz;}) ? (/\b_super\b/) : (/.*/);
-
 			// We set this to false, so we don't initialize a new instance every time we extend a Class.
 			doInitialize = false;
 			var prototype = new this();
@@ -528,7 +629,7 @@ f0xy.define("f0xy", {
 			// Copy the properties over onto the new prototype
 			for(name in obj){
 				// Check if we're overwriting an existing function
-				prototype[name] = (typeof obj[name] === "function") && (typeof _this.prototype[name] === "function") && fnTest.test(obj[name]) ? (function (name, fn) {
+				prototype[name] = (typeof obj[name] === "function") && (typeof _this.prototype[name] === "function") ? (function (name, fn) {
 					return function(){
 						this._super = _this.prototype[name];
 						var ret = fn.apply(this, arguments);
@@ -541,7 +642,6 @@ f0xy.define("f0xy", {
 
 			// The dummy class constructor
 			var Class = function(){
-				this.isClass = true;
 
 				// All construction is actually done in the init method
 				if(doInitialize && this.init){
@@ -580,13 +680,13 @@ f0xy.define("f0xy", {
 		
 		return _BaseClass;
 	})()
-});
-
-f0xy.define("f0xy", {
+});f0xy.define("f0xy", {
 
 	/** @lends f0xy.Class# */ 
 
 	Class : f0xy.extend("f0xy.$$__BaseClass__$$", {
+
+		isClass: true,
 
 		/**
 		*

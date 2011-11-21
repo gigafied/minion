@@ -13,6 +13,26 @@
 				test.logSomething("wooot!!!");
 			});
 
+
+			var test = function(){
+				this.a = "bbb";
+				this.b = "ccc";
+				console.log("zz");	
+			}
+
+			var test2 = function(){
+				this.a = "aaazzz";
+				//return new test();
+			}
+
+			test2.prototype.a = "aaa";
+
+			var t = new test();
+			var t2 = new test2();
+			var t3 = new test2();
+
+			console.log(t);
+			console.log(t2);
 		</script>
 	</head>
 	<body>
