@@ -1,38 +1,12 @@
 <html>
 	<head>
-		<script src="../../src/yepnope.js"></script>
-		<script src="../../src/f0xy.js"></script>
+		<script src="../f0xy.js"></script>
 		<script type="text/javascript">
 
-			f0xy.configure("");
 			f0xy.require("com.example.Example3", function(){
-				console.log("aaa");
-
 				var test = new com.example.Example3();
-				console.log(test);
 				test.logSomething("wooot!!!");
 			});
-
-
-			var test = function(){
-				this.a = "bbb";
-				this.b = "ccc";
-				console.log("zz");	
-			}
-
-			var test2 = function(){
-				this.a = "aaazzz";
-				//return new test();
-			}
-
-			test2.prototype.a = "aaa";
-
-			var t = new test();
-			var t2 = new test2();
-			var t3 = new test2();
-
-			console.log(t);
-			console.log(t2);
 		</script>
 	</head>
 	<body>

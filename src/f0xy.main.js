@@ -27,8 +27,6 @@
 
 	@ author Taka Kojima (taka@gigafied.com)
 	@ version 1.0
-
-	@ requires yepnope-1.0.2+ (or Modernizr 2 w/ Modernizr.load)
 */
 
 
@@ -44,7 +42,35 @@ var f0xy = (function(){
 	"use strict";
 
 	// If Array.indexOf is not defined, let's define it.
-	Array.prototype.indexOf = Array.prototype.indexOf || function(o,i, j){for(j=this.length,i = i < 0 ? i + j < 0 ? 0 : i + j : i || 0 ; i < j && this[i] !==o;i++){var z = "a";}return j <= i ? -1 : i;}
+    Array.prototype.indexOf = Array.prototype.indexOf || function (searchElement /*, fromIndex */ ){       
+        if (this === void 0 || this === null) {
+            throw new TypeError();
+        }
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = 0;
+        if (arguments.length > 0) {
+            n = Number(arguments[1]);
+            if (n !== n) { // shortcut for verifying if it's NaN
+                n = 0;
+            } else if (n !== 0 && n !== Infinity && n !== -Infinity) {
+                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+            }
+        }
+        if (n >= len) {
+            return -1;
+        }
+        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+        for (; k < len; k++) {
+            if (k in t && t[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+    }
 
 	// If Function.bind is not defined, let's define it.
 	Function.prototype.bind = Function.prototype.bind || function(){
@@ -59,10 +85,147 @@ var f0xy = (function(){
 	var _classMappings = [];
 	var _loadedClasses = [];
 	var _separator = ".";
-	var _class_path = "js/";
+	var _class_path = "";
 	var _loadQueues = [];
 	var _extendQueue = [];
 	var _origWindowNS = {};
+
+	var s = "string";
+	var f = "function";
+	var o = "object";
+	var u = "undefined";
+
+	/************* HELPER METHODS ***************/
+
+	// Typechecks o against t or s
+	var _typeCheck = function(o, t, s, r){
+		r = (typeof o === t);
+		r = (!r && s) ? (typeof o === s) : r;
+		return r;
+	}
+
+	/** @private */
+	var _checkExtendQueue = function(){
+		
+		var extendHappened = false;
+
+		for(var i = _extendQueue.length - 1; i >= 0; i --){
+			
+			var packageArray = _extendQueue[i].split(_separator);
+			var className	= packageArray.splice(packageArray.length-1, 1);
+			var namespace = packageArray.join(_separator);
+			
+			var packageObj = _f0xy.get(namespace, false);
+			var obj = packageObj[className];
+
+			if(obj.toExtend){
+				var superClass = _f0xy.get(obj.extendedFrom, false);
+				if(superClass.isClass){
+					
+					var dependencies = obj.dependencies;
+					var scID = obj.extendedFrom;
+
+					obj.toExtend = false;
+					delete obj.toExtend;
+					
+					packageObj[className] = superClass.extend(obj);
+
+					extendHappened = true;
+
+					_extendQueue.splice(i, 1);
+
+				}
+			}
+		}
+		if(extendHappened && _extendQueue.length > 0){
+			_checkExtendQueue();
+		}
+	}
+
+	/** @private */
+	var _checkLoadQueues = function(){
+		for(var i = _loadQueues.length -1; i >= 0; i --){
+			var queue = _loadQueues[i];
+			var dependenciesLoaded = true;
+			
+			for(var j = 0; j < _loadQueues[i].classes.length; j ++){
+				/*	
+				if(!_f0xy.isClass(_loadQueues[i].classes[j])){
+					dependenciesLoaded = false;
+					break;
+				}
+				*/
+
+				var obj = _f0xy.get(_loadQueues[i].classes[j], false);
+
+				if(!obj.isClass){dependenciesLoaded = false;}
+				
+				else if(obj.dependencies){
+					for(var k = 0; k < obj.dependencies.length; k ++){
+						if(_loadedClasses.indexOf(obj.dependencies[k]) === -1){
+							dependenciesLoaded = false;
+							break;
+						}
+					}
+				}
+				if(!dependenciesLoaded){break;}
+			}
+
+			if(dependenciesLoaded){
+				_loadQueues.splice(i, 1);
+				if(queue.complete){
+					queue.complete.call();
+				}				
+			}
+		}
+	}
+
+	/**
+	* Does all the loading of JS files
+	*
+	* @param		files 		String or array of the files to be loaded.
+	* @param		callback 	Callback function to call once all files have been loaded
+	* @private 
+	*/
+	
+	var _load = function(files, callback){
+
+		var _counter = 0 ;
+		var doc = document;
+		var body = "body";
+
+		// If files is a String, create an array
+		if(!_typeCheck(files, o) && !files.sort){
+			files = new Array(files);
+		}
+		
+		function doLoad(){
+
+			// If document.body does not yet exist, let's wait on the load process a bit.
+			if(!doc[body]){return setTimeout(doLoad, 50);}
+
+			for(var i = 0; i < files.length; i ++){
+				
+				var script = doc.createElement("script");
+		      script.onload = script.onreadystatechange = function(e, i){
+		          _counter ++;
+		          if(_counter >= files.length){
+		         	callback.call();
+		          }
+
+		      };
+
+		      script.async = "async";
+		      script.src = files[i];
+		      doc[body].appendChild(script)
+			}
+		}
+
+		doLoad();
+	}
+
+	/************* END HELPER METHODS ***************/	
+
 
 	/**
 	* @exports _f0xy as f0xy 
@@ -79,7 +242,7 @@ var f0xy = (function(){
 	*/
 
 	_f0xy.configure = function(class_path, separator){
-		_class_path = (typeof class_path === "string") ? class_path : _class_path;
+		_class_path = class_path || _class_path;
 		_separator = separator || _separator;
 		_class_path = (_class_path.lastIndexOf("/") === _class_path.length-1) ? _class_path : _class_path + "/";
 	}
@@ -99,8 +262,7 @@ var f0xy = (function(){
 	_f0xy.namespace = function(identifier, autoCreate, classes){
 		classes = classes || false;
 		var ns = window;
-
-		if(identifier != '' && typeof identifier !== "object") {
+		if(identifier != '' && !_typeCheck(identifier, o, f)){
 			var parts = identifier.split(_separator);
 			for (var i = 0; i < parts.length; i++) {
 				if(!ns[parts[i]]){
@@ -114,7 +276,7 @@ var f0xy = (function(){
 				ns = ns[parts[i]];
 			}
 		}
-		else if(typeof identifier === "object"){ns = identifier;}
+		else if(_typeCheck(identifier, o)){ns = identifier;}
 
 		if(classes !== false){
 
@@ -128,7 +290,7 @@ var f0xy = (function(){
 					classes.require.push(classes[className].extendedFrom);
 				}
 
-				if(classes[className].superClassIdentifier){					
+				if(classes[className].toExtend){					
 					if(_extendQueue.indexOf(qualifiedName) === -1){
 						_extendQueue.push(qualifiedName);
 					}
@@ -148,10 +310,10 @@ var f0xy = (function(){
 						_f0xy.require(classes.require);
 					}
 
-					if(_f0xy.isClass(c)){
+					if(_f0xy.isClass(c) && c.prototype){
 						c.prototype.nsID = identifier;
 						c.prototype.ns = ns;
-						c.className = className;
+						c.prototype.className = className;
 
 						if("require" in classes && classes.require.length > 0){
 							c.prototype.dependencies = ((c.prototype.dependencies) ? c.prototype.dependencies : []).concat(classes.require);
@@ -217,18 +379,9 @@ var f0xy = (function(){
 	*/
 
 	_f0xy.isClass = function(identifier){
-		
-		if(typeof identifier !== "object" && typeof identifier !== "function"){
-			identifier = _f0xy.namespace(identifier, false);
-		}
-		
-		if(identifier){
-			return identifier.isClass;
-		}
-
-		return false;
+		identifier = (!_typeCheck(identifier, o, f)) ? _f0xy.namespace(identifier, false) : identifier;
+		return (identifier) ? identifier.isClass : false;
 	}
-
 
 	/**
 	* Extends a given class asynchronously.
@@ -246,7 +399,7 @@ var f0xy = (function(){
 			obj = _f0xy.get(identifier).extend(obj);			
 		}
 		else{
-			obj.superClassIdentifier = identifier;
+			obj.toExtend = true;
 		}
 
 		obj.extendedFrom = identifier;
@@ -274,7 +427,7 @@ var f0xy = (function(){
 		
 		f0xy.unuse(identifiers);
 
-		if(typeof(identifiers) !== 'object' && !identifiers.sort){
+		if(!_typeCheck(identifiers, o) && !identifiers.sort){
 			identifiers = new Array(identifiers);
 		}
 
@@ -340,7 +493,7 @@ var f0xy = (function(){
 	_f0xy.provides = function(file, classes, doLoad, callback){
 
 		// If classes is a String, create an array
-		if(typeof(classes) !== 'object' && !classes.sort){
+		if(!_typeCheck(classes, o) && !classes.sort){
 			classes = new Array(classes);
 		}
 
@@ -356,174 +509,6 @@ var f0xy = (function(){
 		}
 	}
 
-	/** @private */
-	_f0xy.checkExtendQueue = function(){
-		
-		var extendHappened = false;
-
-		for(var i = _extendQueue.length - 1; i >= 0; i --){
-			
-			var packageArray = _extendQueue[i].split(_separator);
-			var className	= packageArray.splice(packageArray.length-1, 1);
-			var namespace = packageArray.join(_separator);
-			
-			var packageObj = _f0xy.get(namespace, false);
-
-			if(typeof packageObj[className].superClassIdentifier !== "undefined"){
-				var superClass = _f0xy.get(packageObj[className].superClassIdentifier, false);
-				if(superClass.isClass){
-					
-					var dependencies = packageObj[className].dependencies;
-					var scID = packageObj[className].superClassIdentifier;
-
-					packageObj[className].superClassIdentifier = null;
-					delete packageObj[className].superClassIdentifier;
-					
-					packageObj[className] = superClass.extend(packageObj[className]);
-					
-					packageObj[className].dependencies = dependencies;
-
-					extendHappened = true;
-
-					_extendQueue.splice(i, 1);
-
-				}
-			}
-		}
-		if(extendHappened && _extendQueue.length > 0){
-			_f0xy.checkExtendQueue();
-		}
-	}
-
-	/** @private */
-	_f0xy.checkLoadQueues = function(){
-		for(var i = _loadQueues.length -1; i >= 0; i --){
-			var queue = _loadQueues[i];
-			var dependenciesLoaded = true;
-			
-			for(var j = 0; j < _loadQueues[i].classes.length; j ++){
-				/*	
-				if(!_f0xy.isClass(_loadQueues[i].classes[j])){
-					dependenciesLoaded = false;
-					break;
-				}
-				*/
-
-				var obj = _f0xy.get(_loadQueues[i].classes[j], false);
-
-				if(obj.dependencies){
-					for(var k = 0; k < obj.dependencies.length; k ++){
-						if(_loadedClasses.indexOf(obj.dependencies[k]) === -1){
-							dependenciesLoaded = false;
-							break;
-						}
-					}
-				}
-				if(!dependenciesLoaded){break;}
-			}
-
-			if(dependenciesLoaded){
-				if(queue.complete){
-					queue.complete.call();				
-				}
-				_loadQueues.splice(i, 1);
-			}
-		}
-	}
-
-	/**
-			include.js 1.0.7
-			(c) 2011 Jérémy Barbe.
-			May be freely distributed under the MIT license.
-	*/
-
-	/**
-	* load asked file
-	* @param files array of files to be loaded
-	* @param callback general callback when all files are loaded
-	* @private 
-	*/
-	
-	_f0xy.load = function(files, callback){
-	  var doc = document, body = "body", emptyFn = function(){},
-	      cache = {}, scriptCounter = 0, time = 1;
-
-	  !files.pop&&(files=[files]);
-	  callback=callback||emptyFn;
-
-	  /**
-	   * create a script node with asked file
-	   * @param   file            the file
-	   * @param   fileCallback    the callback for the current script
-	   * @param   obj             the object loaded in file
-	   * @param   script          placeholder for the script element
-	   * @return  void
-	   */
-	  function _create(file, fileCallback, obj, script, loaded){
-	      script = doc.createElement("script");
-	      scriptCounter++;
-
-	      script.onload = script.onreadystatechange = function(e, i){
-	          i = 0, e = this.readyState || e.type;
-
-	          //seach the loaded, load or complete expression
-	          if(!e.search("load|complete") && !loaded){
-	              obj ?
-	                  //wait the javascript to be parsed to controll if object exists
-	                  (file = function(){
-	                      environment[obj] ? _countFiles(fileCallback) : setTimeout(file, time);
-	                      ++i>time&&(file=emptyFn)
-	                  })():
-	                  _countFiles(fileCallback)
-
-	              loaded = time;
-	          }
-	      };
-
-	      script.async = !0;
-	      script.src = file;
-
-	      doc[body].appendChild(script)
-	  }
-
-	  /**
-	   * count files loaded and launch callback
-	   * @param fileCallback  callback of the current file
-	   * @return void
-	   */
-	  function _countFiles(fileCallback){
-	      fileCallback();
-	      !--scriptCounter&&callback()
-	  }
-
-	  /**
-	   * parse sent script and load them
-	   * @param i             placeholder for the loops
-	   * @param script        placeholder for all scripts
-	   * @param obj           placeholder for the aksed object
-	   * @param callbackFile  placholder for the callback function
-	   * @return void
-	   */
-	  !function include(i, script, obj, callbackFile){
-	      if(!doc[body]) return setTimeout(include, time);
-
-	      script = doc.getElementsByTagName("script");
-	      callbackFile = emptyFn;
-
-	      for(i in script) script[i].src&&(cache[script[i].src]=i);
-
-	      for(i=files.length;i--;)
-	          files[i].pop?
-	              (script = files[i][0], callbackFile = files[i][1], obj = files[i][2]):
-	              (script = files[i]),
-	          cache[script] ?
-	              callbackFile():
-	              _create(script, callbackFile, obj);
-
-	      !scriptCounter&&callback()
-	  }()
-	}
-
 	/**
 	* Asyncrhonously loads in js files for the classes specified.
 	* If the classes have already been loaded, or are already defined, the callback function is invoked immediately.
@@ -535,7 +520,7 @@ var f0xy = (function(){
 
 	_f0xy.require = function(classes, completeFunc){
 
-		if(typeof classes === "string"){classes = [classes];}
+		if(_typeCheck(classes, s)){classes = [classes];}
 		
 		var classFiles = [];
 		
@@ -556,10 +541,10 @@ var f0xy = (function(){
 			
 			_loadQueues.push(queue);
 
-			_f0xy.load(classFIles, function(){
+			_load(classFiles, function(){
 					_loadedClasses = _loadedClasses.concat(classes);
-					_f0xy.checkExtendQueue();
-					_f0xy.checkLoadQueues();
+					_checkExtendQueue();
+					_checkLoadQueues();
 				}
 			);
 		}
