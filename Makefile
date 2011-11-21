@@ -64,13 +64,17 @@ size: f0xy min
 	@@rm ${F0XY_MIN}.gz; \
 
 push: core
+ifneq (${b}, 0)
 ifneq (${m}, 0)
 	@@echo BRANCH
 	git add .
 	git commit -am ${m}
 	#git push origin ${BRANCH}
 else
-	echo "You must specify a commit message. (make push m=message)"
+	echo "You must specify a commit message. (make push b=branch m=message)"
+endif
+else
+	echo "You must specify a branch. (make push b=branch m=message)"
 endif
 
 # change pointers for submodules and update them to what is specified in jQuery
