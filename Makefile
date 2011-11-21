@@ -1,3 +1,5 @@
+OVERRIDING=default
+
 SRC_DIR = src
 TEST_DIR = test
 BUILD_DIR = build
@@ -22,6 +24,8 @@ VER = $(shell cat version.txt)
 DATE=$(shell git log -1 --pretty=format:%ad)
 
 BRANCH = $(b=$(git symbolic-ref -q HEAD); { [ -n "$b" ] && echo ${b##refs/heads/}; } || echo HEAD)
+
+m=0
 
 all: update_submodules core
 
@@ -58,10 +62,14 @@ size: f0xy min
 	@@rm ${F0XY_MIN}.gz; \
 
 push: core
+ifneq (${m}, 0)
 	@@echo ${BRANCH}
 	git add .
-	git commit -am -m
+	git commit -am ${m}
 	#git push origin ${BRANCH}
+else
+	echo "You must specify a commit message. (make push m=message)"
+endif
 
 # change pointers for submodules and update them to what is specified in jQuery
 # --merge  doesn't work when doing an initial clone, thus test if we have non-existing
