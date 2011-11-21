@@ -58,6 +58,7 @@ size: f0xy min
 	@@rm ${F0XY_MIN}.gz; \
 
 push: core
+	echo ${BRANCH}
 	git add .
 	git commit -am -m
 	git push origin ${BRANCH}
