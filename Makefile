@@ -22,7 +22,7 @@ VER = $(shell cat version.txt)
 DATE=$(shell git log -1 --pretty=format:%ad)
 
 COMMIT_MSG = -m
-BRANCH = git branch
+BRANCH = $(git branch)
 
 all: update_submodules core
 
