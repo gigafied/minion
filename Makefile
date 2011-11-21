@@ -21,7 +21,7 @@ VER = $(shell cat version.txt)
 
 DATE=$(shell git log -1 --pretty=format:%ad)
 
-BRANCH = "$(b=$(git symbolic-ref -q HEAD); { [ -n "$b" ] && echo ${b##refs/heads/}; } || echo HEAD)"
+BRANCH = $(b=$(git symbolic-ref -q HEAD); { [ -n "$b" ] && echo ${b##refs/heads/}; } || echo HEAD)
 
 all: update_submodules core
 
