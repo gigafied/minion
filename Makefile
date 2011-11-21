@@ -58,10 +58,10 @@ size: f0xy min
 	@@rm ${F0XY_MIN}.gz; \
 
 push: core
-	@@echo BRANCH
+	@@echo ${BRANCH}
 	git add .
 	git commit -am -m
-	git push origin ${BRANCH}
+	#git push origin ${BRANCH}
 
 # change pointers for submodules and update them to what is specified in jQuery
 # --merge  doesn't work when doing an initial clone, thus test if we have non-existing
