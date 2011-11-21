@@ -79,11 +79,10 @@ else
 endif
 
 push_docs: docs
-	cd gh-pages
-	git add .
-	git commit -am "updated docs"
-	git push origin gh-pages
-	cd ../
+	cd gh-pages;
+	git add .; \
+	git commit -am "updated docs"; \
+	git push origin gh-pages; \
 
 # change pointers for submodules and update them to what is specified in jQuery
 # --merge  doesn't work when doing an initial clone, thus test if we have non-existing
