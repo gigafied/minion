@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Tue Nov 22 03:54:22 2011 -0800
+ * Date: Tue Nov 22 04:44:51 2011 -0800
  */
  
 /**
@@ -35,7 +35,7 @@ THE SOFTWARE.</p>
 
 
 /**
-*	Global Static f0xy Class with static methods.
+*	Global f0xy Class with static methods.
 *	
 *	@namespace
 */
@@ -45,7 +45,7 @@ var f0xy = (function(root){
 	"use strict";
 
 	// If Array.indexOf is not defined, let's define it.
-    Array.prototype.indexOf = Array.prototype.indexOf || function(o,i){for(var j=this.length,i=i<0?i+j<0?0:i+j:i||0;i<j&&this[i]!==o;i++);return j<=i?-1:i}
+   Array.prototype.indexOf = Array.prototype.indexOf || function(o,i){for(var j=this.length,i=i<0?i+j<0?0:i+j:i||0;i<j&&this[i]!==o;i++);return j<=i?-1:i}
 
 	// If Function.bind is not defined, let's define it.
 	Function.prototype.bind = Function.prototype.bind || function(){
@@ -66,15 +66,14 @@ var f0xy = (function(root){
 	var _origRootNS = {};
 	var _initialized = false;
 
-	var _loadQueues = [];
+	var _loadQueue = [];
 	var _extendQueue = [];
 
 	var _waitID = null;
 	var _waitingForLoad = [];
 	var _requestedFiles = [];
-	var _loadedClasses = [];
 	
-	/************* HELPER METHODS ***************/
+	/************* PRIVATE METHODS ***************/
 
 	var isArray = Array.isArray || function(obj){
 		return toString.call( obj ) == '[object Array]';
@@ -101,10 +100,10 @@ var f0xy = (function(root){
 		return ((a) ? a : []).concat(b);		
 	}
 
+	var sTimeout = setTimeout;
+
 	/** @private */
 	var _checkExtendQueue = function(){
-		
-		var extendHappened = false;
 
 		for(var i = _extendQueue.length - 1; i >= 0; i --){
 			
@@ -118,41 +117,36 @@ var f0xy = (function(root){
 			if(obj.toExtend){
 				var superClass = _f0xy.get(obj.extendedFrom, false);
 				if(superClass.isClass){
-					
-					var dependencies = obj.dependencies;
-					var scID = obj.extendedFrom;
 
 					obj.toExtend = false;
 					delete obj.toExtend;
 					
-					packageObj[className] = superClass.extend(obj);
-
-					extendHappened = true;
+					packageObj[className] = _f0xy.extend(superClass, obj);
 
 					_extendQueue.splice(i, 1);
-
+					_checkExtendQueue();					
+					return;
 				}
 			}
 		}
-		if(extendHappened && _extendQueue.length > 0){
-			_checkExtendQueue();
-		}
+		_checkLoadQueue();
 	}
 
 	/** @private */
-	var _checkLoadQueues = function(){
-		for(var i = _loadQueues.length -1; i >= 0; i --){
-			var queue = _loadQueues[i];
+	var _checkLoadQueue = function(){
+
+		for(var i = _loadQueue.length -1; i >= 0; i --){
+			var q = _loadQueue[i];
 			var dependenciesLoaded = true;
 			
-			for(var j = 0; j < _loadQueues[i].classes.length; j ++){
+			for(var j = 0; j < _loadQueue[i].c.length; j ++){
 
-				var obj = _f0xy.get(_loadQueues[i].classes[j], false);
+				var obj = _f0xy.get(_loadQueue[i].c[j], false);
 
 				if(!obj.isClass){dependenciesLoaded = false;}				
 				else if(obj.dependencies){
 					for(var k = 0; k < obj.dependencies.length; k ++){
-						if(_loadedClasses.indexOf(obj.dependencies[k]) === -1){
+						if(!_f0xy.isClass(obj.dependencies[k])){							
 							dependenciesLoaded = false;
 							break;
 						}
@@ -160,13 +154,12 @@ var f0xy = (function(root){
 				}
 				if(!dependenciesLoaded){break;}
 			}
-
-			if(dependenciesLoaded){				
-				if(queue.callback){
-					// 0 ms delay to make sure queue.callback does not get called prematurely, in some instances.
-					setTimeout(queue.callback, 0);
+			if(dependenciesLoaded){
+				if(q.cb){
+					// 10 ms delay to make sure queue.callback does not get called prematurely, in some instances.
+					sTimeout(q.cb, 10);
 				}
-				_loadQueues.splice(i, 1);
+				_loadQueue.splice(i, 1);
 			}
 		}
 	}
@@ -176,18 +169,18 @@ var f0xy = (function(root){
 		
 		for(var i = 0; i < _waitingForLoad.length; i ++){
 			var obj = _waitingForLoad[i];
-			obj.elapsed += 50;
+			obj.e += 50;
 
-			if(_f0xy.isClass(obj.class)){
-				obj.script.onload();
+			if(_f0xy.isClass(obj.c)){
+				obj.s.onload();
 			}
-			else if(obj.elapsed >= _f0xy.errorTimeout){
-				obj.script.onerror();
+			else if(obj.e >= _f0xy.errorTimeout){
+				obj.s.onerror();
 			}
 		}
 
 		if(_waitingForLoad.length > 0){
-			_waitID = setTimeout(_checkWaitQueue, 50);
+			_waitID = sTimeout(_checkWaitQueue, 50);
 		}
 	}
 
@@ -196,61 +189,48 @@ var f0xy = (function(root){
 	*
 	* @param		files 		String or array of the files to be loaded.
 	* @param		classes 		The classes that match up to the files to be loaded.
-	* @param		callback 	Callback function to call once all files have been loaded
 	* @private 
 	*/
 	
-	var _load = function(files, classes, callback){
+	var _load = function(q){
 
-		// Loaded Count
-		var lc = 0;
 		var doc = document;
 		var body = "body";
 
-		// If files is a String, create an array
-		files = strToArray(files);
+		_loadQueue.push(q);
 
 		function inject(f, c){
-			if(_requestedFiles.indexOf(f) === -1){
 
-				if(!doc[body]){return setTimeout(inject, 0, f, c);}
+			if(_requestedFiles.indexOf(f) < 0){
+
+				if(!doc[body]){return sTimeout(inject, 0, f, c);}
+
+				var script = doc.createElement("script");
+		     	script.async = true;
+		      script.src = f;
 				
-				var injectObj = {};
-				injectObj.file = f;
-				injectObj.class = c;
-				injectObj.elapsed = 0;
+				var injectObj = {
+					f : f, 		// File
+					c : c, 		// Class
+					e : 0, 		// Elapsed Time
+					s : script 	// Script
+				};
 
 				_requestedFiles.push(f);			
 				_waitingForLoad.push(injectObj);
 
-				var script = doc.createElement("script");
-		     	script.async = "async";
-		      script.src = f;
-
-				injectObj.script = script;
-
 		      script.onreadystatechange = script.onload = function(e){
-
-		      	if(_f0xy.isClass(c)){
-						_loadedClasses.push(injectObj.class);
-						lc++;
-			          if(lc >= files.length && callback){
-			          	_checkExtendQueue();
-			          	_checkLoadQueues();
-			         	setTimeout(callback, 50);
-			          }
-
-			        injectObj.script.onload = script.onreadystatechange = null;
+		      	if(_f0xy.isClass(c)){						
+			        injectObj.s.onload = script.onreadystatechange = null;
 			        _waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 			   	}
 		      };
 
 		      script.onerror = function(e){
-		      	lc++;
-					_waitingForLoad.splice(i,1);
-					throw new Error(injectObj.class + " failed to load. Attempted to load from file: " + injectObj.file);
-		        injectObj.script.onerror = null;
-		        _waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);	
+					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
+					throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
+		      	injectObj.s.onerror = null;
+		      	_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);	
 		      }
 		      
 		      // Append the script to the document body
@@ -258,11 +238,16 @@ var f0xy = (function(root){
 			}
 		}
 
-		for(var i = 0; i < files.length; i ++){
-			inject(files[i], classes[i]);
+		for(var i = 0; i < q.f.length; i ++){
+			inject(q.f[i], q.c[i]);
 		}
 
-		_waitID = setTimeout(_checkWaitQueue, 50);
+		/*
+			onload and onreadystatechange are unreliable, mainly because of browser cache, thus we have to
+			set a timeout that checks for the definition of each class. Times out at 10 seconds (can be changed through
+			setting f0xy.errorTimeout = ms)
+		*/
+		_waitID = sTimeout(_checkWaitQueue, 50);
 	}
 
 	/**
@@ -270,19 +255,21 @@ var f0xy = (function(root){
 	* Get the namespace/Class, or creates it if it does not exist. Also optionally creates Objects in the specified namepsace.
 	*
 	* @public
-	* @param			{String|Object}	identifier			The fully qualified namespace.
+	* @param			{String|Object}	id						The fully qualified namespace.
 	* @param			{Boolean}			autoCreate			Whether or not to create a blank object if the namespace does not yet exist.
 	* @param			{Object}				[classes]			An object of class definitions which will be added to the namespace.
 	* @returns		{Object}										The object that represents the fully qualified namespace passed in as the first argument.
 	* @private
 	*/
 
-	var _namespace = function(identifier, autoCreate, classes){
+	var _namespace = function(id, autoCreate, classes){
 
 		classes = classes || false;
 		var ns = _f0xy.ns;
-		if(identifier != '' && !isObject(identifier) && !isFunction(identifier)){
-			var parts = identifier.split(_separator);
+		var req = "require";
+
+		if(id != '' && !isObject(id) && !isFunction(id)){
+			var parts = id.split(_separator);
 
 			if(parts[0] === "f0xy"){
 				ns = _f0xy;
@@ -301,7 +288,7 @@ var f0xy = (function(root){
 				ns = ns[parts[i]];
 			}
 		}
-		else if(identifier != ""){ns = identifier;}
+		else if(id != ""){ns = id;}
 
 		if(classes !== false){
 
@@ -309,38 +296,39 @@ var f0xy = (function(root){
 			
 			for(var className in classes){				
 				
-				var qualifiedName = identifier + _separator + className;
+				var qualifiedName = id + _separator + className;
 
 				if(classes[className].extendedFrom){
 					classes.require.push(classes[className].extendedFrom);
 				}
 
 				if(classes[className].toExtend){					
-					if(_extendQueue.indexOf(qualifiedName) === -1){
+					if(_extendQueue.indexOf(qualifiedName) < 0){
 						_extendQueue.push(qualifiedName);
 					}
 				}
 
-				if(className !== "require"){
+				if(className !== req){
 					
 					var c = classes[className];
 
-					c.nsID = identifier;
+					c.nsID = id;
 					c.ns = ns;
 					c.className = className;
 
-					if("require" in classes && classes.require.length > 0){
+					if(req in classes && classes.require.length > 0){
 						c.dependencies = concatArray(c.dependencies, classes.require);
 						_f0xy.require(classes.require);
 					}
 
 					if(_f0xy.isClass(c) && c.prototype){
-						c.prototype.nsID = identifier;
-						c.prototype.ns = ns;
-						c.prototype.className = className;
+						var proto = c.prototype;
+						proto.nsID = id;
+						proto.ns = ns;
+						proto.className = className;
 
-						if("require" in classes && classes.require.length > 0){
-							c.prototype.dependencies = concatArray(c.prototype.dependencies, classes.require);
+						if(req in classes && classes.require.length > 0){
+							proto.dependencies = concatArray(proto.dependencies, classes.require);
 						}
 					}
 
@@ -352,7 +340,7 @@ var f0xy = (function(root){
 		return ns;
 	}		
 
-	/************* END HELPER METHODS ***************/	
+	/************* END PRIVATE METHODS ***************/	
 
 
 	/**
@@ -397,26 +385,25 @@ var f0xy = (function(root){
 	* Gets the object by it's fully qualified identifier.
 	*
 	* @public
-	* @param			{String}				identifier			The identifier to get
+	* @param			{String}				id						The identifier to get
 	* @returns		{Object|Boolean}							The object that represents the identifier or False if it has not yet been defined.
 	*/
 
-	_f0xy.get = function(identifier){
-		return _namespace(identifier, false);
+	_f0xy.get = function(id){
+		return _namespace(id, false);
 	}
 
 	/**
 	* Defines Classes under the given namespace.
 	*
 	* @public
-	* @param			{String}				identifier			The namespace to define the Classes under.
+	* @param			{String}				id						The namespace to define the Classes under.
 	* @param			{Object}				[classes]			An object of class definitions which will be added to the namespace
 	* @returns		{Object}										The object that represents the namespace passed in as the first argument.
 	*/
-	_f0xy.define = function(identifier, classes){
-		var r = _namespace(identifier, true, classes);
+	_f0xy.define = function(id, classes){
+		var r = _namespace(id, true, classes);
 		_checkExtendQueue();
-		_checkLoadQueues();
 		return r;
 	}
 
@@ -424,17 +411,17 @@ var f0xy = (function(root){
 	* Gets the URL for a given identifier.
 	*
 	* @public
-	* @param		 	{String}			identifier			The fully qualified name to look up.
+	* @param		 	{String}			id						The fully qualified name to look up.
 	* @returns		{String}									The URL of the file that maps to the fully qualified name.
 	*/
 
-	_f0xy.getURL = function(identifier) {
+	_f0xy.getURL = function(id) {
 		
-		if(_classMappings[identifier]){
-			return _classMappings[identifier];
+		if(_classMappings[id]){
+			return _classMappings[id];
 		}
 		var regexp = new RegExp('\\' + _separator, 'g');
-		return _class_path + identifier.replace(regexp, '/') + '.js';
+		return _class_path + id.replace(regexp, '/') + '.js';
 	}
 
 	/**
@@ -442,35 +429,35 @@ var f0xy = (function(root){
 	* NOTE: Classes that have not yet loaded all of their dependencies, will return FALSE for this check.
 	*
 	* @public
-	* @param			{String|Object}		identifier			The fully qualfied class name, or an Object.
+	* @param			{String|Object}		id						The fully qualfied class name, or an Object.
 	* @returns		{Boolean}										Whether or not this is a Class.
 	*/
 
-	_f0xy.isClass = function(identifier){
-		identifier = (!isObject(identifier) && !isFunction(identifier)) ? _namespace(identifier, false) : identifier;
-		return (identifier) ? identifier.isClass : false;
+	_f0xy.isClass = function(id){
+		id = (!isObject(id) && !isFunction(id)) ? _namespace(id, false) : id;
+		return (id) ? id.isClass : false;
 	}
 
 	/**
 	* Extends a given class asynchronously.
 	*
 	* @public
-	* @param			{String}			identifier			The fully qualified name of the Class you want to extend.
+	* @param			{String}			id						The fully qualified name of the Class you want to extend.
 	* @param			{Object}			obj					A new Class Object
 	* @returns		{Object}									The extended Class, or, if still waiting on dependencies, the original Object with a few more properties for internal f0xy use.
 	*/ 
 
-	_f0xy.extend = function(identifier, obj){
+	_f0xy.extend = function(id, obj){
 		
 		// If the Class exists and is a f0xy class, then return the extended object.
-		if(_f0xy.isClass(identifier)){
-			obj = _f0xy.get(identifier).extend(obj);			
+		if(_f0xy.isClass(id)){
+			obj = _f0xy.get(id).extend(obj);			
 		}
 		else{
 			obj.toExtend = true;
 		}
 
-		obj.extendedFrom = identifier;
+		obj.extendedFrom = id;
 
 		return obj;
 	}
@@ -488,20 +475,20 @@ var f0xy = (function(root){
 	*
 	* @see 		f0xy.unuse
 	* @public
-	* @param	 	{String|Array}		identifiers		The fully qualfiied name(s) to import into the global namespace.
+	* @param	 	{String|Array}		ids		The fully qualfiied name(s) to import into the global namespace.
 	*/
 	 
-	_f0xy.use = function(identifiers){
+	_f0xy.use = function(ids){
 		
-		f0xy.unuse(identifiers);
+		f0xy.unuse(ids);
 
-		identifiers = strToArray(identifiers);
+		ids = strToArray(ids);
 
-		for (var i = 0; i < identifiers.length; i++) {
+		for (var i = 0; i < ids.length; i++) {
 			
-			var identifier = identifiers[i];	
+			var id = ids[i];	
 			
-			var parts = identifier.split(_separator);
+			var parts = id.split(_separator);
 			var target = parts.pop();
 			var ns = _f0xy.get(parts.join(_separator), false);
 			
@@ -579,58 +566,43 @@ var f0xy = (function(root){
 	* If the classes have already been loaded, or are already defined, the callback function is invoked immediately.
 	*
 	* @public
-	* @param	 {String|Array}		classes					The fully qualified names of the class(es) to load.
+	* @param	 {String|Array}		ids				The fully qualified names of the class(es) to load.
 	* @param	 {Function}				callback			The function to call once all classes (and their dependencies) have been loaded.
 	*/
 
-	_f0xy.require = function(identifiers, callback){
+	_f0xy.require = function(ids, callback){
 
 		if(!_initialized){f0xy.configure();}
 
-		identifiers = strToArray(identifiers);
+		ids = strToArray(ids);
 		
 		var files = [];
 		var classes = [];
 
-		for(var i = 0; i < identifiers.length; i ++){
+		for(var i = 0; i < ids.length; i ++){
 
-			var identifier = identifiers[i];
-			var file = _f0xy.getURL(identifier);
+			var id = ids[i];
+			var file = _f0xy.getURL(id);
 
-			if((_requestedFiles.indexOf(file) === -1) && !_f0xy.get(identifier)){	
-				files.push(_f0xy.getURL(identifier));
-				classes.push(identifier);
+			if((_requestedFiles.indexOf(file) < 0) && !_f0xy.get(id)){	
+				files.push(_f0xy.getURL(id));
+				classes.push(id);
 			}
 		}
 
-		if(files.length > 0){	
-			
-			_loadQueues.push({
-				classes: classes,
-				callback: callback
-			});
+		if(files.length > 0){
 
-			_load(files, classes, function(){					
-					_checkExtendQueue();
-					_checkLoadQueues();
-			});
+			var q = {
+				f  : files,
+				c  : classes,
+				cb : callback
+			};
+			
+			_load(q);
 		}
 
-		else{
-
-			for(var i = 0; i < identifiers.length; i ++){
-				var identifier = identifiers[i];
-
-				if(_f0xy.get(identifier)){
-					if(_loadedClasses.indexOf(identifier) === -1){
-						_loadedClasses.push(identifier);
-					}
-				}
-			}
-			
-			if(callback){
-				callback.call();
-			}
+		else if(callback){
+			sTimeout(callback, 0);
 		}
 	}
 
