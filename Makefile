@@ -64,20 +64,6 @@ size: f0xy min
 	wc -c ${F0XY} ${F0XY_MIN} ${F0XY_MIN}.gz;
 	@@rm ${F0XY_MIN}.gz; \
 
-push: core
-ifneq (${b}, 0)
-ifneq (${m}, 0)
-	@@echo BRANCH
-	git add .
-	git commit -am "${m}"
-	git push origin ${b}
-else
-	@@echo "You must specify a commit message. (make push b=branch m=message)"
-endif
-else
-	@@echo "You must specify a branch. (make push b=branch m=message)"
-endif
-
 push_docs: docs
 	cd gh-pages; git add .; \
 	git commit -am "updated docs"; \
