@@ -1,7 +1,0 @@
-#! /bin/sh
-#rm -rf docs
-rm src/f0xy+yepnope.js
-cat src/yepnope.js src/f0xy.js >> src/f0xy+yepnope.js
-uglifyjs -o bin/f0xy.min.js -nc src/f0xy.js
-uglifyjs -o bin/f0xy+yepnope.min.js -nc src/f0xy+yepnope.js
-lib/node-jsdoc-toolkit/app/run.js -c=lib/jsdoc.conf

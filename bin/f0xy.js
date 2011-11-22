@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Mon Nov 21 17:17:03 2011 -0800
+ * Date: Mon Nov 21 17:17:18 2011 -0800
  */
  
 /**
@@ -46,7 +46,8 @@
 */
 
 /** @namespace */
-var f0xy = (function(){
+
+var f0xy = (function(root){
 
 	"use strict";
 
@@ -86,7 +87,7 @@ var f0xy = (function(){
 		var __method = this, args = Array.prototype.slice.call(arguments), object = args.shift();
 		return function(){
 			var local_args = args.concat(Array.prototype.slice.call(arguments));
-			if (this !== window) local_args.push(this);
+			if (this !== _root) local_args.push(this);
 			return __method.apply(object, local_args);
 		}
 	}
@@ -99,6 +100,7 @@ var f0xy = (function(){
 	var _extendQueue = [];
 	var _origRootNS = {};
 	var _initialized = false;
+	var _root = root;
 
 	var s = "string";
 	var f = "function";
@@ -254,18 +256,18 @@ var f0xy = (function(){
 	* @param		 {String}			[class_path="js/"]	The root path of all your classes. Can be absolute or relative.
 	*/
 
-	_f0xy.configure = function(class_path, separator, useWindowNS){
+	_f0xy.configure = function(class_path, separator, useRootNS){
 		_class_path = class_path || _class_path;
 		_separator = separator || _separator;
 		_class_path = (_class_path.lastIndexOf("/") === _class_path.length-1) ? _class_path : _class_path + "/";
 
-		if(useWindowNS !== false){
+		if(useRootNS !== false){
 			for(var i in _f0xy.ns){
-				if(!window[i]){
-					window[i] = _f0xy.ns[i];
+				if(!_root[i]){
+					_root[i] = _f0xy.ns[i];
 				}
 			}
-			_f0xy.ns = window;
+			_f0xy.ns = _root;
 		}
 		_initialized = true;
 	}
@@ -439,7 +441,7 @@ var f0xy = (function(){
 	}
 
 	/**
-	* Imports properties from the specified namespace to the global space (ie. under _f0xy.ns, or window)
+	* Imports properties from the specified namespace to the global space (ie. under _f0xy.ns, or _root)
 	* This is only meant to be used as a utility, and for temporary purposes. Please clean up with f0xy.unuse()
 	* You are responsible for not polluting the global namespace.
 	*
@@ -593,7 +595,7 @@ var f0xy = (function(){
 
 	return _f0xy;
 
-})();
+})(this);
 f0xy.define("f0xy", {
 
 	/**
