@@ -95,27 +95,25 @@ var f0xy = (function(root){
 
 	/** @private */
 	var _checkExtendQueue = function(){
+		var eq = _extendQueue;
 
-		for(var i = _extendQueue.length - 1; i >= 0; i --){
-			
-			var packageArray = _extendQueue[i].split(_separator);
-			var className	= packageArray.splice(packageArray.length-1, 1);
-			var namespace = packageArray.join(_separator);
-			
-			var packageObj = _f0xy.get(namespace, false);
-			var obj = packageObj[className];
+		for(var i = eq.length - 1; i >= 0; i --){
 
-			if(obj.toExtend){
-				var superClass = _f0xy.get(obj.extendedFrom, false);
+			var ns = eq[i].split(_separator);
+			var id = ns.splice(ns.length-1,1);
+			ns = _f0xy.get(ns.join(_separator), false);
+
+			if(ns[id].toExtend){
+				var superClass = _f0xy.get(ns[id].extendedFrom, false);
 				if(superClass.isClass){
 
-					obj.toExtend = false;
-					delete obj.toExtend;
+					ns[id].toExtend = false;
+					delete ns[id].toExtend;
 					
-					packageObj[className] = _f0xy.extend(superClass, obj);
+					ns[id] = _f0xy.extend(superClass, ns[id]);
 
-					_extendQueue.splice(i, 1);
-					_checkExtendQueue();					
+					eq.splice(i, 1);
+					_checkExtendQueue();
 					return;
 				}
 			}
@@ -127,17 +125,18 @@ var f0xy = (function(root){
 	var _checkLoadQueue = function(){
 
 		for(var i = _loadQueue.length -1; i >= 0; i --){
+
 			var q = _loadQueue[i];
 			var dependenciesLoaded = true;
 			
-			for(var j = 0; j < _loadQueue[i].c.length; j ++){
+			for(var j = 0; j < q.c.length; j ++){
 
-				var obj = _f0xy.get(_loadQueue[i].c[j], false);
+				var obj = _f0xy.get(q.c[j], false);
 
 				if(!obj.isClass){dependenciesLoaded = false;}				
 				else if(obj.dependencies){
 					for(var k = 0; k < obj.dependencies.length; k ++){
-						if(!_f0xy.isClass(obj.dependencies[k])){							
+						if(!_f0xy.isClass(obj.dependencies[k])){
 							dependenciesLoaded = false;
 							break;
 						}
@@ -156,21 +155,24 @@ var f0xy = (function(root){
 	}
 
 	var _checkWaitQueue = function(){
+		
+		var w = _waitingForLoad;
+
 		if(_waitID){clearTimeout(_waitID);}
 		
-		for(var i = 0; i < _waitingForLoad.length; i ++){
-			var obj = _waitingForLoad[i];
-			obj.e += 50;
+		for(var i = 0; i < w.length; i ++){
+			var o = w[i];
+			o.e += 50;
 
-			if(_f0xy.isClass(obj.c)){
-				obj.s.onload();
+			if(_f0xy.isClass(o.c)){
+				o.s.onload();
 			}
-			else if(obj.e >= _f0xy.errorTimeout){
-				obj.s.onerror();
+			else if(o.e >= _f0xy.errorTimeout){
+				o.s.onerror();
 			}
 		}
 
-		if(_waitingForLoad.length > 0){
+		if(w.length > 0){
 			_waitID = sTimeout(_checkWaitQueue, 50);
 		}
 	}
@@ -257,7 +259,6 @@ var f0xy = (function(root){
 
 		classes = classes || false;
 		var ns = _f0xy.ns;
-		var req = "require";
 
 		if(id != '' && !isObject(id) && !isFunction(id)){
 			var parts = id.split(_separator);
@@ -279,37 +280,38 @@ var f0xy = (function(root){
 				ns = ns[parts[i]];
 			}
 		}
+		
 		else if(id != ""){ns = id;}
 
-		if(classes !== false){
+		if(classes){
 
-			if(!classes.require){classes.require = [];}
+			classes.require = concatArray(classes.require);
+			var cr = classes.require;
 			
 			for(var className in classes){				
-				
-				var qualifiedName = id + _separator + className;
 
-				if(classes[className].extendedFrom){
-					classes.require.push(classes[className].extendedFrom);
-				}
+				if(className !== "require"){
 
-				if(classes[className].toExtend){					
-					if(_extendQueue.indexOf(qualifiedName) < 0){
-						_extendQueue.push(qualifiedName);
-					}
-				}
-
-				if(className !== req){
-					
+					var qualifiedName = id + _separator + className;
 					var c = classes[className];
 
+					if(c.extendedFrom){
+						cr.push(c.extendedFrom);
+					}
+
+					if(c.toExtend){					
+						if(_extendQueue.indexOf(qualifiedName) < 0){
+							_extendQueue.push(qualifiedName);
+						}
+					}
+					
 					c.nsID = id;
 					c.ns = ns;
 					c.className = className;
 
-					if(req in classes && classes.require.length > 0){
-						c.dependencies = concatArray(c.dependencies, classes.require);
-						_f0xy.require(classes.require);
+					if(cr.length > 0){
+						c.dependencies = concatArray(c.dependencies, cr);
+						_f0xy.require(cr);
 					}
 
 					if(_f0xy.isClass(c) && c.prototype){
@@ -318,8 +320,8 @@ var f0xy = (function(root){
 						proto.ns = ns;
 						proto.className = className;
 
-						if(req in classes && classes.require.length > 0){
-							proto.dependencies = concatArray(proto.dependencies, classes.require);
+						if(cr.length > 0){
+							proto.dependencies = concatArray(proto.dependencies, cr);
 						}
 					}
 
@@ -411,8 +413,8 @@ var f0xy = (function(root){
 		if(_classMappings[id]){
 			return _classMappings[id];
 		}
-		var regexp = new RegExp('\\' + _separator, 'g');
-		return _class_path + id.replace(regexp, '/') + '.js';
+
+		return _class_path + id.replace(new RegExp('\\' + _separator, 'g'), '/') + '.js';
 	}
 
 	/**
@@ -576,7 +578,7 @@ var f0xy = (function(root){
 			var file = _f0xy.getURL(id);
 
 			if((_requestedFiles.indexOf(file) < 0) && !_f0xy.get(id)){	
-				files.push(_f0xy.getURL(id));
+				files.push(file);
 				classes.push(id);
 			}
 		}

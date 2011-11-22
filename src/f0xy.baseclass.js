@@ -31,7 +31,7 @@ f0xy.define("f0xy", {
 			// Set it back to true, now that our "prototype" instance exists.
 			doInitialize = true;
 
-			// Make a deep copy of this object, removing all references that might affect other instances.
+			// Reference to this that won't change
 			var _this = this;
 
 			if(prototype.dependencies){
@@ -49,6 +49,7 @@ f0xy.define("f0xy", {
 						this._super = null;
 						delete this._super;
 						f0xy.unuse();
+						return ret;
 					};
 				}(name, obj[name])) : obj[name];
 			}

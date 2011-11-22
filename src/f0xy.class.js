@@ -29,7 +29,6 @@ f0xy.define("f0xy", {
 			}
 		},
 		
-		
 		/** 
 		* Local version of window.setTimeout that keeps scope of <i>this</i>.<br>
 		* 
