@@ -25,8 +25,7 @@ f0xy.define("f0xy", {
 		*/
 		use_dependencies : function(){
 			if(this.dependencies){
-				console.log(arguments.callee.caller);
-				f0xy.use(this.dependencies, arguments.callee.caller);
+				f0xy.use(this.dependencies);
 			}
 		},
 

@@ -7,7 +7,7 @@ BUILD_DIR = build
 PREFIX = .
 BIN_DIR = ${PREFIX}/bin
 
-COMPILER = uglifyjs -nc
+COMPILER = uglifyjs -nc --unsafe
 
 HEADER = ${SRC_DIR}/f0xy.header.js
 

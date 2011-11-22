@@ -89,6 +89,7 @@ var f0xy = (function(){
 	var _loadQueues = [];
 	var _extendQueue = [];
 	var _origRootNS = {};
+	var _initialized = false;
 
 	var s = "string";
 	var f = "function";
@@ -250,12 +251,14 @@ var f0xy = (function(){
 		_class_path = (_class_path.lastIndexOf("/") === _class_path.length-1) ? _class_path : _class_path + "/";
 
 		if(useWindowNS !== false){
-			_useWindowNS = true;			
 			for(var i in _f0xy.ns){
-				window[i] = _f0xy.ns[i];
+				if(!window[i]){
+					window[i] = _f0xy.ns[i];
+				}
 			}
 			_f0xy.ns = window;
 		}
+		_initialized = true;
 	}
 
 	/**
@@ -271,10 +274,18 @@ var f0xy = (function(){
 	*/
 
 	_f0xy.namespace = function(identifier, autoCreate, classes){
+
 		classes = classes || false;
 		var ns = _f0xy.ns;
+
 		if(identifier != '' && !_typeCheck(identifier, o, f)){
 			var parts = identifier.split(_separator);
+
+			if(parts[0] === "f0xy"){
+				ns = this;
+				parts.splice(0,1);
+			}
+
 			for (var i = 0; i < parts.length; i++) {
 				if(!ns[parts[i]]){
 					if(autoCreate){
@@ -530,6 +541,8 @@ var f0xy = (function(){
 	*/
 
 	_f0xy.require = function(classes, completeFunc){
+
+		if(!_initialized){f0xy.configure();}
 
 		if(_typeCheck(classes, s)){classes = [classes];}
 		

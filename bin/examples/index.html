@@ -2,12 +2,14 @@
 	<head>
 		<script src="../f0xy.js"></script>
 		<script type="text/javascript">
-			f0xy.configure("", ".", false);
+			
+			console.log(f0xy);
+
+			//f0xy.configure("", ".", false);
 			f0xy.require("com.example.Example3", function(){
-				var test = new f0xy.ns.com.example.Example3();
+				var test = new com.example.Example3();
 				test.logSomething("wooot!!!");
 			});
-
 			
 		</script>
 	</head>
