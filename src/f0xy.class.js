@@ -28,7 +28,8 @@ f0xy.define("f0xy", {
 				f0xy.use(this.dependencies);
 			}
 		},
-
+		
+		
 		/** 
 		* Local version of window.setTimeout that keeps scope of <i>this</i>.<br>
 		* 

@@ -44,11 +44,10 @@ f0xy.define("f0xy", {
 				// Check if we're overwriting an existing function
 				prototype[name] = (typeof obj[name] === "function") && (typeof _this.prototype[name] === "function") ? (function (name, fn) {
 					return function(){
-						f0xy.use(this.dependencies);
 						this._super = _this.prototype[name];
 						var ret = fn.apply(this, arguments);
 						this._super = null;
-						delete this._super;					 
+						delete this._super;
 						f0xy.unuse();
 					};
 				}(name, obj[name])) : obj[name];

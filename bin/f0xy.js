@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Mon Nov 21 17:17:18 2011 -0800
+ * Date: Mon Nov 21 17:36:06 2011 -0800
  */
  
 /**
@@ -93,18 +93,26 @@ var f0xy = (function(root){
 	}
 
 	var _classMappings = [];
-	var _loadedClasses = [];
+
 	var _separator = ".";
 	var _class_path = "";
-	var _loadQueues = [];
-	var _extendQueue = [];
+
+	var _root = root;
 	var _origRootNS = {};
 	var _initialized = false;
-	var _root = root;
 
+	var _loadQueues = [];
+	var _extendQueue = [];
+
+	var _waitID = null;
+	var _waitingForLoad = [];
+	var _requestedFiles = [];
+	var _loadedClasses = [];
+	
 	var s = "string";
 	var f = "function";
 	var o = "object";
+	var n = "number";
 	var u = "undefined";
 
 	/************* HELPER METHODS ***************/
@@ -161,17 +169,10 @@ var f0xy = (function(root){
 			var dependenciesLoaded = true;
 			
 			for(var j = 0; j < _loadQueues[i].classes.length; j ++){
-				/*	
-				if(!_f0xy.isClass(_loadQueues[i].classes[j])){
-					dependenciesLoaded = false;
-					break;
-				}
-				*/
 
 				var obj = _f0xy.get(_loadQueues[i].classes[j], false);
 
-				if(!obj.isClass){dependenciesLoaded = false;}
-				
+				if(!obj.isClass){dependenciesLoaded = false;}				
 				else if(obj.dependencies){
 					for(var k = 0; k < obj.dependencies.length; k ++){
 						if(_loadedClasses.indexOf(obj.dependencies[k]) === -1){
@@ -183,12 +184,33 @@ var f0xy = (function(root){
 				if(!dependenciesLoaded){break;}
 			}
 
-			if(dependenciesLoaded){
+			if(dependenciesLoaded){				
+				if(queue.callback){
+					// 0 ms delay to make sure queue.callback does not get called prematurely, in some instances.
+					setTimeout(queue.callback, 0);
+				}
 				_loadQueues.splice(i, 1);
-				if(queue.complete){
-					queue.complete.call();
-				}				
 			}
+		}
+	}
+
+	var _checkWaitQueue = function(){
+		if(_waitID){clearTimeout(_waitID);}
+		
+		for(var i = 0; i < _waitingForLoad.length; i ++){
+			var obj = _waitingForLoad[i];
+			obj.elapsed += 50;
+
+			if(_f0xy.isClass(obj.class)){
+				obj.script.onload();
+			}
+			else if(obj.elapsed >= _f0xy.errorTimeout){
+				obj.script.onerror();
+			}
+		}
+
+		if(_waitingForLoad.length > 0){
+			_waitID = setTimeout(_checkWaitQueue, 50);
 		}
 	}
 
@@ -196,13 +218,15 @@ var f0xy = (function(root){
 	* Does all the loading of JS files
 	*
 	* @param		files 		String or array of the files to be loaded.
+	* @param		classes 		The classes that match up to the files to be loaded.
 	* @param		callback 	Callback function to call once all files have been loaded
 	* @private 
 	*/
 	
-	var _load = function(files, callback){
+	var _load = function(files, classes, callback){
 
-		var _counter = 0 ;
+		// Loaded Count
+		var lc = 0;
 		var doc = document;
 		var body = "body";
 
@@ -210,30 +234,60 @@ var f0xy = (function(root){
 		if(!_typeCheck(files, o) && !files.sort){
 			files = new Array(files);
 		}
-		
-		function doLoad(){
 
-			// If document.body does not yet exist, let's wait on the load process a bit.
-			if(!doc[body]){return setTimeout(doLoad, 50);}
+		function inject(f, c){
+			if(_requestedFiles.indexOf(f) === -1){
 
-			for(var i = 0; i < files.length; i ++){
+				if(!doc[body]){return setTimeout(inject, 0, f, c);}
 				
-				var script = doc.createElement("script");
-		      script.onload = script.onreadystatechange = function(e, i){
-		          _counter ++;
-		          if(_counter >= files.length){
-		         	callback.call();
-		          }
+				var injectObj = {};
+				injectObj.file = f;
+				injectObj.class = c;
+				injectObj.elapsed = 0;
 
+				_requestedFiles.push(f);			
+				_waitingForLoad.push(injectObj);
+
+				var script = doc.createElement("script");
+		     	script.async = "async";
+		      script.src = f;
+
+				injectObj.script = script;
+
+		      script.onreadystatechange = script.onload = function(e){
+
+		      	if(_f0xy.isClass(c)){
+						_loadedClasses.push(injectObj.class);
+						lc++;
+			          if(lc >= files.length && callback){
+			          	_checkExtendQueue();
+			          	_checkLoadQueues();
+			         	setTimeout(callback, 50);
+			          }
+
+			        injectObj.script.onload = script.onreadystatechange = null;
+			        _waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
+			   	}
 		      };
 
-		      script.async = "async";
-		      script.src = files[i];
-		      doc[body].appendChild(script)
+		      script.onerror = function(e){
+		      	lc++;
+					_waitingForLoad.splice(i,1);
+					throw new Error(injectObj.class + " failed to load. Attempted to load from file: " + injectObj.file);
+		        injectObj.script.onerror = null;
+		        _waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);	
+		      }
+		      
+		      // Append the script to the document body
+		   	doc[body].appendChild(script);
 			}
 		}
 
-		doLoad();
+		for(var i = 0; i < files.length; i ++){
+			inject(files[i], classes[i]);
+		}
+
+		_waitID = setTimeout(_checkWaitQueue, 50);
 	}
 
 	/************* END HELPER METHODS ***************/	
@@ -248,6 +302,9 @@ var f0xy = (function(root){
 	// Set the root namespace
 	_f0xy.ns = {};
 
+	// Set the default error timeout to 10 seconds.
+	_f0xy.errorTimeout = 1e4;
+
 	/**
 	* Configure f0xy. Call to update the base class path, or to change the default separator (".").
 	* 
@@ -261,15 +318,18 @@ var f0xy = (function(root){
 		_separator = separator || _separator;
 		_class_path = (_class_path.lastIndexOf("/") === _class_path.length-1) ? _class_path : _class_path + "/";
 
-		if(useRootNS !== false){
-			for(var i in _f0xy.ns){
-				if(!_root[i]){
-					_root[i] = _f0xy.ns[i];
+		if(!_initialized){
+			if(useRootNS !== false){
+				for(var i in _f0xy.ns){
+					if(!_root[i]){
+						console.log(_f0xy.ns, i);
+						_root[i] = _f0xy.ns[i];
+					}
 				}
+				_f0xy.ns = _root;
 			}
-			_f0xy.ns = _root;
+			_initialized = true;
 		}
-		_initialized = true;
 	}
 
 	/**
@@ -382,7 +442,10 @@ var f0xy = (function(root){
 	* @returns		{Object}										The object that represents the namespace passed in as the first argument.
 	*/
 	_f0xy.define = function(identifier, classes){
-		return _f0xy.namespace(identifier, true, classes);
+		var r = _f0xy.namespace(identifier, true, classes);
+		_checkExtendQueue();
+		_checkLoadQueues();
+		return r;
 	}
 
 	/**
@@ -508,6 +571,7 @@ var f0xy = (function(root){
 			}
 		}
 	}
+	
 
 	/**
 	* Tells f0xy that filePath provides the class definitions for these classes.
@@ -548,36 +612,39 @@ var f0xy = (function(root){
 	*
 	* @public
 	* @param	 {String|Array}		classes					The fully qualified names of the class(es) to load.
-	* @param	 {Function}				completeFunc			The function to call once all classes (and their dependencies) have been loaded.
+	* @param	 {Function}				callback			The function to call once all classes (and their dependencies) have been loaded.
 	*/
 
-	_f0xy.require = function(classes, completeFunc){
+	_f0xy.require = function(identifiers, callback){
 
 		if(!_initialized){f0xy.configure();}
 
-		if(_typeCheck(classes, s)){classes = [classes];}
+		if(_typeCheck(identifiers, s)){identifiers = [identifiers];}
 		
-		var classFiles = [];
-		
-		for(var i = 0; i < classes.length; i ++){
-			var identifier = classes[i];
+		var files = [];
+		var classes = [];
 
-			if((_loadedClasses.indexOf(identifier) === -1) && !_f0xy.get(identifier)){	
-				classFiles.push(_f0xy.getURL(identifier));
+		for(var i = 0; i < identifiers.length; i ++){
+
+			var identifier = identifiers[i];
+			var file = _f0xy.getURL(identifier);
+
+			if((_requestedFiles.indexOf(file) === -1) && !_f0xy.get(identifier)){	
+				files.push(_f0xy.getURL(identifier));
+				classes.push(identifier);
 			}
 		}
 
-		if(classFiles.length > 0){	
+		if(files.length > 0){	
 			var queue = {
 				classes: classes,
-				classFiles: classFiles,
-				complete: completeFunc
+				files: files,
+				callback: callback
 			};
 			
 			_loadQueues.push(queue);
 
-			_load(classFiles, function(){
-					_loadedClasses = _loadedClasses.concat(classes);
+			_load(files, classes, function(){					
 					_checkExtendQueue();
 					_checkLoadQueues();
 				}
@@ -585,10 +652,19 @@ var f0xy = (function(root){
 		}
 
 		else{
-			_loadedClasses = _loadedClasses.concat(classes);
 
-			if(completeFunc){
-				completeFunc.call();
+			for(var i = 0; i < identifiers.length; i ++){
+				var identifier = identifiers[i];
+
+				if(_f0xy.get(identifier)){
+					if(_loadedClasses.indexOf(identifier) === -1){
+						_loadedClasses.push(identifier);
+					}
+				}
+			}
+			
+			if(callback){
+				callback.call();
 			}
 		}
 	}
@@ -642,11 +718,10 @@ f0xy.define("f0xy", {
 				// Check if we're overwriting an existing function
 				prototype[name] = (typeof obj[name] === "function") && (typeof _this.prototype[name] === "function") ? (function (name, fn) {
 					return function(){
-						f0xy.use(this.dependencies);
 						this._super = _this.prototype[name];
 						var ret = fn.apply(this, arguments);
 						this._super = null;
-						delete this._super;					 
+						delete this._super;
 						f0xy.unuse();
 					};
 				}(name, obj[name])) : obj[name];
@@ -722,7 +797,8 @@ f0xy.define("f0xy", {
 				f0xy.use(this.dependencies);
 			}
 		},
-
+		
+		
 		/** 
 		* Local version of window.setTimeout that keeps scope of <i>this</i>.<br>
 		* 

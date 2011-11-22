@@ -3,7 +3,7 @@
 
 The goal of f0xy is to provide AMD like simple, easy-to-implement inheritance and class support for JavaScript.
 
-f0xy does all this, all while sporting a tiny footprint of 2.1k (when minified and gzipped).
+f0xy does all this, all while sporting a tiny footprint of 2.4k (when minified and gzipped).
 
 ### Getting Started
 
