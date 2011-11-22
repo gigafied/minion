@@ -88,7 +88,7 @@ var f0xy = (function(){
 	var _class_path = "";
 	var _loadQueues = [];
 	var _extendQueue = [];
-	var _origWindowNS = {};
+	var _origRootNS = {};
 
 	var s = "string";
 	var f = "function";
@@ -233,6 +233,9 @@ var f0xy = (function(){
 	*/
 	var _f0xy = {};
 
+	// Set the root namespace
+	_f0xy.ns = {};
+
 	/**
 	* Configure f0xy. Call to update the base class path, or to change the default separator (".").
 	* 
@@ -241,10 +244,18 @@ var f0xy = (function(){
 	* @param		 {String}			[class_path="js/"]	The root path of all your classes. Can be absolute or relative.
 	*/
 
-	_f0xy.configure = function(class_path, separator){
+	_f0xy.configure = function(class_path, separator, useWindowNS){
 		_class_path = class_path || _class_path;
 		_separator = separator || _separator;
 		_class_path = (_class_path.lastIndexOf("/") === _class_path.length-1) ? _class_path : _class_path + "/";
+
+		if(useWindowNS !== false){
+			_useWindowNS = true;			
+			for(var i in _f0xy.ns){
+				window[i] = _f0xy.ns[i];
+			}
+			_f0xy.ns = window;
+		}
 	}
 
 	/**
@@ -261,7 +272,7 @@ var f0xy = (function(){
 
 	_f0xy.namespace = function(identifier, autoCreate, classes){
 		classes = classes || false;
-		var ns = window;
+		var ns = _f0xy.ns;
 		if(identifier != '' && !_typeCheck(identifier, o, f)){
 			var parts = identifier.split(_separator);
 			for (var i = 0; i < parts.length; i++) {
@@ -408,7 +419,7 @@ var f0xy = (function(){
 	}
 
 	/**
-	* Imports properties from the specified namespace to the global space (ie. under window)
+	* Imports properties from the specified namespace to the global space (ie. under _f0xy.ns, or window)
 	* This is only meant to be used as a utility, and for temporary purposes. Please clean up with f0xy.unuse()
 	* You are responsible for not polluting the global namespace.
 	*
@@ -442,15 +453,15 @@ var f0xy = (function(){
 			if (target === '*') {
 				// imports all Classes/namespaces under the given namespace
 				for(var objectName in ns){
-					_origWindowNS[objectName] = (window[objectName]) ? window[objectName] : null;
-					window[objectName] = ns[objectName];
+					_origRootNS[objectName] = (_f0xy.ns[objectName]) ? _f0xy.ns[objectName] : null;
+					_f0xy.ns[objectName] = ns[objectName];
 				}
 			}
 			else{
 				// imports only the specified Class/namespace
 				if(ns[target]){
-					_origWindowNS[target] = (window[target]) ? window[target] : null;
-					window[target] = ns[target];
+					_origRootNS[target] = (_f0xy.ns[target]) ? _f0xy.ns[target] : null;
+					_f0xy.ns[target] = ns[target];
 				}
 			}
 		}
@@ -468,10 +479,10 @@ var f0xy = (function(){
 
 	_f0xy.unuse = function(){
 
-		for(var prop in _origWindowNS){
-			window[prop] = _origWindowNS[prop];
-			if(window[prop] === null){
-				delete window[prop];
+		for(var prop in _origRootNS){
+			_f0xy.ns[prop] = _origRootNS[prop];
+			if(_f0xy.ns[prop] === null){
+				delete _f0xy.ns[prop];
 			}
 		}
 	}

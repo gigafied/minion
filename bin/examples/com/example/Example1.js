@@ -15,9 +15,7 @@ f0xy.define("com.example", {
 
 		logSomething : function(something){
 
-			this.use_dependencies();
-
-			ExampleUtils.log(something);
+			f0xy.get("com.example.utils.ExampleUtils").log(something);
 		}
 
 	})
