@@ -36,35 +36,7 @@ var f0xy = (function(root){
 	"use strict";
 
 	// If Array.indexOf is not defined, let's define it.
-    Array.prototype.indexOf = Array.prototype.indexOf || function (searchElement /*, fromIndex */ ){       
-        if (this === void 0 || this === null) {
-            throw new TypeError();
-        }
-        var t = Object(this);
-        var len = t.length >>> 0;
-        if (len === 0) {
-            return -1;
-        }
-        var n = 0;
-        if (arguments.length > 0) {
-            n = Number(arguments[1]);
-            if (n !== n) { // shortcut for verifying if it's NaN
-                n = 0;
-            } else if (n !== 0 && n !== Infinity && n !== -Infinity) {
-                n = (n > 0 || -1) * Math.floor(Math.abs(n));
-            }
-        }
-        if (n >= len) {
-            return -1;
-        }
-        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-        for (; k < len; k++) {
-            if (k in t && t[k] === searchElement) {
-                return k;
-            }
-        }
-        return -1;
-    }
+    Array.prototype.indexOf = Array.prototype.indexOf || function(o,i){for(var j=this.length,i=i<0?i+j<0?0:i+j:i||0;i<j&&this[i]!==o;i++);return j<=i?-1:i}
 
 	// If Function.bind is not defined, let's define it.
 	Function.prototype.bind = Function.prototype.bind || function(){
@@ -93,19 +65,31 @@ var f0xy = (function(root){
 	var _requestedFiles = [];
 	var _loadedClasses = [];
 	
-	var s = "string";
-	var f = "function";
-	var o = "object";
-	var n = "number";
-	var u = "undefined";
-
 	/************* HELPER METHODS ***************/
 
-	// Typechecks o against t or s
-	var _typeCheck = function(o, t, s, r){
-		r = (typeof o === t);
-		r = (!r && s) ? (typeof o === s) : r;
-		return r;
+	var isArray = Array.isArray || function(obj){
+		return toString.call( obj ) == '[object Array]';
+	}
+
+	var isObject = function(obj){
+		return Object(obj) === obj;
+	}
+
+	var isString = function(s) {
+		return typeof s == 'string';
+	}
+
+	var isFunction = function(fn){
+		return toString.call(fn) == '[object Function]';
+	}
+
+	var strToArray = function(s){
+		return (isString(s)) ? [s] : s;
+	}
+
+	var concatArray = function(a, b){
+		b = b || [];
+		return ((a) ? a : []).concat(b);		
 	}
 
 	/** @private */
@@ -215,9 +199,7 @@ var f0xy = (function(root){
 		var body = "body";
 
 		// If files is a String, create an array
-		if(!_typeCheck(files, o) && !files.sort){
-			files = new Array(files);
-		}
+		files = strToArray(files);
 
 		function inject(f, c){
 			if(_requestedFiles.indexOf(f) === -1){
@@ -274,6 +256,93 @@ var f0xy = (function(root){
 		_waitID = setTimeout(_checkWaitQueue, 50);
 	}
 
+	/**
+	* Used by f0xy.get() and f0xy.define(). 
+	* Get the namespace/Class, or creates it if it does not exist. Also optionally creates Objects in the specified namepsace.
+	*
+	* @public
+	* @param			{String|Object}	identifier			The fully qualified namespace.
+	* @param			{Boolean}			autoCreate			Whether or not to create a blank object if the namespace does not yet exist.
+	* @param			{Object}				[classes]			An object of class definitions which will be added to the namespace.
+	* @returns		{Object}										The object that represents the fully qualified namespace passed in as the first argument.
+	* @private
+	*/
+
+	var _namespace = function(identifier, autoCreate, classes){
+
+		classes = classes || false;
+		var ns = _f0xy.ns;
+		if(identifier != '' && !isObject(identifier) && !isFunction(identifier)){
+			var parts = identifier.split(_separator);
+
+			if(parts[0] === "f0xy"){
+				ns = _f0xy;
+				parts.splice(0,1);
+			}
+
+			for (var i = 0; i < parts.length; i++) {
+				if(!ns[parts[i]]){
+					if(autoCreate){
+						ns[parts[i]] = {};
+					}
+					else{
+						return false;
+					}
+				}
+				ns = ns[parts[i]];
+			}
+		}
+		else if(identifier != ""){ns = identifier;}
+
+		if(classes !== false){
+
+			if(!classes.require){classes.require = [];}
+			
+			for(var className in classes){				
+				
+				var qualifiedName = identifier + _separator + className;
+
+				if(classes[className].extendedFrom){
+					classes.require.push(classes[className].extendedFrom);
+				}
+
+				if(classes[className].toExtend){					
+					if(_extendQueue.indexOf(qualifiedName) === -1){
+						_extendQueue.push(qualifiedName);
+					}
+				}
+
+				if(className !== "require"){
+					
+					var c = classes[className];
+
+					c.nsID = identifier;
+					c.ns = ns;
+					c.className = className;
+
+					if("require" in classes && classes.require.length > 0){
+						c.dependencies = concatArray(c.dependencies, classes.require);
+						_f0xy.require(classes.require);
+					}
+
+					if(_f0xy.isClass(c) && c.prototype){
+						c.prototype.nsID = identifier;
+						c.prototype.ns = ns;
+						c.prototype.className = className;
+
+						if("require" in classes && classes.require.length > 0){
+							c.prototype.dependencies = concatArray(c.prototype.dependencies, classes.require);
+						}
+					}
+
+					ns[className] = c;
+				}
+			}
+		}
+
+		return ns;
+	}		
+
 	/************* END HELPER METHODS ***************/	
 
 
@@ -306,7 +375,6 @@ var f0xy = (function(root){
 			if(useRootNS !== false){
 				for(var i in _f0xy.ns){
 					if(!_root[i]){
-						console.log(_f0xy.ns, i);
 						_root[i] = _f0xy.ns[i];
 					}
 				}
@@ -317,95 +385,6 @@ var f0xy = (function(root){
 	}
 
 	/**
-	* Used by f0xy.get() and f0xy.define(). 
-	* Get the namespace/Class, or creates it if it does not exist. Also optionally creates Objects in the specified namepsace.
-	*
-	* @public
-	* @param			{String|Object}	identifier			The fully qualified namespace.
-	* @param			{Boolean}			autoCreate			Whether or not to create a blank object if the namespace does not yet exist.
-	* @param			{Object}				[classes]			An object of class definitions which will be added to the namespace.
-	* @returns		{Object}										The object that represents the fully qualified namespace passed in as the first argument.
-	* @private
-	*/
-
-	_f0xy.namespace = function(identifier, autoCreate, classes){
-
-		classes = classes || false;
-		var ns = _f0xy.ns;
-
-		if(identifier != '' && !_typeCheck(identifier, o, f)){
-			var parts = identifier.split(_separator);
-
-			if(parts[0] === "f0xy"){
-				ns = this;
-				parts.splice(0,1);
-			}
-
-			for (var i = 0; i < parts.length; i++) {
-				if(!ns[parts[i]]){
-					if(autoCreate){
-						ns[parts[i]] = {};
-					}
-					else{
-						return false;
-					}
-				}
-				ns = ns[parts[i]];
-			}
-		}
-		else if(_typeCheck(identifier, o)){ns = identifier;}
-
-		if(classes !== false){
-
-			if(!classes.require){classes.require = [];}
-			
-			for(var className in classes){				
-				
-				var qualifiedName = identifier + _separator + className;
-
-				if(classes[className].extendedFrom){
-					classes.require.push(classes[className].extendedFrom);
-				}
-
-				if(classes[className].toExtend){					
-					if(_extendQueue.indexOf(qualifiedName) === -1){
-						_extendQueue.push(qualifiedName);
-					}
-				}
-
-				if(className !== "require"){
-					
-					var c = classes[className];
-
-					c.nsID = identifier;
-					c.ns = ns;
-					c.className = className;
-
-					if("require" in classes && classes.require.length > 0){
-						c.dependencies = ((c.dependencies) ? c.dependencies : []).concat(classes.require);
-
-						_f0xy.require(classes.require);
-					}
-
-					if(_f0xy.isClass(c) && c.prototype){
-						c.prototype.nsID = identifier;
-						c.prototype.ns = ns;
-						c.prototype.className = className;
-
-						if("require" in classes && classes.require.length > 0){
-							c.prototype.dependencies = ((c.prototype.dependencies) ? c.prototype.dependencies : []).concat(classes.require);
-						}
-					}
-
-					ns[className] = c;
-				}
-			}
-		}
-
-		return ns;
-	}	
-
-	/**
 	* Gets the object by it's fully qualified identifier.
 	*
 	* @public
@@ -414,7 +393,7 @@ var f0xy = (function(root){
 	*/
 
 	_f0xy.get = function(identifier){
-		return _f0xy.namespace(identifier, false);
+		return _namespace(identifier, false);
 	}
 
 	/**
@@ -426,7 +405,7 @@ var f0xy = (function(root){
 	* @returns		{Object}										The object that represents the namespace passed in as the first argument.
 	*/
 	_f0xy.define = function(identifier, classes){
-		var r = _f0xy.namespace(identifier, true, classes);
+		var r = _namespace(identifier, true, classes);
 		_checkExtendQueue();
 		_checkLoadQueues();
 		return r;
@@ -459,7 +438,7 @@ var f0xy = (function(root){
 	*/
 
 	_f0xy.isClass = function(identifier){
-		identifier = (!_typeCheck(identifier, o, f)) ? _f0xy.namespace(identifier, false) : identifier;
+		identifier = (!isObject(identifier) && !isFunction(identifier)) ? _namespace(identifier, false) : identifier;
 		return (identifier) ? identifier.isClass : false;
 	}
 
@@ -507,9 +486,7 @@ var f0xy = (function(root){
 		
 		f0xy.unuse(identifiers);
 
-		if(!_typeCheck(identifiers, o) && !identifiers.sort){
-			identifiers = new Array(identifiers);
-		}
+		identifiers = strToArray(identifiers);
 
 		for (var i = 0; i < identifiers.length; i++) {
 			
@@ -574,9 +551,7 @@ var f0xy = (function(root){
 	_f0xy.provides = function(file, classes, doLoad, callback){
 
 		// If classes is a String, create an array
-		if(!_typeCheck(classes, o) && !classes.sort){
-			classes = new Array(classes);
-		}
+		classes = strToArray(classes);
 
 		// If the file is not absolute, prepend the class_path
 		file = (!new RegExp("(http://|/)[^ :]+").test(file)) ? _class_path + file : file;
@@ -603,7 +578,7 @@ var f0xy = (function(root){
 
 		if(!_initialized){f0xy.configure();}
 
-		if(_typeCheck(identifiers, s)){identifiers = [identifiers];}
+		identifiers = strToArray(identifiers);
 		
 		var files = [];
 		var classes = [];
@@ -620,19 +595,16 @@ var f0xy = (function(root){
 		}
 
 		if(files.length > 0){	
-			var queue = {
-				classes: classes,
-				files: files,
-				callback: callback
-			};
 			
-			_loadQueues.push(queue);
+			_loadQueues.push({
+				classes: classes,
+				callback: callback
+			});
 
 			_load(files, classes, function(){					
 					_checkExtendQueue();
 					_checkLoadQueues();
-				}
-			);
+			});
 		}
 
 		else{
