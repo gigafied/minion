@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Tue Nov 22 15:10:14 2011 -0800
+ * Date: Tue Nov 22 16:08:48 2011 -0800
  */
  
 /**
@@ -497,14 +497,14 @@ var f0xy = (function(root){
 			ns = _f0xy.get(ns.join(_separator), false);
 			
 			if(id === '*'){
-				// imports all Classes/namespaces under the given namespace
+				// injects all ids under namespace into the root namespace
 				for(var n in ns){
 					_origRootNS[n] = (_f0xy.ns[n]) ? _f0xy.ns[n] : null;
 					_f0xy.ns[n] = ns[n];
 				}
 			}
 			else{
-				// imports only the specified Class/namespace
+				// injects this id into the root namespace
 				if(ns[id]){
 					_origRootNS[id] = (_f0xy.ns[id]) ? _f0xy.ns[id] : null;
 					_f0xy.ns[id] = ns[id];
@@ -612,8 +612,7 @@ var f0xy = (function(root){
 
 	return _f0xy;
 
-})(this);
-f0xy.define("f0xy", {
+})(this);f0xy.define("f0xy", {
 
 	/**
 	* The f0xy Base Class
