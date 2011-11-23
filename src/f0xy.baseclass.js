@@ -48,7 +48,7 @@ f0xy.define("f0xy", {
 						var ret = fn.apply(this, arguments);
 						this._super = null;
 						delete this._super;
-						f0xy.unuse();
+						setTimeout(f0xy.unuse, 0);
 						return ret;
 					};
 				}(name, obj[name])) : obj[name];

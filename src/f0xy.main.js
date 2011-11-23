@@ -100,7 +100,7 @@ var f0xy = (function(root){
 		for(var i = eq.length - 1; i >= 0; i --){
 
 			var ns = eq[i].split(_separator);
-			var id = ns.splice(ns.length-1,1);
+			var id = ns.splice(ns.length-1,1)[0];
 			ns = _f0xy.get(ns.join(_separator), false);
 
 			if(ns[id].toExtend){
@@ -113,7 +113,7 @@ var f0xy = (function(root){
 					ns[id] = _f0xy.extend(superClass, ns[id]);
 
 					eq.splice(i, 1);
-					_checkExtendQueue();
+					sTimeout(_checkExtendQueue, 0);
 					return;
 				}
 			}
@@ -130,28 +130,31 @@ var f0xy = (function(root){
 			var dependenciesLoaded = true;
 			
 			for(var j = 0; j < q.c.length; j ++){
-
-				var obj = _f0xy.get(q.c[j], false);
-
-				if(!obj.isClass){dependenciesLoaded = false;}				
-				else if(obj.dependencies){
-					for(var k = 0; k < obj.dependencies.length; k ++){
-						if(!_f0xy.isClass(obj.dependencies[k])){
-							dependenciesLoaded = false;
-							break;
-						}
-					}
-				}
+				dependenciesLoaded = _areDependenciesLoaded(q.c[j]);
 				if(!dependenciesLoaded){break;}
 			}
 			if(dependenciesLoaded){
 				if(q.cb){
-					// 10 ms delay to make sure queue.callback does not get called prematurely, in some instances.
-					sTimeout(q.cb, 10);
+					// 0 ms delay to make sure queue.callback does not get called prematurely, in some instances.
+					q.cb();
 				}
 				_loadQueue.splice(i, 1);
 			}
 		}
+	}
+
+	// Recursively checks dependencies
+	var _areDependenciesLoaded = function(o){
+		o = _f0xy.get(o, false);
+		if(!o.isClass){return false}
+		if(o.dependencies){
+			for(var i = 0; i < o.dependencies.length; i ++){
+				if(!_areDependenciesLoaded(o.dependencies[i])){
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	var _checkWaitQueue = function(){
@@ -280,7 +283,7 @@ var f0xy = (function(root){
 				ns = ns[parts[i]];
 			}
 		}
-		
+
 		else if(id != ""){ns = id;}
 
 		if(classes){
@@ -472,31 +475,30 @@ var f0xy = (function(root){
 	*/
 	 
 	_f0xy.use = function(ids){
-		
-		f0xy.unuse(ids);
 
 		ids = strToArray(ids);
 
 		for (var i = 0; i < ids.length; i++) {
 			
-			var id = ids[i];	
+			var id = ids[i];
+
+			var obj = _f0xy.get(id, true);
+			var ns = id.split(_separator);
+			var id = ns.splice(ns.length-1,1)[0];
+			ns = _f0xy.get(ns.join(_separator), false);
 			
-			var parts = id.split(_separator);
-			var target = parts.pop();
-			var ns = _f0xy.get(parts.join(_separator), false);
-			
-			if (target === '*') {
+			if(id === '*'){
 				// imports all Classes/namespaces under the given namespace
-				for(var objectName in ns){
-					_origRootNS[objectName] = (_f0xy.ns[objectName]) ? _f0xy.ns[objectName] : null;
-					_f0xy.ns[objectName] = ns[objectName];
+				for(var n in ns){
+					_origRootNS[n] = (_f0xy.ns[n]) ? _f0xy.ns[n] : null;
+					_f0xy.ns[n] = ns[n];
 				}
 			}
 			else{
 				// imports only the specified Class/namespace
-				if(ns[target]){
-					_origRootNS[target] = (_f0xy.ns[target]) ? _f0xy.ns[target] : null;
-					_f0xy.ns[target] = ns[target];
+				if(ns[id]){
+					_origRootNS[id] = (_f0xy.ns[id]) ? _f0xy.ns[id] : null;
+					_f0xy.ns[id] = ns[id];
 				}
 			}
 		}
@@ -513,13 +515,13 @@ var f0xy = (function(root){
 	*/
 
 	_f0xy.unuse = function(){
-
 		for(var prop in _origRootNS){
 			_f0xy.ns[prop] = _origRootNS[prop];
 			if(_f0xy.ns[prop] === null){
 				delete _f0xy.ns[prop];
 			}
 		}
+		_origRootNS = {};
 	}
 	
 
@@ -595,7 +597,7 @@ var f0xy = (function(root){
 		}
 
 		else if(callback){
-			sTimeout(callback, 0);
+			callback();
 		}
 	}
 
