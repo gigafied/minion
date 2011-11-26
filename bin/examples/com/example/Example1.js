@@ -10,12 +10,16 @@ f0xy.define("com.example", {
 		exampleVar2: 2,
 
 		init: function(){
-			
+			f0xy.addInterest(this, "test");
 		},
 
 		logSomething : function(something){
 
 			f0xy.get("com.example.utils.ExampleUtils").log(something);
+		},
+
+		handleNotification: function(notification, data){
+			console.log(notification);
 		}
 
 	})

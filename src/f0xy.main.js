@@ -63,6 +63,7 @@ var f0xy = (function(root){
 	var _waitID = null;
 	var _waitingForLoad = [];
 	var _requestedFiles = [];
+	var _notificationManager = null;
 	
 	/************* PRIVATE METHODS ***************/
 
@@ -259,7 +260,7 @@ var f0xy = (function(root){
 	*/
 
 	var _namespace = function(id, autoCreate, classes){
-
+		id = id || "";
 		classes = classes || false;
 		var ns = _f0xy.ns;
 
@@ -598,6 +599,66 @@ var f0xy = (function(root){
 
 		else if(callback){
 			callback();
+		}
+	}
+
+	_f0xy.enableNotifications = function(){
+		if(_f0xy.isClass("f0xy.NotificationManager")){
+			_notificationManager = new _f0xy.NotificationManager();
+		}		
+	}
+
+	_f0xy.addInterest = function(){
+		if(_notificationManager){
+			_notificationManager.addInterest.apply(_notificationManager, arguments);
+		}
+	}
+
+	_f0xy.addInterests = function(){
+		if(_notificationManager){
+			_notificationManager.addInterests.apply(_notificationManager, arguments);
+		}
+	}
+
+	_f0xy.removeInterest = function(){
+		if(_notificationManager){
+			_notificationManager.removeInterest.apply(_notificationManager, arguments);
+		}
+	}
+		
+	_f0xy.removeInterests = function(){
+		if(_notificationManager){
+			_notificationManager.removeInterests.apply(_notificationManager, arguments);
+		}
+	}
+
+	_f0xy.removeAllInterests = function(){
+		if(_notificationManager){
+			_notificationManager.removeAllInterests.apply(_notificationManager, arguments);
+		}
+	}
+
+	_f0xy.notify = function(){
+		if(_notificationManager){
+			_notificationManager.notify.apply(_notificationManager, arguments);
+		}
+	}
+
+	_f0xy.holdNotification = function(){
+		if(_notificationManager){
+			_notificationManager.holdNotification.apply(_notificationManager, arguments);
+		}
+	}
+
+	_f0xy.releaseNotification = function(){
+		if(_notificationManager){
+			_notificationManager.releaseNotification.apply(_notificationManager, arguments);
+		}
+	}
+
+	_f0xy.cancelNotification = function(){
+		if(_notificationManager){
+			_notificationManager.cancelNotification.apply(_notificationManager, arguments);
 		}
 	}
 
