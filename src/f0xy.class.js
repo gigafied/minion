@@ -1,3 +1,4 @@
+
 f0xy.define("f0xy", {
 
 	/** @lends f0xy.Class# */ 
@@ -5,6 +6,7 @@ f0xy.define("f0xy", {
 	Class : f0xy.extend("f0xy.$$__BaseClass__$$", {
 
 		isClass: true,
+		_interestHandlers: [],
 
 		/**
 		*
@@ -55,8 +57,56 @@ f0xy.define("f0xy", {
 		*/
 		proxy: function(func){
 			return func.bind(this);
+		},
+
+		addInterest : function(name, handler, priority){
+			if(handler){
+				f0xy.addInterest(this, name, priority);
+				this._interestHandlers[name] = handler;
+			}
+		},
+
+		removeInterest : function(name){
+			if(this._interestHandlers[name]){
+				this._interestHandlers[name] = null;
+				delete this._interestHandlers[name];
+			}
+			f0xy.removeInterest(this, name);
+		},
+
+		removeInterests : function(names){
+			for(var i = 0; i < names.length; i ++){
+				this.removeInterest(names[i]);
+			}
+		},
+
+		removeAllInterests : function(){
+			f0xy.removeAllInterests(this);
+			this._interestHandlers = [];
+		},
+
+		notify : function(name, data){
+			var notification = new f0xy.Notification(name, data);
+			notification.dispatch(this);			
+		},
+
+		holdNotification : function(name){
+			f0xy.holdNotification(name);
+		},
+
+		releaseNotification : function(name){
+			f0xy.releaseNotification(name);	
+		},
+
+		cancelNotification : function(name){
+			f0xy.cancelNotification(name);			
+		},
+
+		handleNotification : function(n){
+			var handler = this._interestHandlers[n.name];
+			if(handler){
+				handler(n);
+			}
 		}
-
 	})
-
 });

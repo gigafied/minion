@@ -10,7 +10,7 @@ f0xy.define("com.example", {
 		exampleVar2: 2,
 
 		init: function(){
-			f0xy.addInterest(this, "test");
+			this.addInterest("test", this.handleTest);
 		},
 
 		logSomething : function(something){
@@ -18,9 +18,14 @@ f0xy.define("com.example", {
 			f0xy.get("com.example.utils.ExampleUtils").log(something);
 		},
 
-		handleNotification: function(notification, data){
-			console.log(notification);
-		}
+		handleTest : function(n){
+			n.hold();
+			console.log("holding notification");
 
+			setTimeout(function(){
+				console.log("releasing notification");
+				n.release();
+			}, 2000);
+		}
 	})
 });

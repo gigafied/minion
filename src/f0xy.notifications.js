@@ -5,21 +5,21 @@ f0xy.define("f0xy", {
 	NotificationManager : f0xy.extend("f0xy.Class", {
 
 		_pendingNotifications: [],
-		_namesList: {},
+		_interests: {},
 		
 		init : function(){
 			
 		},
 		
 		addInterest : function(obj, name, priority){
-			if(typeof this._namesList[name] === "undefined"){
-				this._namesList[name] = [];
+			if(typeof this._interests[name] === "undefined"){
+				this._interests[name] = [];
 			}
-			if(priority <= -1 || typeof this._namesList[name] !== undefined && priority >= this._namesList[name].length){
-				this._namesList[name].push(obj);
+			if(priority <= -1 || typeof this._interests[name] !== undefined && priority >= this._interests[name].length){
+				this._interests[name].push(obj);
 			}
 			else{
-				this._namesList[name].splice(priority, 0, obj);
+				this._interests[name].splice(priority, 0, obj);
 			}
 		},
 		
@@ -37,9 +37,9 @@ f0xy.define("f0xy", {
 		
 		removeInterest : function(obj, name){
 			
-			var objIndex = this._namesList[name].indexOf(obj);
+			var objIndex = this._interests[name].indexOf(obj);
 			if(objIndex > -1){			
-				this._namesList[name].splice(objIndex, 1);
+				this._interests[name].splice(objIndex, 1);
 				if(this._notificationStatuses[name] === "pending" && objIndex >= this._notificationPointers[name]){
 					this._notificationPointers[name] --;
 				}
@@ -54,20 +54,19 @@ f0xy.define("f0xy", {
 		
 		removeAllInterests : function(obj, name){
 			if(obj != null){
-				for(var i in this._namesList){
+				for(var i in this._interests){
 					this.removeInterest(obj, i);
 				}
 			}
 			else if(name != null){
-				this._namesList[name] = null;
+				this._interests[name] = null;
 			}		
 		},
 		
 		notify : function(notification){
 			notification.status = "pending";
-			
-			if(this._namesList[notification.name] != null){
-				_pendingNotifications.push(notification);
+			if(this._interests[notification.name] != null){
+				this._pendingNotifications.push(notification);
 				this._notifyObjects(notification);			
 			}
 		},
@@ -76,10 +75,10 @@ f0xy.define("f0xy", {
 
 			var name = notification.name;
 
-			while(notification.pointer < this._namesList[name].length){
+			while(notification.pointer < this._interests[name].length){
 				if(notification.status === "pending"){
-					if(this._namesList[name][notification.pointer].handleNotification != null){
-						this._namesList[name][notification.pointer].handleNotification(notification);
+					if(this._interests[name][notification.pointer].handleNotification != null){
+						this._interests[name][notification.pointer].handleNotification(notification);
 					}
 					else{
 						//throw new Error("handleNotification method not found on " + namesList[name][notificationPointers[name]]);
@@ -91,13 +90,16 @@ f0xy.define("f0xy", {
 					return;
 				}
 			}
-			cancelNotification(notification.name);
+
+			if(notification.status === "pending"){
+				this.cancelNotification(notification.name);
+			}
 		},
 
 		getNotification : function(name, data){
-			for(var i = 0; i < _pendingNotifications.length; i ++){
-				if(_pendingNotifications[i].name === name){
-					return _pendingNotifications[i];
+			for(var i = 0; i < this._pendingNotifications.length; i ++){
+				if(this._pendingNotifications[i].name === name){
+					return this._pendingNotifications[i];
 				}
 			}
 			if(data){
@@ -107,14 +109,15 @@ f0xy.define("f0xy", {
 		},
 		
 		holdNotification : function(name){
-			var notification = getNotification(name);
+			var notification = this.getNotification(name);
 			if(notification){
-				notification.status = "hold"
+				notification.status = "hold";
 			}
 		},
 		
 		releaseNotification : function(name){
-			var notification = getNotification(name);
+			var notification = this.getNotification(name);
+
 			if(notification && notification.status === "hold"){
 				notification.status = "pending"
 				this._notifyObjects(notification);
@@ -122,9 +125,9 @@ f0xy.define("f0xy", {
 		},
 		
 		cancelNotification : function(name){
-			var notification = getNotification(name);
+			var notification = this.getNotification(name);
 			if(notification){
-				_pendingNotifications.splice(_pendingNotifications.indexOf(notification), 1);
+				this._pendingNotifications.splice(this._pendingNotifications.indexOf(notification), 1);
 				notification.status = "";
 			}
 		}
@@ -167,119 +170,6 @@ f0xy.define("f0xy", {
 		dispatch: function(obj){
 			this.dispatcher = obj;
 			f0xy.notify(this);
-		}
-	})
-});
-
-
-f0xy.define("f0xy", {
-
-	/** @lends f0xy.Class# */ 
-
-	Class : f0xy.extend("f0xy.$$__BaseClass__$$", {
-
-		isClass: true,
-		_interestHandlers: [],
-
-		/**
-		*
-		* The base f0xy Class. All Classes are required to be descendants
-		* of this class, either directly, or indirectly.
-		*
-		* @constructs
-		*/
-		init: function(){
-			
-		},
-
-		/** 
-		* Imports all the dependencies (determined by what is in the "require" array and what Class this Class extends) to the global namespace temporarily.
-		* Basically, it just does: <code>f0xy.use(this.dependencies);</code>
-		*
-		* @see f0xy.use
-		*/
-		use_dependencies : function(){
-			if(this.dependencies){
-				f0xy.use(this.dependencies);
-			}
-		},
-		
-		/** 
-		* Local version of window.setTimeout that keeps scope of <i>this</i>.<br>
-		* 
-		* @returns {Number}		 A timeout ID
-		*/
-		setTimeout : function(func, delay){
-			return window.setTimeout(this.proxy(func), delay);
-		},
-
-		/** 
-		* Local version of window.setInterval that keeps scope of <i>this</i>.<br>
-		*
-		* @returns {Number}		 An interval ID
-		*/
-		setInterval : function(func, delay){
-			return window.setInterval(this.proxy(func), delay);
-		},
-
-		/** 
-		* Shorthand for <i>func.bind(this)</i><br>
-		* or rather, <i>$.proxy(func, this)</i> in jQuery terms
-		*
-		* @returns {Function}		 The proxied function
-		*/
-		proxy: function(func){
-			return func.bind(this);
-		},
-
-		addInterest : function(name, handler, priority){
-			if(handler){
-				f0xy.addInterest(this, name, priority);
-				this._interestHandlers[name] = handler;
-			}
-		},
-
-		removeInterest : function(name){
-			if(this._interestHandlers[name]){
-				this._interestHandlers[name] = null;
-				delete this._interestHandlers[name];
-			}
-			f0xy.removeInterest(this, name);
-		},
-
-		removeInterests : function(names){
-			for(var i = 0; i < names.length; i ++){
-				this.removeInterest(names[i]);
-			}
-		},
-
-		removeAllInterests : function(){
-			f0xy.removeAllInterests(this);
-			this._interestHandlers = [];
-		},
-
-		notify : function(name, data){
-			var notification = new f0xy.Notification(name, data);
-			notification.dispatch(this);			
-		},
-
-		holdNotification : function(name){
-			f0xy.holdNotification(name);
-		},
-
-		releaseNotification : function(name){
-			f0xy.releaseNotification(name);	
-		},
-
-		cancelNotification : function(name){
-			f0xy.cancelNotification(name);			
-		},
-
-		handleNotification : function(n){
-			var handler = this._interestHandlers[n.name];
-			if(handler){
-				handler(n);
-			}
 		}
 	})
 });
