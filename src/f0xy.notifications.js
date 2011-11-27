@@ -1,7 +1,5 @@
 f0xy.define("f0xy", {
 
-	/** @lends f0xy.NotificationManager# */ 
-
 	NotificationManager : f0xy.extend("f0xy.Class", {
 
 		_pendingNotifications: [],
@@ -136,11 +134,7 @@ f0xy.define("f0xy", {
 
 });
 
-f0xy.enableNotifications();
-
 f0xy.define("f0xy", {
-
-	/** @lends f0xy.Notification# */ 
 
 	Notification : f0xy.extend("f0xy.Class", {
 
@@ -173,3 +167,5 @@ f0xy.define("f0xy", {
 		}
 	})
 });
+
+f0xy.enableNotifications();

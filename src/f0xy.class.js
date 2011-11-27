@@ -90,22 +90,26 @@ f0xy.define("f0xy", {
 			notification.dispatch(this);			
 		},
 
+		/** @ignore */
 		holdNotification : function(name){
 			f0xy.holdNotification(name);
 		},
 
+		/** @ignore */
 		releaseNotification : function(name){
 			f0xy.releaseNotification(name);	
 		},
 
+		/** @ignore */
 		cancelNotification : function(name){
 			f0xy.cancelNotification(name);			
 		},
-
+		
+		/** @ignore */
 		handleNotification : function(n){
 			var handler = this._interestHandlers[n.name];
 			if(handler){
-				handler(n);
+				this.proxy(handler)(n);
 			}
 		}
 	})

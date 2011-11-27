@@ -23,6 +23,7 @@ f0xy.define("f0xy", {
 		_BaseClass.isClass = true;
 
 		// Create a new Class that inherits from this class
+		/** @ignore */
 		_BaseClass.extend = function extend(obj){
 			
 			// We set this to false, so we don't initialize a new instance every time we extend a Class.
@@ -55,6 +56,7 @@ f0xy.define("f0xy", {
 			}
 
 			// The dummy class constructor
+			/** @ignore */
 			var Class = function(){
 
 				// All construction is actually done in the init method

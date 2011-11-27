@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Fri Nov 25 23:19:43 2011 -0800
+ * Date: Fri Nov 25 23:41:41 2011 -0800
  */
  
 /**
@@ -66,7 +66,7 @@ var f0xy = (function(root){
 	var _origRootNS = {};
 	var _initialized = false;
 
-	var _loadQueue = [];
+	var loadQueue = [];
 	var _extendQueue = [];
 
 	var _waitID = null;
@@ -74,279 +74,291 @@ var f0xy = (function(root){
 	var _requestedFiles = [];
 	var _notificationManager = null;
 	
-	/************* PRIVATE METHODS ***************/
+	/*================= HELPER FUNCTIONS =================*/
 
-	var isArray = Array.isArray || function(obj){
-		return toString.call( obj ) == '[object Array]';
-	}
-
-	var isObject = function(obj){
-		return Object(obj) === obj;
-	}
-
-	var isString = function(s) {
-		return typeof s == 'string';
-	}
-
-	var isFunction = function(fn){
-		return toString.call(fn) == '[object Function]';
-	}
-
-	var strToArray = function(s){
-		return (isString(s)) ? [s] : s;
-	}
-
-	var concatArray = function(a, b){
-		b = b || [];
-		return ((a) ? a : []).concat(b);		
-	}
-
-	var sTimeout = setTimeout;
-
-	/** @private */
-	var _checkExtendQueue = function(){
-		var eq = _extendQueue;
-
-		for(var i = eq.length - 1; i >= 0; i --){
-
-			var ns = eq[i].split(_separator);
-			var id = ns.splice(ns.length-1,1)[0];
-			ns = _f0xy.get(ns.join(_separator), false);
-
-			if(ns[id].toExtend){
-				var superClass = _f0xy.get(ns[id].extendedFrom, false);
-				if(superClass.isClass){
-
-					ns[id].toExtend = false;
-					delete ns[id].toExtend;
-					
-					ns[id] = _f0xy.extend(superClass, ns[id]);
-
-					eq.splice(i, 1);
-					sTimeout(_checkExtendQueue, 0);
-					return;
-				}
-			}
-		}
-		_checkLoadQueue();
-	}
-
-	/** @private */
-	var _checkLoadQueue = function(){
-
-		for(var i = _loadQueue.length -1; i >= 0; i --){
-
-			var q = _loadQueue[i];
-			var dependenciesLoaded = true;
-			
-			for(var j = 0; j < q.c.length; j ++){
-				dependenciesLoaded = _areDependenciesLoaded(q.c[j]);
-				if(!dependenciesLoaded){break;}
-			}
-			if(dependenciesLoaded){
-				if(q.cb){
-					// 0 ms delay to make sure queue.callback does not get called prematurely, in some instances.
-					q.cb();
-				}
-				_loadQueue.splice(i, 1);
-			}
-		}
-	}
-
-	// Recursively checks dependencies
-	var _areDependenciesLoaded = function(o){
-		o = _f0xy.get(o, false);
-		if(!o.isClass){return false}
-		if(o.dependencies){
-			for(var i = 0; i < o.dependencies.length; i ++){
-				if(!_areDependenciesLoaded(o.dependencies[i])){
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-
-	var _checkWaitQueue = function(){
-		
-		var w = _waitingForLoad;
-
-		if(_waitID){clearTimeout(_waitID);}
-		
-		for(var i = 0; i < w.length; i ++){
-			var o = w[i];
-			o.e += 50;
-
-			if(_f0xy.isClass(o.c)){
-				o.s.onload();
-			}
-			else if(o.e >= _f0xy.errorTimeout){
-				o.s.onerror();
-			}
+		/** @private */
+		var isArray = Array.isArray || function(obj){
+			return toString.call( obj ) == '[object Array]';
 		}
 
-		if(w.length > 0){
-			_waitID = sTimeout(_checkWaitQueue, 50);
-		}
-	}
-
-	/**
-	* Does all the loading of JS files
-	*
-	* @param		files 		String or array of the files to be loaded.
-	* @param		classes 		The classes that match up to the files to be loaded.
-	* @private 
-	*/
-	
-	var _load = function(q){
-
-		var doc = document;
-		var body = "body";
-
-		_loadQueue.push(q);
-
-		function inject(f, c){
-
-			if(_requestedFiles.indexOf(f) < 0){
-
-				if(!doc[body]){return sTimeout(inject, 0, f, c);}
-
-				var script = doc.createElement("script");
-		     	script.async = true;
-		      script.src = f;
-				
-				var injectObj = {
-					f : f, 		// File
-					c : c, 		// Class
-					e : 0, 		// Elapsed Time
-					s : script 	// Script
-				};
-
-				_requestedFiles.push(f);			
-				_waitingForLoad.push(injectObj);
-
-		      script.onreadystatechange = script.onload = function(e){
-		      	if(_f0xy.isClass(c)){						
-			        injectObj.s.onload = script.onreadystatechange = null;
-			        _waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-			   	}
-		      };
-
-		      script.onerror = function(e){
-					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-					throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
-		      	injectObj.s.onerror = null;
-		      	_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);	
-		      }
-		      
-		      // Append the script to the document body
-		   	doc[body].appendChild(script);
-			}
+		/** @private */
+		var isObject = function(obj){
+			return Object(obj) === obj;
 		}
 
-		for(var i = 0; i < q.f.length; i ++){
-			inject(q.f[i], q.c[i]);
+		/** @private */
+		var isString = function(s) {
+			return typeof s == 'string';
 		}
 
-		/*
-			onload and onreadystatechange are unreliable, mainly because of browser cache, thus we have to
-			set a timeout that checks for the definition of each class. Times out at 10 seconds (can be changed through
-			setting f0xy.errorTimeout = ms)
-		*/
-		_waitID = sTimeout(_checkWaitQueue, 50);
-	}
+		/** @private */
+		var isFunction = function(fn){
+			return toString.call(fn) == '[object Function]';
+		}
 
-	/**
-	* Used by f0xy.get() and f0xy.define(). 
-	* Get the namespace/Class, or creates it if it does not exist. Also optionally creates Objects in the specified namepsace.
-	*
-	* @public
-	* @param			{String|Object}	id						The fully qualified namespace.
-	* @param			{Boolean}			autoCreate			Whether or not to create a blank object if the namespace does not yet exist.
-	* @param			{Object}				[classes]			An object of class definitions which will be added to the namespace.
-	* @returns		{Object}										The object that represents the fully qualified namespace passed in as the first argument.
-	* @private
-	*/
+		/** @private */
+		var strToArray = function(s){
+			return (isString(s)) ? [s] : s;
+		}
 
-	var _namespace = function(id, autoCreate, classes){
-		id = id || "";
-		classes = classes || false;
-		var ns = _f0xy.ns;
+		/** @private */
+		var concatArray = function(a, b){
+			b = b || [];
+			return ((a) ? a : []).concat(b);		
+		}
 
-		if(id != '' && !isObject(id) && !isFunction(id)){
-			var parts = id.split(_separator);
+		/** @private */
+		var sTimeout = setTimeout;
 
-			if(parts[0] === "f0xy"){
-				ns = _f0xy;
-				parts.splice(0,1);
-			}
-
-			for (var i = 0; i < parts.length; i++) {
-				if(!ns[parts[i]]){
-					if(autoCreate){
-						ns[parts[i]] = {};
-					}
-					else{
+		// Recursively checks dependencies
+		/** @private */
+		var areDependenciesLoaded = function(o){
+			o = _f0xy.get(o, false);
+			if(!o.isClass){return false}
+			if(o.dependencies){
+				for(var i = 0; i < o.dependencies.length; i ++){
+					if(!areDependenciesLoaded(o.dependencies[i])){
 						return false;
 					}
 				}
-				ns = ns[parts[i]];
 			}
+			return true;
+		}		
+
+		/** @private */
+		var checkExtendQueue = function(){
+			var eq = _extendQueue;
+
+			for(var i = eq.length - 1; i >= 0; i --){
+
+				var ns = eq[i].split(_separator);
+				var id = ns.splice(ns.length-1,1)[0];
+				ns = _f0xy.get(ns.join(_separator), false);
+
+				if(ns[id].toExtend){
+					var superClass = _f0xy.get(ns[id].extendedFrom, false);
+					if(superClass.isClass){
+
+						ns[id].toExtend = false;
+						delete ns[id].toExtend;
+						
+						ns[id] = _f0xy.extend(superClass, ns[id]);
+
+						eq.splice(i, 1);
+						sTimeout(checkExtendQueue, 0);
+						return;
+					}
+				}
+			}
+			checkLoadQueue();
 		}
 
-		else if(id != ""){ns = id;}
+		/** @private */
+		var checkLoadQueue = function(){
 
-		if(classes){
+			for(var i = loadQueue.length -1; i >= 0; i --){
 
-			classes.require = concatArray(classes.require);
-			var cr = classes.require;
-			
-			for(var className in classes){				
-
-				if(className !== "require"){
-
-					var qualifiedName = id + _separator + className;
-					var c = classes[className];
-
-					if(c.extendedFrom){
-						cr.push(c.extendedFrom);
+				var q = loadQueue[i];
+				var dependenciesLoaded = true;
+				
+				for(var j = 0; j < q.c.length; j ++){
+					dependenciesLoaded = areDependenciesLoaded(q.c[j]);
+					if(!dependenciesLoaded){break;}
+				}
+				if(dependenciesLoaded){
+					if(q.cb){
+						// 0 ms delay to make sure queue.callback does not get called prematurely, in some instances.
+						q.cb();
 					}
-
-					if(c.toExtend){					
-						if(_extendQueue.indexOf(qualifiedName) < 0){
-							_extendQueue.push(qualifiedName);
-						}
-					}
-					
-					c.nsID = id;
-					c.ns = ns;
-					c.className = className;
-
-					if(cr.length > 0){
-						c.dependencies = concatArray(c.dependencies, cr);
-						_f0xy.require(cr);
-					}
-
-					if(_f0xy.isClass(c) && c.prototype){
-						var proto = c.prototype;
-						proto.nsID = id;
-						proto.ns = ns;
-						proto.className = className;
-
-						if(cr.length > 0){
-							proto.dependencies = concatArray(proto.dependencies, cr);
-						}
-					}
-
-					ns[className] = c;
+					loadQueue.splice(i, 1);
 				}
 			}
 		}
 
-		return ns;
-	}		
+		/** @private */
+		var checkWaitQueue = function(){
+			
+			var w = _waitingForLoad;
 
-	/************* END PRIVATE METHODS ***************/	
+			if(_waitID){clearTimeout(_waitID);}
+			
+			for(var i = 0; i < w.length; i ++){
+				var o = w[i];
+				o.e += 50;
+
+				if(_f0xy.isClass(o.c)){
+					o.s.onload();
+				}
+				else if(o.e >= _f0xy.errorTimeout){
+					o.s.onerror();
+				}
+			}
+
+			if(w.length > 0){
+				_waitID = sTimeout(checkWaitQueue, 50);
+			}
+		}
+
+		/**
+		* Does all the loading of JS files
+		*
+		* @param		files 		String or array of the files to be loaded.
+		* @param		classes 		The classes that match up to the files to be loaded.
+		* @ignore
+		* @private 
+		*/
+		
+		var load = function(q){
+
+			var doc = document;
+			var body = "body";
+
+			loadQueue.push(q);
+
+			/** @ignore */
+			function inject(f, c){
+
+				if(_requestedFiles.indexOf(f) < 0){
+
+					if(!doc[body]){return sTimeout(inject, 0, f, c);}
+
+					var script = doc.createElement("script");
+			     	script.async = true;
+			      script.src = f;
+					
+					var injectObj = {
+						f : f, 		// File
+						c : c, 		// Class
+						e : 0, 		// Elapsed Time
+						s : script 	// Script
+					};
+
+					_requestedFiles.push(f);			
+					_waitingForLoad.push(injectObj);
+
+					/** @ignore */
+			      script.onreadystatechange = /** @ignore */ script.onload = function(e){
+			      	if(_f0xy.isClass(c)){	
+				        injectObj.s.onload = script.onreadystatechange = null;
+				        _waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
+				   	}
+			      };
+
+			      /** @ignore */
+			      script.onerror = function(e){
+						_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
+						throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
+			      	injectObj.s.onerror = null;
+			      	_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);	
+			      }
+			      
+			      // Append the script to the document body
+			   	doc[body].appendChild(script);
+				}
+			}
+
+			for(var i = 0; i < q.f.length; i ++){
+				inject(q.f[i], q.c[i]);
+			}
+
+			/*
+				onload and onreadystatechange are unreliable, mainly because of browser cache, thus we have to
+				set a timeout that checks for the definition of each class. Times out at 10 seconds (can be changed through
+				setting f0xy.errorTimeout = ms)
+			*/
+			_waitID = sTimeout(checkWaitQueue, 50);
+		}
+
+		/**
+		* Used by f0xy.get() and f0xy.define(). 
+		* Get the namespace/Class, or creates it if it does not exist. Also optionally creates Objects in the specified namepsace.
+		*
+		* @param			{String|Object}	id						The fully qualified namespace.
+		* @param			{Boolean}			autoCreate			Whether or not to create a blank object if the namespace does not yet exist.
+		* @param			{Object}				[classes]			An object of class definitions which will be added to the namespace.
+		* @returns		{Object}										The object that represents the fully qualified namespace passed in as the first argument.
+		* @private
+		*/
+
+		var namespace = function(id, autoCreate, classes){
+			id = id || "";
+			classes = classes || false;
+			var ns = _f0xy.ns;
+
+			if(id != '' && !isObject(id) && !isFunction(id)){
+				var parts = id.split(_separator);
+
+				if(parts[0] === "f0xy"){
+					ns = _f0xy;
+					parts.splice(0,1);
+				}
+
+				for (var i = 0; i < parts.length; i++) {
+					if(!ns[parts[i]]){
+						if(autoCreate){
+							ns[parts[i]] = {};
+						}
+						else{
+							return false;
+						}
+					}
+					ns = ns[parts[i]];
+				}
+			}
+
+			else if(id != ""){ns = id;}
+
+			if(classes){
+
+				classes.require = concatArray(classes.require);
+				var cr = classes.require;
+				
+				for(var className in classes){				
+
+					if(className !== "require"){
+
+						var qualifiedName = id + _separator + className;
+						var c = classes[className];
+
+						if(c.extendedFrom){
+							cr.push(c.extendedFrom);
+						}
+
+						if(c.toExtend){					
+							if(_extendQueue.indexOf(qualifiedName) < 0){
+								_extendQueue.push(qualifiedName);
+							}
+						}
+						
+						c.nsID = id;
+						c.ns = ns;
+						c.className = className;
+
+						if(cr.length > 0){
+							c.dependencies = concatArray(c.dependencies, cr);
+							_f0xy.require(cr);
+						}
+
+						if(_f0xy.isClass(c) && c.prototype){
+							var proto = c.prototype;
+							proto.nsID = id;
+							proto.ns = ns;
+							proto.className = className;
+
+							if(cr.length > 0){
+								proto.dependencies = concatArray(proto.dependencies, cr);
+							}
+						}
+
+						ns[className] = c;
+					}
+				}
+			}
+
+			return ns;
+		}		
+
+		/*================= END OF HELPER FUNCTIONS =================*/
 
 
 	/**
@@ -396,7 +408,7 @@ var f0xy = (function(root){
 	*/
 
 	_f0xy.get = function(id){
-		return _namespace(id, false);
+		return namespace(id, false);
 	}
 
 	/**
@@ -408,8 +420,8 @@ var f0xy = (function(root){
 	* @returns		{Object}										The object that represents the namespace passed in as the first argument.
 	*/
 	_f0xy.define = function(id, classes){
-		var r = _namespace(id, true, classes);
-		_checkExtendQueue();
+		var r = namespace(id, true, classes);
+		checkExtendQueue();
 		return r;
 	}
 
@@ -440,7 +452,7 @@ var f0xy = (function(root){
 	*/
 
 	_f0xy.isClass = function(id){
-		id = (!isObject(id) && !isFunction(id)) ? _namespace(id, false) : id;
+		id = (!isObject(id) && !isFunction(id)) ? namespace(id, false) : id;
 		return (id) ? id.isClass : false;
 	}
 
@@ -603,7 +615,7 @@ var f0xy = (function(root){
 				cb : callback
 			};
 			
-			_load(q);
+			load(q);
 		}
 
 		else if(callback){
@@ -611,60 +623,70 @@ var f0xy = (function(root){
 		}
 	}
 
+	/** @private */
 	_f0xy.enableNotifications = function(){
 		if(_f0xy.isClass("f0xy.NotificationManager")){
 			_notificationManager = new _f0xy.NotificationManager();
 		}		
 	}
 
+	/** @private */
 	_f0xy.addInterest = function(){
 		if(_notificationManager){
 			_notificationManager.addInterest.apply(_notificationManager, arguments);
 		}
 	}
 
+	/** @private */
 	_f0xy.addInterests = function(){
 		if(_notificationManager){
 			_notificationManager.addInterests.apply(_notificationManager, arguments);
 		}
 	}
 
+	/** @private */
 	_f0xy.removeInterest = function(){
 		if(_notificationManager){
 			_notificationManager.removeInterest.apply(_notificationManager, arguments);
 		}
 	}
 		
+	/** @private */
 	_f0xy.removeInterests = function(){
 		if(_notificationManager){
 			_notificationManager.removeInterests.apply(_notificationManager, arguments);
 		}
 	}
 
+	/** @private */
 	_f0xy.removeAllInterests = function(){
 		if(_notificationManager){
 			_notificationManager.removeAllInterests.apply(_notificationManager, arguments);
 		}
 	}
 
+	/** @private */
 	_f0xy.notify = function(){
 		if(_notificationManager){
 			_notificationManager.notify.apply(_notificationManager, arguments);
 		}
 	}
 
+	/** @private */
 	_f0xy.holdNotification = function(){
 		if(_notificationManager){
 			_notificationManager.holdNotification.apply(_notificationManager, arguments);
 		}
 	}
 
+	/** @private */
 	_f0xy.releaseNotification = function(){
 		if(_notificationManager){
 			_notificationManager.releaseNotification.apply(_notificationManager, arguments);
 		}
 	}
 
+	/** @private */
 	_f0xy.cancelNotification = function(){
 		if(_notificationManager){
 			_notificationManager.cancelNotification.apply(_notificationManager, arguments);
@@ -698,6 +720,7 @@ var f0xy = (function(root){
 		_BaseClass.isClass = true;
 
 		// Create a new Class that inherits from this class
+		/** @ignore */
 		_BaseClass.extend = function extend(obj){
 			
 			// We set this to false, so we don't initialize a new instance every time we extend a Class.
@@ -730,6 +753,7 @@ var f0xy = (function(root){
 			}
 
 			// The dummy class constructor
+			/** @ignore */
 			var Class = function(){
 
 				// All construction is actually done in the init method
@@ -861,28 +885,30 @@ f0xy.define("f0xy", {
 			notification.dispatch(this);			
 		},
 
+		/** @ignore */
 		holdNotification : function(name){
 			f0xy.holdNotification(name);
 		},
 
+		/** @ignore */
 		releaseNotification : function(name){
 			f0xy.releaseNotification(name);	
 		},
 
+		/** @ignore */
 		cancelNotification : function(name){
 			f0xy.cancelNotification(name);			
 		},
-
+		
+		/** @ignore */
 		handleNotification : function(n){
 			var handler = this._interestHandlers[n.name];
 			if(handler){
-				handler(n);
+				this.proxy(handler)(n);
 			}
 		}
 	})
 });f0xy.define("f0xy", {
-
-	/** @lends f0xy.NotificationManager# */ 
 
 	NotificationManager : f0xy.extend("f0xy.Class", {
 
@@ -1018,11 +1044,7 @@ f0xy.define("f0xy", {
 
 });
 
-f0xy.enableNotifications();
-
 f0xy.define("f0xy", {
-
-	/** @lends f0xy.Notification# */ 
 
 	Notification : f0xy.extend("f0xy.Class", {
 
@@ -1055,3 +1077,5 @@ f0xy.define("f0xy", {
 		}
 	})
 });
+
+f0xy.enableNotifications();
