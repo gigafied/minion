@@ -3,10 +3,10 @@ f0xy.define("f0xy", {
 
 	/** @lends f0xy.Class# */ 
 
-	Class : f0xy.extend("f0xy.$$__BaseClass__$$", {
+	Class : f0xy.extend("f0xy.__BaseClass__", {
 
-		isClass: true,
-		_interestHandlers: [],
+		__isDefined: true,
+		__interestHandlers: null,
 
 		/**
 		*
@@ -37,7 +37,7 @@ f0xy.define("f0xy", {
 		* @returns {Number}		 A timeout ID
 		*/
 		setTimeout : function(func, delay){
-			return window.setTimeout(this.proxy(func), delay);
+			return setTimeout(this.proxy(func), delay);
 		},
 
 		/** 
@@ -46,7 +46,7 @@ f0xy.define("f0xy", {
 		* @returns {Number}		 An interval ID
 		*/
 		setInterval : function(func, delay){
-			return window.setInterval(this.proxy(func), delay);
+			return setInterval(this.proxy(func), delay);
 		},
 
 		/** 
@@ -62,14 +62,14 @@ f0xy.define("f0xy", {
 		addInterest : function(name, handler, priority){
 			if(handler){
 				f0xy.addInterest(this, name, priority);
-				this._interestHandlers[name] = handler;
+				this.__interestHandlers[name] = handler;
 			}
 		},
 
 		removeInterest : function(name){
-			if(this._interestHandlers[name]){
-				this._interestHandlers[name] = null;
-				delete this._interestHandlers[name];
+			if(this.__interestHandlers[name]){
+				this.__interestHandlers[name] = null;
+				delete this.__interestHandlers[name];
 			}
 			f0xy.removeInterest(this, name);
 		},
@@ -82,32 +82,17 @@ f0xy.define("f0xy", {
 
 		removeAllInterests : function(){
 			f0xy.removeAllInterests(this);
-			this._interestHandlers = [];
+			this.__interestHandlers = [];
 		},
 
 		notify : function(name, data){
-			var notification = new f0xy.Notification(name, data);
-			notification.dispatch(this);			
-		},
-
-		/** @ignore */
-		holdNotification : function(name){
-			f0xy.holdNotification(name);
-		},
-
-		/** @ignore */
-		releaseNotification : function(name){
-			f0xy.releaseNotification(name);	
-		},
-
-		/** @ignore */
-		cancelNotification : function(name){
-			f0xy.cancelNotification(name);			
+			//var notification = new f0xy.Notification(name, data);
+			//notification.dispatch(this);
 		},
 		
 		/** @ignore */
 		handleNotification : function(n){
-			var handler = this._interestHandlers[n.name];
+			var handler = this.__interestHandlers[n.name];
 			if(handler){
 				this.proxy(handler)(n);
 			}

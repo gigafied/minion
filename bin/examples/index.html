@@ -1,18 +1,25 @@
 <html>
-	<head>
+	<head>	<head>
+
 		<script src="../f0xy.js"></script>
 		<script type="text/javascript">
 			
-			f0xy.require("com.example.Example3", function(){
-				
-				var test = new com.example.Example3();
-				var test2 = new com.example.Example3();
-				var test3 = new com.example.Example3();
-				var test4 = new com.example.Example3();
-				var test5 = new com.example.Example3();
+			f0xy.require([
+					"com.example.Example3",
+					"com.example.Singleton"
+				],
+				function(){
+					var test = new com.example.Example3();
+					test.logSomething("something");
 
-				test.logSomething("wooot!!!");
-			});
+					var test2 = new com.example.Singleton("aaa");
+					var test3 = new com.example.Singleton("bbb");
+
+					test3.test = "yay!!";
+
+					console.log(test2.test, test3.test);
+				}
+			);
 			
 		</script>
 	</head>

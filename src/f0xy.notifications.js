@@ -34,12 +34,12 @@ f0xy.define("f0xy", {
 		},
 		
 		removeInterest : function(obj, name){
-			
 			var objIndex = this._interests[name].indexOf(obj);
-			if(objIndex > -1){			
+			if(obj && objIndex > -1){
 				this._interests[name].splice(objIndex, 1);
-				if(this._notificationStatuses[name] === "pending" && objIndex >= this._notificationPointers[name]){
-					this._notificationPointers[name] --;
+				var pendingNotification = this.getNotification(name);
+				if(pendingNotification){
+					pendingNotification.pointer--;
 				}
 			}
 		},
@@ -63,9 +63,10 @@ f0xy.define("f0xy", {
 		
 		notify : function(notification){
 			notification.status = "pending";
+			notification.pointer = 0;
 			if(this._interests[notification.name] != null){
 				this._pendingNotifications.push(notification);
-				this._notifyObjects(notification);			
+				this._notifyObjects(notification);
 			}
 		},
 		
@@ -79,7 +80,7 @@ f0xy.define("f0xy", {
 						this._interests[name][notification.pointer].handleNotification(notification);
 					}
 					else{
-						//throw new Error("handleNotification method not found on " + namesList[name][notificationPointers[name]]);
+						//throw new Error("handleNotification method not found");
 					}
 					notification.pointer ++;
 				}
@@ -126,7 +127,6 @@ f0xy.define("f0xy", {
 			var notification = this.getNotification(name);
 			if(notification){
 				this._pendingNotifications.splice(this._pendingNotifications.indexOf(notification), 1);
-				notification.status = "";
 			}
 		}
 
@@ -147,6 +147,9 @@ f0xy.define("f0xy", {
 		init : function(name, data){
 			this.name = name;
 			this.data = data;
+			this.pointer = 0;
+			this.status = "";
+			this.dispatcher = null;
 		},
 
 		hold : function(){

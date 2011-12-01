@@ -1,99 +1,178 @@
+//* @ignore */
 f0xy.define("f0xy", {
 
 	/**
 	* The f0xy Base Class
-	* Simple JavaScript Inheritance
-	*
-	* Taken from: http://ejohn.org/blog/simple-javascript-inheritance/
-	* MIT Licensed.
-	*
-	* @class
-	* @private
-	* @ignore
-	*/ 
+	* Classical JavaScript Inheritance (or an attempt thereof)
+	* f0xy.Class is the ONLY Class to extend this directly, do not directly extend this Class.
+	* Largely taken from: http://ejohn.org/blog/simple-javascript-inheritance/
+	* @ignore */
 
-	// ## f0xy Base Class.
-	// f0xy.Class is the ONLY Class to extend this directly, do not directly extend this Class.
+	__BaseClass__ : (function() {
 
-	$$__BaseClass__$$ : (function(doInitialize){
-		
-		// The base Class implementation (does nothing)
-		var _BaseClass = function(){};
+		/*
+			Attempts to shallow copy objects, so as to not have a bunch of references lying around in object instances
+			Otherwise, it is bad news bears doing something like this.nArray.push() in a Class method
+			because it modifies nArray on prototype, and thus any other instances of said Class
+		*/
+		var _copy = function (obj) {
+			var i, attr, c;
 
-		_BaseClass.isClass = true;
+			// Null, undefined, number, boolean, string, function all get returned immediately, no need to copy them.
+			if (!obj || typeof obj !== "object") {
+				return obj;
+			}
 
-		// Create a new Class that inherits from this class
+			if (obj instanceof Date) {
+				return new Date().setTime(obj.getTime());
+			}
+
+			if (obj instanceof Array) {
+				return obj.concat();
+			}
+
+			if (typeof obj === "object") {
+				c = {};
+				for (attr in obj) {
+					if (obj.hasOwnProperty(attr)) {
+						c[attr] = obj[attr];
+					}
+				}
+				return c;
+			}
+			// If it fails, just return the original object.
+			return obj;
+		};
+
+		// Checks the function contents to see if it has a reference to __super
+		var _doesCallSuper = /xyz/.test(function(){xyz;}) ? /\b__super\b/ : /.*/;
+
 		/** @ignore */
-		_BaseClass.extend = function extend(obj){
-			
-			// We set this to false, so we don't initialize a new instance every time we extend a Class.
-			doInitialize = false;
-			var prototype = new this();
-			// Set it back to true, now that our "prototype" instance exists.
-			doInitialize = true;
+		var _baseClass = function(){;}
 
-			// Reference to this that won't change
+		_baseClass.__isDefined = true;
+
+		/** @ignore */
+		_baseClass.__extend = function(obj) {
+
+			// By passing "__no_init__" as the first argument, we skip calling the constructor and other initialization;
+			var _proto = new this("__no_init__");
+			var _perInstanceProps = {};
 			var _this = this;
 
-			if(prototype.dependencies){
-				obj.dependencies = obj.dependencies || [];
-				obj.dependencies = obj.dependencies.concat(prototype.dependencies);
-			}
+			/*
+				Handy for referencing dependencies. If a Class requires com.example.Test, then you can reference said class
+				in any method by this.__imports.Test;
 
-			// Copy the properties over onto the new prototype
-			for(name in obj){
-				// Check if we're overwriting an existing function
-				prototype[name] = (typeof obj[name] === "function") && (typeof _this.prototype[name] === "function") ? (function (name, fn) {
-					return function(){
-						this._super = _this.prototype[name];
-						var ret = fn.apply(this, arguments);
-						this._super = null;
-						delete this._super;
-						setTimeout(f0xy.unuse, 0);
-						return ret;
-					};
-				}(name, obj[name])) : obj[name];
-			}
+				This method is preferred over this.use_dependencies(), as you have to explicitly call this.unuse_dependencies()
+				to be responsible, at the end of every method.
+			*/
+			_proto.__imports = {};
 
-			// The dummy class constructor
-			/** @ignore */
-			var Class = function(){
+			f0xy.use(obj.__dependencies, _proto.__imports);
 
-				// All construction is actually done in the init method
-				if(doInitialize && this.init){
-					this.init.apply(this, arguments);
+			// Copy the object's properties onto the prototype
+			for(var name in obj) {
+
+				// If we're overwriting an existing function that calls this.__super, do a little super magic.
+				if(typeof obj[name] == "function" && typeof _this.prototype[name] == "function" && _doesCallSuper.test(obj[name])){
+					_proto[name] = (function(name, fn){
+						return function() {
+							var tmp = this.__super;
+
+							// Reference the prototypes method, as super temporarily
+							this.__super = _this.prototype[name];
+
+							var ret = fn.apply(this, arguments);
+
+							// Reset this.__super
+							this.__super = tmp;
+
+							return ret;
+						};
+					})(name, obj[name]);
 				}
+				else{
+					_proto[name] = obj[name];
+				}
+
+				/*
+					If it's an array or an object, we need to make a per instance copy of these values, so as to not affect other
+					instances when dealing with Arrays or Objects.
+				*/
+				if (typeof obj[name] === "object") {
+					_perInstanceProps[name] = obj[name];
+				}
+			};
+
+			/*
+				Merge this object's dependencies with the prototypes dependencies. This way, you get a full list just from looking at
+				a top tier instance
+			*/
+
+			if(_proto.__dependencies) {
+				obj.__dependencies = obj.__dependencies || [];
+				obj.__dependencies = obj.__dependencies.concat(_proto.__dependencies);
+			};
+
+			_proto.__dependencies = obj.__dependencies;
+
+			var _class = function() {
+				
+				if(arguments[0] !== "__no_init__"){
+
+					if(!obj.__isSingleton){
+
+						for(var attr in _perInstanceProps) {
+							this[attr] = _copy(_perInstanceProps[attr]);
+						};
+					}
+
+					// All real construction is actually done in the init method
+					return this.init.apply(this, arguments);
+				}
+			};
+
+			// Set the prototype and Constructor accordingly.
+			_class.prototype = _proto;
+			//* @ignore */
+			_class.constructor = _class;
+
+			// Expose the extend method
+			//* @ignore */
+			_class.__extend = _baseClass.__extend;
+
+			/*
+				Custom f0xy properties, anything beginning with an __ on a Class or instance, is populated and used by f0xy.
+				The "__" prefix is used to avoid naming conflictions with developers, and allows
+				us to not have to impose a list of reserved words on developers.
+			*/
+			_class.__isDefined = true;
+
+			if(obj.__isSingleton) {
+				_class.__isSingleton = obj.__isSingleton;
 			}
 
-			// Populate our constructed prototype object
-			Class.prototype = prototype;
-
-			// Enforce the constructor to be what we expect
-			Class.constructor = Class;
-
-			// And make this class extendable
-			Class.extend = extend;
-			Class.isClass = true;
-
-			if(obj.ns){
-				Class.ns = obj.ns;
-			}
+			if(obj.__ns) {
+				_class.__ns = obj.__ns;
+			};
 			
-			if(obj.nsID){
-				Class.nsID = obj.nsID;
-			}
+			if(obj.__nsID) {
+				_class.__nsID = obj.__nsID;
+			};
 			
-			if(obj.className){
-				Class.className = obj.className;
-			}
+			if(obj._class) {
+				_class._class = obj._class;
+			};
 
-			if(obj.dependencies){
-				Class.dependencies = obj.dependencies;
-			}
+			if(obj.__dependencies) {
+				_class.__dependencies = obj.__dependencies;
+			};
 
-			return Class;
+			return _class;
 		};
 		
-		return _BaseClass;
+		return _baseClass;
+
 	})()
 });
