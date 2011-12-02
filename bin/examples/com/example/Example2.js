@@ -6,7 +6,7 @@ f0xy.define("com.example", {
 		test2: 4,
 
 		init: function(){
-			
+			this.__super();
 		},
 
 		logSomething : function(something){

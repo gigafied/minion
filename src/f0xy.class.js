@@ -1,4 +1,3 @@
-
 f0xy.define("f0xy", {
 
 	/** @lends f0xy.Class# */ 
@@ -6,7 +5,7 @@ f0xy.define("f0xy", {
 	Class : f0xy.extend("f0xy.__BaseClass__", {
 
 		__isDefined: true,
-		__interestHandlers: null,
+		__interestHandlers: [],
 
 		/**
 		*
@@ -29,6 +28,10 @@ f0xy.define("f0xy", {
 			if(this.dependencies){
 				f0xy.use(this.dependencies);
 			}
+		},
+
+		unuse_dependencies : function(){
+			f0xy.unuse();
 		},
 		
 		/** 
@@ -86,8 +89,8 @@ f0xy.define("f0xy", {
 		},
 
 		notify : function(name, data){
-			//var notification = new f0xy.Notification(name, data);
-			//notification.dispatch(this);
+			var notification = new f0xy.Notification(name, data);
+			notification.dispatch(this);
 		},
 		
 		/** @ignore */

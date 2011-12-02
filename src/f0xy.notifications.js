@@ -64,6 +64,7 @@ f0xy.define("f0xy", {
 		notify : function(notification){
 			notification.status = "pending";
 			notification.pointer = 0;
+
 			if(this._interests[notification.name] != null){
 				this._pendingNotifications.push(notification);
 				this._notifyObjects(notification);
@@ -73,7 +74,6 @@ f0xy.define("f0xy", {
 		_notifyObjects : function(notification){
 
 			var name = notification.name;
-
 			while(notification.pointer < this._interests[name].length){
 				if(notification.status === "pending"){
 					if(this._interests[name][notification.pointer].handleNotification != null){

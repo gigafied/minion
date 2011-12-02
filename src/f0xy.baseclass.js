@@ -60,17 +60,6 @@ f0xy.define("f0xy", {
 			var _perInstanceProps = {};
 			var _this = this;
 
-			/*
-				Handy for referencing dependencies. If a Class requires com.example.Test, then you can reference said class
-				in any method by this.__imports.Test;
-
-				This method is preferred over this.use_dependencies(), as you have to explicitly call this.unuse_dependencies()
-				to be responsible, at the end of every method.
-			*/
-			_proto.__imports = {};
-
-			f0xy.use(obj.__dependencies, _proto.__imports);
-
 			// Copy the object's properties onto the prototype
 			for(var name in obj) {
 
@@ -100,26 +89,25 @@ f0xy.define("f0xy", {
 					If it's an array or an object, we need to make a per instance copy of these values, so as to not affect other
 					instances when dealing with Arrays or Objects.
 				*/
-				if (typeof obj[name] === "object") {
+				if (typeof obj[name] === "object" && name.indexOf("__") !== 0) {
 					_perInstanceProps[name] = obj[name];
 				}
 			};
 
-			/*
-				Merge this object's dependencies with the prototypes dependencies. This way, you get a full list just from looking at
-				a top tier instance
-			*/
-
-			if(_proto.__dependencies) {
-				obj.__dependencies = obj.__dependencies || [];
-				obj.__dependencies = obj.__dependencies.concat(_proto.__dependencies);
-			};
-
-			_proto.__dependencies = obj.__dependencies;
-
 			var _class = function() {
 				
 				if(arguments[0] !== "__no_init__"){
+
+					/*
+						Handy for referencing dependencies. If a Class requires com.example.Test, then you can reference said class
+						in any method by this.__imports.Test;
+
+						This method is preferred over this.use_dependencies(), as you have to explicitly call this.unuse_dependencies()
+						to be responsible, at the end of every method.
+					*/
+					if(!_class.prototype.hasOwnProperty("__imports")){
+						this.__imports = f0xy.use(this.__dependencies, {});
+					}
 
 					if(!obj.__isSingleton){
 
