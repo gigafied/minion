@@ -4,6 +4,7 @@ f0xy.define("f0xy", {
 
 		_pendingNotifications: [],
 		_interests: {},
+		_removeQueue: [],
 		
 		init : function(){
 			
@@ -36,10 +37,13 @@ f0xy.define("f0xy", {
 		removeInterest : function(obj, name){
 			var objIndex = this._interests[name].indexOf(obj);
 			if(obj && objIndex > -1){
-				this._interests[name].splice(objIndex, 1);
 				var pendingNotification = this.getNotification(name);
 				if(pendingNotification){
-					pendingNotification.pointer--;
+					var rq = this._removeQueue[name] = this._removeQueue[name] || [];
+					rq.push(obj);
+				}
+				else{
+					this._interests[name].splice(objIndex, 1);
 				}
 			}
 		},
@@ -74,6 +78,7 @@ f0xy.define("f0xy", {
 		_notifyObjects : function(notification){
 
 			var name = notification.name;
+
 			while(notification.pointer < this._interests[name].length){
 				if(notification.status === "pending"){
 					if(this._interests[name][notification.pointer].handleNotification != null){
@@ -127,6 +132,16 @@ f0xy.define("f0xy", {
 			var notification = this.getNotification(name);
 			if(notification){
 				this._pendingNotifications.splice(this._pendingNotifications.indexOf(notification), 1);
+
+				notification.status = "";
+
+				if(this._removeQueue[name]){
+					for(var i = 0; i < this._removeQueue.length; i ++){
+						this.removeInterest(this._removeQueue[name][i], name);
+					}
+					this._removeQueue[name] = null;
+					delete this._removeQueue[name];
+				}
 			}
 		}
 
@@ -147,9 +162,6 @@ f0xy.define("f0xy", {
 		init : function(name, data){
 			this.name = name;
 			this.data = data;
-			this.pointer = 0;
-			this.status = "";
-			this.dispatcher = null;
 		},
 
 		hold : function(){

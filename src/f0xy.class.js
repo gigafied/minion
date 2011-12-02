@@ -5,8 +5,7 @@ f0xy.define("f0xy", {
 	Class : f0xy.extend("f0xy.__BaseClass__", {
 
 		__isDefined: true,
-		__interestHandlers: [],
-
+		
 		/**
 		*
 		* The base f0xy Class. All Classes are required to be descendants
@@ -63,16 +62,19 @@ f0xy.define("f0xy", {
 		},
 
 		addInterest : function(name, handler, priority){
+			if(!this._interestHandlers){
+				this._interestHandlers = [];
+			}
 			if(handler){
 				f0xy.addInterest(this, name, priority);
-				this.__interestHandlers[name] = handler;
+				this._interestHandlers[name] = handler;
 			}
 		},
 
 		removeInterest : function(name){
-			if(this.__interestHandlers[name]){
-				this.__interestHandlers[name] = null;
-				delete this.__interestHandlers[name];
+			if(this._interestHandlers[name]){
+				this._interestHandlers[name] = null;
+				delete this._interestHandlers[name];
 			}
 			f0xy.removeInterest(this, name);
 		},
@@ -85,7 +87,7 @@ f0xy.define("f0xy", {
 
 		removeAllInterests : function(){
 			f0xy.removeAllInterests(this);
-			this.__interestHandlers = [];
+			this._interestHandlers = [];
 		},
 
 		notify : function(name, data){
@@ -95,7 +97,7 @@ f0xy.define("f0xy", {
 		
 		/** @ignore */
 		handleNotification : function(n){
-			var handler = this.__interestHandlers[n.name];
+			var handler = this._interestHandlers[n.name];
 			if(handler){
 				this.proxy(handler)(n);
 			}

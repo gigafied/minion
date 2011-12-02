@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Thu Dec 1 16:21:54 2011 -0800
+ * Date: Thu Dec 1 16:22:02 2011 -0800
  */
  /**
 
@@ -1000,8 +1000,7 @@ f0xy.define("f0xy", {
 	Class : f0xy.extend("f0xy.__BaseClass__", {
 
 		__isDefined: true,
-		__interestHandlers: [],
-
+		
 		/**
 		*
 		* The base f0xy Class. All Classes are required to be descendants
@@ -1058,16 +1057,19 @@ f0xy.define("f0xy", {
 		},
 
 		addInterest : function(name, handler, priority){
+			if(!this._interestHandlers){
+				this._interestHandlers = [];
+			}
 			if(handler){
 				f0xy.addInterest(this, name, priority);
-				this.__interestHandlers[name] = handler;
+				this._interestHandlers[name] = handler;
 			}
 		},
 
 		removeInterest : function(name){
-			if(this.__interestHandlers[name]){
-				this.__interestHandlers[name] = null;
-				delete this.__interestHandlers[name];
+			if(this._interestHandlers[name]){
+				this._interestHandlers[name] = null;
+				delete this._interestHandlers[name];
 			}
 			f0xy.removeInterest(this, name);
 		},
@@ -1080,7 +1082,7 @@ f0xy.define("f0xy", {
 
 		removeAllInterests : function(){
 			f0xy.removeAllInterests(this);
-			this.__interestHandlers = [];
+			this._interestHandlers = [];
 		},
 
 		notify : function(name, data){
@@ -1090,7 +1092,7 @@ f0xy.define("f0xy", {
 		
 		/** @ignore */
 		handleNotification : function(n){
-			var handler = this.__interestHandlers[n.name];
+			var handler = this._interestHandlers[n.name];
 			if(handler){
 				this.proxy(handler)(n);
 			}
@@ -1182,6 +1184,7 @@ f0xy.define("f0xy", {
 
 		_pendingNotifications: [],
 		_interests: {},
+		_removeQueue: [],
 		
 		init : function(){
 			
@@ -1214,10 +1217,13 @@ f0xy.define("f0xy", {
 		removeInterest : function(obj, name){
 			var objIndex = this._interests[name].indexOf(obj);
 			if(obj && objIndex > -1){
-				this._interests[name].splice(objIndex, 1);
 				var pendingNotification = this.getNotification(name);
 				if(pendingNotification){
-					pendingNotification.pointer--;
+					var rq = this._removeQueue[name] = this._removeQueue[name] || [];
+					rq.push(obj);
+				}
+				else{
+					this._interests[name].splice(objIndex, 1);
 				}
 			}
 		},
@@ -1252,6 +1258,7 @@ f0xy.define("f0xy", {
 		_notifyObjects : function(notification){
 
 			var name = notification.name;
+
 			while(notification.pointer < this._interests[name].length){
 				if(notification.status === "pending"){
 					if(this._interests[name][notification.pointer].handleNotification != null){
@@ -1305,6 +1312,16 @@ f0xy.define("f0xy", {
 			var notification = this.getNotification(name);
 			if(notification){
 				this._pendingNotifications.splice(this._pendingNotifications.indexOf(notification), 1);
+
+				notification.status = "";
+
+				if(this._removeQueue[name]){
+					for(var i = 0; i < this._removeQueue.length; i ++){
+						this.removeInterest(this._removeQueue[name][i], name);
+					}
+					this._removeQueue[name] = null;
+					delete this._removeQueue[name];
+				}
 			}
 		}
 
@@ -1325,9 +1342,6 @@ f0xy.define("f0xy", {
 		init : function(name, data){
 			this.name = name;
 			this.data = data;
-			this.pointer = 0;
-			this.status = "";
-			this.dispatcher = null;
 		},
 
 		hold : function(){
