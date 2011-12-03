@@ -34,7 +34,7 @@ THE SOFTWARE.</p>
 	TODO:
 		- Notification Support Toggling? 
 		- Multiple inheritance
-		- Independent library support, i.e. ability to do f0xy.require("f0xy.libs.jquery") to _load jquery
+		- Independent library support, i.e. ability to do f0xy.require("f0xy.libs.jquery") to load jquery
 		- AMD adherence?
 		- NodeJS implementation (almost there)
 */
@@ -73,7 +73,7 @@ var f0xy = (function (root) {
 	var _origRootNS = {};
 	var _initialized;
 
-	var __loadQueue = [];
+	var _loadQueue = [];
 	var _extendQueue = [];
 
 	var _waitID;
@@ -88,15 +88,19 @@ var f0xy = (function (root) {
 	copy the reference locally, along with all defined Classes and whatnot.
 
 	Makes for some awesome goodness, being able to easily communicate between windows and iframes through notifications
-	and not having to _load classes more than once.
+	and not having to load classes more than once.
 	*/
 
 	var nsTarget;
 	nsTarget = (root.parent && root.parent.f0xy) ? root.parent.f0xy : nsTarget;
 	nsTarget = (root.opener && root.opener.f0xy) ? root.opener.f0xy : nsTarget;
+	
 	if (nsTarget) {
-		nsTarget.copyToNS(root);
-		return nsTarget;
+		try{
+			nsTarget.copyToNS(root);
+			return nsTarget;
+		}
+		catch(e){;}
 	}
 	//
 
@@ -174,12 +178,12 @@ var f0xy = (function (root) {
 	var _checkLoadQueue = function () {
 		var i, j, q, dependenciesLoaded;
 
-		for (i = __loadQueue.length - 1; i >= 0; i -= 1) {
+		for (i = _loadQueue.length -1; i >= 0; i --) {
 
-			q = __loadQueue[i];
+			q = _loadQueue[i];
 			dependenciesLoaded = true;
 
-			for (j = 0; j < q.c.length; j += 1) {
+			for (j = 0; j < q.c.length; j ++) {
 				dependenciesLoaded = _areDependenciesLoaded(q.c[j]);
 				if (!dependenciesLoaded) {
 					break;
@@ -188,10 +192,9 @@ var f0xy = (function (root) {
 
 			if (dependenciesLoaded) {
 				if (q.cb) {
-					// 0 ms delay to make sure queue.callback does not get called prematurely, in some instances.
 					q.cb();
 				}
-				__loadQueue.splice(i, 1);
+				_loadQueue.splice(i, 1);
 			}
 		}
 	};
@@ -238,10 +241,12 @@ var f0xy = (function (root) {
 		for (i = 0; i < w.length; i += 1) {
 			o = w[i];
 			o.e += 50;
-
+			
 			if (_f0xy.isDefined(o.c)) {
 				o.s.onload();
-			} else if (o.e >= _f0xy.errorTimeout) {
+			}
+			
+			if (o.e >= _f0xy.errorTimeout) {
 				o.s.onerror();
 			}
 		}
@@ -252,9 +257,9 @@ var f0xy = (function (root) {
 	};
 
 	/**
-	* Does all the _loading of JS files
+	* Does all the loading of JS files
 	*
-	* @param		q 		The queue to be _loaded
+	* @param		q 		The queue to be loaded
 	* @ignore
 	* @private 
 	*/
@@ -262,9 +267,9 @@ var f0xy = (function (root) {
 	var _load = function (q) {
 
 		var doc = document;
-		var body = "body";
+		var head = "head";
 
-		__loadQueue.push(q);
+		_loadQueue.push(q);
 
 		/** @ignore */
 		function inject(f, c) {
@@ -273,7 +278,7 @@ var f0xy = (function (root) {
 
 			if (_requestedFiles.indexOf(f) < 0) {
 
-				if (!doc[body]) {
+				if (!doc[head]) {
 					return _sTimeout(inject, 0, f, c);
 				}
 
@@ -293,7 +298,7 @@ var f0xy = (function (root) {
 				/** @ignore */
 				script.onreadystatechange = /** @ignore */ script.onload = function (e) {
 					if (_f0xy.isDefined(c)) {
-						injectObj.s.onload = script.onreadystatechange = null;
+						injectObj.s.onload = injectObj.s.onreadystatechange = null;
 						_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 				 	}
 				};
@@ -306,10 +311,10 @@ var f0xy = (function (root) {
 					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 				}
 
-				script.src = f;				
+				script.src = f;
 				
-				// Append the script to the document body
-			 	doc[body].appendChild(script);
+				// Append the script to the document head
+			 	doc[head].appendChild(script);
 			}
 		}
 
@@ -507,12 +512,12 @@ var f0xy = (function (root) {
 			return _classMappings[id];
 		}
 
-		return _class_path + id.replace(new RegExp('\\' + _separator, 'g'), '/') + '.js';
+		return (_class_path + id).replace(new RegExp('\\' + _separator, 'g'), '/') + '.js';
 	}
 
 	/**
 	* Checks to see whether the given fully qualified name or Object is defined as a f0xy class. (Checks for .__isDefined)<br>
-	* NOTE: Classes that have not yet _loaded all of their dependencies, will return FALSE for this check.
+	* NOTE: Classes that have not yet loaded all of their dependencies, will return FALSE for this check.
 	*
 	* @public
 	* @param			{String|Object}	id						The fully qualfied class name, or an Object.
@@ -649,14 +654,14 @@ var f0xy = (function (root) {
 	* Tells f0xy that filePath provides the class definitions for these classes.
 	* Useful in cases where you group specific things into minfiied js files.
 	*
-	* f0xy.provides can _load the file right away, by passing doLoad as true, and a callback function.
+	* f0xy.provides can load the file right away, by passing doLoad as true, and a callback function.
 	* Otherwise, it just maps the classes to the specified filePath for any subsequent calls to f0xy.require()
 	*
 	* @public
 	* @param		{String}				file					The path of a JS file.
 	* @param	 	{String|Array}		definitions			Fully qualfiied name(s) of class(es)
 	* @param		{Boolean}			[doLoad=false]		Whether or not to subsequently call f0xy.require()
-	* @param 	{Function}			[callback=null]	If doLoad=true, the callback function to call once the file has been _loaded.
+	* @param 	{Function}			[callback=null]	If doLoad=true, the callback function to call once the file has been loaded.
 	*/
 
 	_f0xy.provides = function (file, definitions, doLoad, callback) {
@@ -677,16 +682,15 @@ var f0xy = (function (root) {
 	}
 
 	/**
-	* Asyncrhonously _loads in js files for the classes specified.
-	* If the classes have already been _loaded, or are already defined, the callback function is invoked immediately.
+	* Asyncrhonously loads in js files for the classes specified.
+	* If the classes have already been loaded, or are already defined, the callback function is invoked immediately.
 	*
 	* @public
-	* @param	 {String|Array}	ids				The fully qualified names of the class(es) to _load.
-	* @param	 {Function}			callback			The function to call once all classes (and their dependencies) have been _loaded.
+	* @param	 {String|Array}	ids				The fully qualified names of the class(es) to load.
+	* @param	 {Function}			callback			The function to call once all classes (and their dependencies) have been loaded.
 	*/
 
 	_f0xy.require = function (ids, callback) {
-
 		if (!_initialized) {
 			_f0xy.configure();
 		}
@@ -714,8 +718,14 @@ var f0xy = (function (root) {
 				c	: classList,
 				cb : callback
 			};
-		
-			_load(q);
+
+			/*
+				Really, really nasty bug in IE if we call _load immediately vs on a setTimeout.
+				I would seriously give $10 to the person who could explain it to me. IE9 (and maybe IE7 and IE8)
+				It's so weird bizarrea and complicated that I can't even explain it here... I'm not kidding.
+			*/
+			_sTimeout(function(){_load(q);}, 0);
+			//_load(q);
 		}
 
 		else if (callback) {

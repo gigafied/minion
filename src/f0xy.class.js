@@ -59,7 +59,7 @@ f0xy.define("f0xy", {
 		*/
 		proxy: function(func){
 
-			var bind = Function.prototype.bind || function (context) {
+			var bind = function (context) {
 				if (!context) {return this;}
 				var this_ = this;
 				return function() {
