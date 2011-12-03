@@ -124,7 +124,7 @@ f0xy.define("f0xy", {
 			// Set the prototype and Constructor accordingly.
 			_class.prototype = _proto;
 			//* @ignore */
-			_class.constructor = _class;
+			_class.prototype.constructor = _class;
 
 			// Expose the extend method
 			//* @ignore */

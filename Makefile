@@ -15,7 +15,6 @@ FILES = ${HEADER}\
 	${SRC_DIR}/f0xy.main.js\
 	${SRC_DIR}/f0xy.baseclass.js\
 	${SRC_DIR}/f0xy.class.js\
-	${SRC_DIR}/f0xy.singleton.js\
 	${SRC_DIR}/f0xy.static.js\
 	${SRC_DIR}/f0xy.notifications.js\
 

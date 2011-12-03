@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Thu Dec 1 16:22:02 2011 -0800
+ * Date: Thu Dec 1 17:38:25 2011 -0800
  */
  /**
 
@@ -68,24 +68,11 @@ var f0xy = (function (root) {
 			if (this[b] === a) {
 				return b;
 			}
-			b = +1;
+			b += 1;
 		}
 		return -1;
 	};
-
-	// If Function.bind is not defined, let's define it.
-	Function.prototype.bind = Function.prototype.bind || function () {
-		var method = this;
-		var args = Array.prototype.slice.call(arguments), object = args.shift();
-		return function () {
-			var local_args = args.concat(Array.prototype.slice.call(arguments));
-			if (this !== window) {
-				local_args.push(this);
-			}
-			return method.apply(object, local_args);
-		};
-	};
-
+	
 	var _classMappings = [];
 
 	var _separator = ".";
@@ -102,6 +89,7 @@ var f0xy = (function (root) {
 	var _waitingForLoad = [];
 	var _requestedFiles = [];
 	var _notificationManager;
+	var _waitInterval = 500;
 
 
 	/*
@@ -268,7 +256,7 @@ var f0xy = (function (root) {
 		}
 
 		if (w.length > 0) {
-			_waitID = _sTimeout(_checkWaitQueue, 50);
+			_waitID = _sTimeout(_checkWaitQueue, _waitInterval);
 		}
 	};
 
@@ -299,8 +287,7 @@ var f0xy = (function (root) {
 				}
 
 				script = doc.createElement("script");
-		     	script.async = true;
-		      script.src = f;
+			 	script.async = true;
 			
 				injectObj = {
 					f : f, 		// File
@@ -313,23 +300,25 @@ var f0xy = (function (root) {
 				_waitingForLoad.push(injectObj);
 
 				/** @ignore */
-		      script.onreadystatechange = /** @ignore */ script.onload = function (e) {
-		      	if (_f0xy.isDefined(c)) {
-			        injectObj.s.onload = script.onreadystatechange = null;
-			        _waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-			   	}
-		      };
+				script.onreadystatechange = /** @ignore */ script.onload = function (e) {
+					if (_f0xy.isDefined(c)) {
+						injectObj.s.onload = script.onreadystatechange = null;
+						_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
+				 	}
+				};
 
-		      /** @ignore */
-		      script.onerror = function (e) {
+				/** @ignore */
+				script.onerror = function (e) {
 					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 					throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
-		      	injectObj.s.onerror = null;
-		      	_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-		      }
-		      
-		      // Append the script to the document body
-		   	doc[body].appendChild(script);
+					injectObj.s.onerror = null;
+					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
+				}
+
+				script.src = f;				
+				
+				// Append the script to the document body
+			 	doc[body].appendChild(script);
 			}
 		}
 
@@ -338,11 +327,10 @@ var f0xy = (function (root) {
 		}
 
 		/*
-			onload and onreadystatechange are unreliable, mainly because of browser cache, thus we have to
-			set a timeout that checks for the definition of each class. Times out at 10 seconds (can be changed through
-			setting f0xy.errorTimeout = ms)
+			If the load times out, fire onerror after the time defined by f0xy.errorTimeout (default is 10 seconds)
+			(can be changed through setting f0xy.errorTimeout = ms)
 		*/
-		_waitID = _sTimeout(_checkWaitQueue, 50);
+		_waitID = _sTimeout(_checkWaitQueue, _waitInterval);
 	}
 
 	/**
@@ -731,8 +719,8 @@ var f0xy = (function (root) {
 		if (fileList.length > 0) {
 
 			var q = {
-				f  : fileList,
-				c  : classList,
+				f	: fileList,
+				c	: classList,
 				cb : callback
 			};
 		
@@ -743,7 +731,7 @@ var f0xy = (function (root) {
 			callback();
 		}
 	}
-
+	
 	/** @private */
 	_f0xy.enableNotifications = function () {
 		if (_f0xy.isDefined("f0xy.NotificationManager")) {
@@ -954,7 +942,7 @@ f0xy.define("f0xy", {
 			// Set the prototype and Constructor accordingly.
 			_class.prototype = _proto;
 			//* @ignore */
-			_class.constructor = _class;
+			_class.prototype.constructor = _class;
 
 			// Expose the extend method
 			//* @ignore */
@@ -1053,7 +1041,16 @@ f0xy.define("f0xy", {
 		* @returns {Function}		 The proxied function
 		*/
 		proxy: function(func){
-			return func.bind(this);
+
+			var bind = Function.prototype.bind || function (context) {
+				if (!context) {return this;}
+				var this_ = this;
+				return function() {
+					return this_.apply(context, Array.prototype.slice.call(arguments));
+				}
+			};
+
+			return bind.call(func, this);
 		},
 
 		addInterest : function(name, handler, priority){
@@ -1099,36 +1096,6 @@ f0xy.define("f0xy", {
 		}
 	})
 });(function(){
-
-	var __instance;
-
-	f0xy.define("f0xy", {
-
-		/**
-		*
-		* Yep pretty much exactly what it seems like it does
-		* 
-		*/
-
-		Singleton : f0xy.extend("f0xy.Class", {
-
-			__isSingleton: true,
-
-			init : function(){
-				if(!__instance){
-					__instance = this;
-				}
-				return __instance;
-			},
-
-			getInstance : function(){
-				return this.init();
-			}
-
-		})
-	});
-
-})();(function(){
 
 	f0xy.define("f0xy", {
 		require: [

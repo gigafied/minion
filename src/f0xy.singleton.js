@@ -1,7 +1,5 @@
 (function(){
 
-	var __instance;
-
 	f0xy.define("f0xy", {
 
 		/**
@@ -15,17 +13,20 @@
 			__isSingleton: true,
 
 			init : function(){
-				if(!__instance){
-					__instance = this;
+				if(!this.constructor._instance){
+					this.constructor._instance = this;
 				}
-				return __instance;
-			},
-
-			getInstance : function(){
-				return this.init();
+				return this.constructor._instance;
 			}
-
 		})
 	});
+
+	f0xy.Singleton.prototype.getInstance = function(){
+		if(!this._instance){
+			return this.init.apply(this, Array.prototype.slice.call(arguments));
+		}
+		this._instance = new this.apply(this, Array.prototype.slice.call(arguments));
+		return this._instance;
+	}
 
 })();

@@ -58,7 +58,16 @@ f0xy.define("f0xy", {
 		* @returns {Function}		 The proxied function
 		*/
 		proxy: function(func){
-			return func.bind(this);
+
+			var bind = Function.prototype.bind || function (context) {
+				if (!context) {return this;}
+				var this_ = this;
+				return function() {
+					return this_.apply(context, Array.prototype.slice.call(arguments));
+				}
+			};
+
+			return bind.call(func, this);
 		},
 
 		addInterest : function(name, handler, priority){
