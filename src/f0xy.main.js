@@ -177,8 +177,9 @@ var f0xy = (function (root) {
 	/** @private */
 	var _checkLoadQueue = function () {
 		var i, j, q, dependenciesLoaded;
+		q = {};
 
-		for (i = _loadQueue.length -1; i >= 0; i --) {
+		for (i = _loadQueue.length - 1; i >= 0; i --) {
 
 			q = _loadQueue[i];
 			dependenciesLoaded = true;
@@ -204,7 +205,7 @@ var f0xy = (function (root) {
 		var eq = _extendQueue;
 		var i, superClass, ns, id;
 
-		for (i = eq.length - 1; i >= 0; i -= 1) {
+		for (i = eq.length - 1; i >= 0; i --) {
 
 			ns = eq[i].split(_separator);
 			id = ns.splice(ns.length - 1, 1)[0];
@@ -243,7 +244,7 @@ var f0xy = (function (root) {
 			o.e += 50;
 			
 			if (_f0xy.isDefined(o.c)) {
-				o.s.onload();
+				//o.s.onload();
 			}
 			
 			if (o.e >= _f0xy.errorTimeout) {
@@ -268,7 +269,6 @@ var f0xy = (function (root) {
 
 		var doc = document;
 		var head = "head";
-
 		_loadQueue.push(q);
 
 		/** @ignore */
@@ -718,14 +718,7 @@ var f0xy = (function (root) {
 				c	: classList,
 				cb : callback
 			};
-
-			/*
-				Really, really nasty bug in IE if we call _load immediately vs on a setTimeout.
-				I would seriously give $10 to the person who could explain it to me. IE9 (and maybe IE7 and IE8)
-				It's so weird bizarrea and complicated that I can't even explain it here... I'm not kidding.
-			*/
-			_sTimeout(function(){_load(q);}, 0);
-			//_load(q);
+			_load(q);
 		}
 
 		else if (callback) {

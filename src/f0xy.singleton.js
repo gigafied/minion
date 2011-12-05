@@ -1,32 +1,31 @@
-(function(){
+f0xy.define("f0xy", {
 
-	f0xy.define("f0xy", {
+	/**
+	*
+	* Yep pretty much exactly what it seems like it does
+	* 
+	*/
 
-		/**
-		*
-		* Yep pretty much exactly what it seems like it does
-		* 
-		*/
+	Singleton : f0xy.extend("f0xy.Class", {
 
-		Singleton : f0xy.extend("f0xy.Class", {
+		__isSingleton: true,
 
-			__isSingleton: true,
+		__preInit : function(){
+			if(this.constructor.prototype._instance){return this.constructor.prototype._instance;}
+			
+			this.init();
 
-			init : function(){
-				if(!this.constructor._instance){
-					this.constructor._instance = this;
-				}
-				return this.constructor._instance;
-			}
-		})
-	});
+			this.constructor.prototype._instance = this;
+			return this.constructor.prototype._instance;
+		},
 
-	f0xy.Singleton.prototype.getInstance = function(){
-		if(!this._instance){
-			return this.init.apply(this, Array.prototype.slice.call(arguments));
+		init : function(){
+
+		},
+
+		getInstance : function(){
+			return this.__preInit();
 		}
-		this._instance = new this.apply(this, Array.prototype.slice.call(arguments));
-		return this._instance;
-	}
-
-})();
+		
+	})
+});

@@ -109,15 +109,20 @@ f0xy.define("f0xy", {
 						this.__imports = f0xy.use(this.__dependencies, {});
 					}
 
-					if(!obj.__isSingleton){
+					if(!this.__isSingleton){
 
 						for(var attr in _perInstanceProps) {
 							this[attr] = _copy(_perInstanceProps[attr]);
 						};
+
+						// All real construction is actually done in the init method
+						return this.init.apply(this, arguments);
+					}
+					
+					else{
+						return this.__preInit.apply(this, arguments);
 					}
 
-					// All real construction is actually done in the init method
-					return this.init.apply(this, arguments);
 				}
 			};
 

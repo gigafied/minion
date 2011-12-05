@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Fri Dec 2 20:01:11 2011 -0800
+ * Date: Sat Dec 3 07:05:29 2011 -0800
  */
  /**
 
@@ -103,9 +103,13 @@ var f0xy = (function (root) {
 	var nsTarget;
 	nsTarget = (root.parent && root.parent.f0xy) ? root.parent.f0xy : nsTarget;
 	nsTarget = (root.opener && root.opener.f0xy) ? root.opener.f0xy : nsTarget;
+	
 	if (nsTarget) {
-		nsTarget.copyToNS(root);
-		return nsTarget;
+		try{
+			nsTarget.copyToNS(root);
+			return nsTarget;
+		}
+		catch(e){;}
 	}
 	//
 
@@ -182,8 +186,9 @@ var f0xy = (function (root) {
 	/** @private */
 	var _checkLoadQueue = function () {
 		var i, j, q, dependenciesLoaded;
+		q = {};
 
-		for (i = _loadQueue.length -1; i >= 0; i --) {
+		for (i = _loadQueue.length - 1; i >= 0; i --) {
 
 			q = _loadQueue[i];
 			dependenciesLoaded = true;
@@ -209,7 +214,7 @@ var f0xy = (function (root) {
 		var eq = _extendQueue;
 		var i, superClass, ns, id;
 
-		for (i = eq.length - 1; i >= 0; i -= 1) {
+		for (i = eq.length - 1; i >= 0; i --) {
 
 			ns = eq[i].split(_separator);
 			id = ns.splice(ns.length - 1, 1)[0];
@@ -248,7 +253,7 @@ var f0xy = (function (root) {
 			o.e += 50;
 			
 			if (_f0xy.isDefined(o.c)) {
-				o.s.onload();
+				//o.s.onload();
 			}
 			
 			if (o.e >= _f0xy.errorTimeout) {
@@ -273,7 +278,6 @@ var f0xy = (function (root) {
 
 		var doc = document;
 		var head = "head";
-
 		_loadQueue.push(q);
 
 		/** @ignore */
@@ -723,14 +727,7 @@ var f0xy = (function (root) {
 				c	: classList,
 				cb : callback
 			};
-
-			/*
-				Really, really nasty bug in IE if we call _load immediately vs on a setTimeout.
-				I would seriously give $10 to the person who could explain it to me. IE9 (and maybe IE7 and IE8)
-				It's so weird bizarrea and complicated that I can't even explain it here... I'm not kidding.
-			*/
-			_sTimeout(function(){_load(q);}, 0);
-			//_load(q);
+			_load(q);
 		}
 
 		else if (callback) {
@@ -933,15 +930,20 @@ f0xy.define("f0xy", {
 						this.__imports = f0xy.use(this.__dependencies, {});
 					}
 
-					if(!obj.__isSingleton){
+					if(!this.__isSingleton){
 
 						for(var attr in _perInstanceProps) {
 							this[attr] = _copy(_perInstanceProps[attr]);
 						};
+
+						// All real construction is actually done in the init method
+						return this.init.apply(this, arguments);
+					}
+					
+					else{
+						return this.__preInit.apply(this, arguments);
 					}
 
-					// All real construction is actually done in the init method
-					return this.init.apply(this, arguments);
 				}
 			};
 
@@ -1101,57 +1103,84 @@ f0xy.define("f0xy", {
 			}
 		}
 	})
-});(function(){
+});f0xy.define("f0xy", {
 
-	f0xy.define("f0xy", {
-		require: [
-			"f0xy.Class"
-		],
+	require: [
+		"f0xy.Class"
+	],
 
-		/**
-		*
-		* Yep pretty much exactly what it seems like it does
-		* 
-		*/
+	/**
+	*
+	* Yep pretty much exactly what it seems like it does
+	* 
+	*/
 
-		Static : (function() {
+	Static : (function() {
 
-			var _staticClass = function() {;}
+		var _staticClass = function() {;}
 
-			_staticClass.__isDefined = true;
-			_staticClass.__isStatic = true;
+		_staticClass.__isDefined = true;
+		_staticClass.__isStatic = true;
 
-			_staticClass.__extend = function(obj){
-				var _class = function() {;}
+		_staticClass.__extend = function(obj){
+			var _class = function() {;}
 
-				for(var prop in obj){
-					if(obj.hasOwnProperty(prop)){
-						_class[prop] = obj[prop];
-					}
+			for(var prop in obj){
+				if(obj.hasOwnProperty(prop)){
+					_class[prop] = obj[prop];
 				}
-
-				for(var prop in this){
-					if(this.hasOwnProperty(prop)){
-						_class[prop] = this[prop];
-					}
-				}
-
-				for(var prop in f0xy.Class.prototype){
-					if(f0xy.Class.prototype.hasOwnProperty(prop)){
-						_class[prop] = f0xy.Class.prototype[prop];
-					}
-				}
-
-				return _class;
 			}
 
-			return _staticClass;
+			for(var prop in this){
+				if(this.hasOwnProperty(prop)){
+					_class[prop] = this[prop];
+				}
+			}
 
-		})()
+			for(var prop in f0xy.Class.prototype){
+				if(f0xy.Class.prototype.hasOwnProperty(prop)){
+					_class[prop] = f0xy.Class.prototype[prop];
+				}
+			}
 
-	});
+			return _class;
+		}
 
-})();f0xy.define("f0xy", {
+		return _staticClass;
+
+	})()
+
+});f0xy.define("f0xy", {
+
+	/**
+	*
+	* Yep pretty much exactly what it seems like it does
+	* 
+	*/
+
+	Singleton : f0xy.extend("f0xy.Class", {
+
+		__isSingleton: true,
+
+		__preInit : function(){
+			if(this.constructor.prototype._instance){return this.constructor.prototype._instance;}
+			
+			this.init();
+
+			this.constructor.prototype._instance = this;
+			return this.constructor.prototype._instance;
+		},
+
+		init : function(){
+
+		},
+
+		getInstance : function(){
+			return this.__preInit();
+		}
+		
+	})
+});f0xy.define("f0xy", {
 
 	NotificationManager : f0xy.extend("f0xy.Class", {
 
