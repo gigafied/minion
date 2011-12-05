@@ -63,26 +63,28 @@ f0xy.define("f0xy", {
 			// Copy the object's properties onto the prototype
 			for(var name in obj) {
 
-				// If we're overwriting an existing function that calls this.__super, do a little super magic.
-				if(typeof obj[name] == "function" && typeof _this.prototype[name] == "function" && _doesCallSuper.test(obj[name])){
-					_proto[name] = (function(name, fn){
-						return function() {
-							var tmp = this.__super;
+				if(name != "__static"){
+					// If we're overwriting an existing function that calls this.__super, do a little super magic.
+					if(typeof obj[name] == "function" && typeof _this.prototype[name] == "function" && _doesCallSuper.test(obj[name])){
+						_proto[name] = (function(name, fn){
+							return function() {
+								var tmp = this.__super;
 
-							// Reference the prototypes method, as super temporarily
-							this.__super = _this.prototype[name];
+								// Reference the prototypes method, as super temporarily
+								this.__super = _this.prototype[name];
 
-							var ret = fn.apply(this, arguments);
+								var ret = fn.apply(this, arguments);
 
-							// Reset this.__super
-							this.__super = tmp;
+								// Reset this.__super
+								this.__super = tmp;
 
-							return ret;
-						};
-					})(name, obj[name]);
-				}
-				else{
-					_proto[name] = obj[name];
+								return ret;
+							};
+						})(name, obj[name]);
+					}
+					else{
+						_proto[name] = obj[name];
+					}
 				}
 
 				/*
@@ -106,18 +108,23 @@ f0xy.define("f0xy", {
 						to be responsible, at the end of every method.
 					*/
 					if(!_class.prototype.hasOwnProperty("__imports")){
-						this.__imports = f0xy.use(this.__dependencies, {});
+						_class.prototype.__imports = f0xy.use(this.__dependencies, {});
 					}
 
-					if(!obj.__isSingleton){
+					if(!this.__isSingleton){
 
 						for(var attr in _perInstanceProps) {
 							this[attr] = _copy(_perInstanceProps[attr]);
 						};
+
+						// All real construction is actually done in the init method
+						return this.init.apply(this, arguments);
+					}
+					
+					else{
+						return this.__preInit.apply(this, arguments);
 					}
 
-					// All real construction is actually done in the init method
-					return this.init.apply(this, arguments);
 				}
 			};
 
@@ -156,6 +163,32 @@ f0xy.define("f0xy", {
 			if(obj.__dependencies) {
 				_class.__dependencies = obj.__dependencies;
 			};
+
+			/*
+				Add all static methods and properties that are defined in the __static object.
+				Only write to it if it doesn't already exist, to disable overwriting things we actually need for f0xy by malicious or
+				plain bad code.
+			*/
+			if(obj.__static){
+				_class.__static = _class.__static || {};
+				for(var prop in obj.__static){
+					if(!_class[prop]){
+						_class[prop] = obj.__static[prop];
+						_class.__static[prop] = obj.__static[prop];
+					}
+				}
+				_class.__static = obj.__static;
+			}
+
+			if(this.__static){
+				_class.__static = _class.__static || {};				
+				for(var prop in this.__static){
+					if(!_class[prop]){
+						_class[prop] = this.__static[prop];
+						_class.__static[prop] = this.__static[prop];
+					}
+				}
+			}
 
 			return _class;
 		};

@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Fri Dec 2 20:01:11 2011 -0800
+ * Date: Thu Dec 8 00:01:02 2011 -0800
  */
  /**
 
@@ -46,6 +46,7 @@ THE SOFTWARE.</p>
 		- Independent library support, i.e. ability to do f0xy.require("f0xy.libs.jquery") to load jquery
 		- AMD adherence?
 		- NodeJS implementation (almost there)
+		- __preDefine method on Classes, takes 1 argument, a callback that gets called once __preDefine does all it needs to do
 */
 
 var f0xy = (function (root) {
@@ -77,6 +78,8 @@ var f0xy = (function (root) {
 
 	var _separator = ".";
 	var _class_path = "";
+	var _file_suffix = "";
+		
 	var _classes = {};
 
 	var _origRootNS = {};
@@ -103,9 +106,13 @@ var f0xy = (function (root) {
 	var nsTarget;
 	nsTarget = (root.parent && root.parent.f0xy) ? root.parent.f0xy : nsTarget;
 	nsTarget = (root.opener && root.opener.f0xy) ? root.opener.f0xy : nsTarget;
+	
 	if (nsTarget) {
-		nsTarget.copyToNS(root);
-		return nsTarget;
+		try{
+			nsTarget.copyToNS(root);
+			return nsTarget;
+		}
+		catch(e){;}
 	}
 	//
 
@@ -182,8 +189,9 @@ var f0xy = (function (root) {
 	/** @private */
 	var _checkLoadQueue = function () {
 		var i, j, q, dependenciesLoaded;
+		q = {};
 
-		for (i = _loadQueue.length -1; i >= 0; i --) {
+		for (i = _loadQueue.length - 1; i >= 0; i --) {
 
 			q = _loadQueue[i];
 			dependenciesLoaded = true;
@@ -209,7 +217,7 @@ var f0xy = (function (root) {
 		var eq = _extendQueue;
 		var i, superClass, ns, id;
 
-		for (i = eq.length - 1; i >= 0; i -= 1) {
+		for (i = eq.length - 1; i >= 0; i --) {
 
 			ns = eq[i].split(_separator);
 			id = ns.splice(ns.length - 1, 1)[0];
@@ -248,10 +256,10 @@ var f0xy = (function (root) {
 			o.e += 50;
 			
 			if (_f0xy.isDefined(o.c)) {
-				o.s.onload();
+				//o.s.onload();
 			}
 			
-			if (o.e >= _f0xy.errorTimeout) {
+			else if (o.e >= _f0xy.errorTimeout) {
 				o.s.onerror();
 			}
 		}
@@ -273,7 +281,6 @@ var f0xy = (function (root) {
 
 		var doc = document;
 		var head = "head";
-
 		_loadQueue.push(q);
 
 		/** @ignore */
@@ -294,7 +301,7 @@ var f0xy = (function (root) {
 					f : f, 		// File
 					c : c, 		// Class
 					e : 0, 		// Elapsed Time
-					s : script 	// Script
+					s : script // Script
 				};
 
 				_requestedFiles.push(f);	
@@ -304,13 +311,13 @@ var f0xy = (function (root) {
 				script.onreadystatechange = /** @ignore */ script.onload = function (e) {
 					if (_f0xy.isDefined(c)) {
 						injectObj.s.onload = injectObj.s.onreadystatechange = null;
+						injectObj.s.onerror = null;
 						_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 				 	}
 				};
 
 				/** @ignore */
 				script.onerror = function (e) {
-					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 					throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
 					injectObj.s.onerror = null;
 					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
@@ -451,17 +458,28 @@ var f0xy = (function (root) {
 	_f0xy.errorTimeout = 1e4;
 
 	/**
-	* Configure f0xy. Call to update the base class path, or to change the default _separator (".").
+	* Configure f0xy.
 	* 
 	* @public
-	* @param		 {String}		[new_separator="."]		Namespace _separator
-	* @param		 {String}		[new_class_path="js/"]	The root path of all your classes. Can be absolute or relative.
+	* @param		 {Object}		configObj					Configuration object, possible properties are : rootPath, separator and fileSuffix
 	*/
 
-	_f0xy.configure = function (new_class_path, new_separator, useRootNS) {
-		_class_path = new_class_path || _class_path;
-		_separator = new_separator || _separator;
+	_f0xy.configure = function (configObj) {
+		
+		configObj = configObj || {};
+
+		_class_path = configObj.rootPath || _class_path;
 		_class_path = (_class_path.lastIndexOf("/") === _class_path.length - 1) ? _class_path : _class_path + "/";
+
+		_separator = configObj.separator || _separator;
+		_file_suffix = configObj.fileSuffix || _file_suffix;
+
+		var useRootNS = true;
+
+		if(configObj.noPollution){
+			useRootNS = !!configObj.noPollution;
+		};
+
 		var i;
 
 		if (!_initialized) {
@@ -516,8 +534,8 @@ var f0xy = (function (root) {
 		if (_classMappings[id]) {
 			return _classMappings[id];
 		}
-
-		return (_class_path + id).replace(new RegExp('\\' + _separator, 'g'), '/') + '.js';
+		var url = (_class_path + id).replace(new RegExp('\\' + _separator, 'g'), '/') + '.js' + ((_file_suffix) ? "?" + _file_suffix : "");
+		return url;
 	}
 
 	/**
@@ -723,14 +741,9 @@ var f0xy = (function (root) {
 				c	: classList,
 				cb : callback
 			};
-
-			/*
-				Really, really nasty bug in IE if we call _load immediately vs on a setTimeout.
-				I would seriously give $10 to the person who could explain it to me. IE9 (and maybe IE7 and IE8)
-				It's so weird bizarrea and complicated that I can't even explain it here... I'm not kidding.
-			*/
-			_sTimeout(function(){_load(q);}, 0);
+			
 			//_load(q);
+			_sTimeout(function(){_load(q);}, 0);
 		}
 
 		else if (callback) {
@@ -887,26 +900,28 @@ f0xy.define("f0xy", {
 			// Copy the object's properties onto the prototype
 			for(var name in obj) {
 
-				// If we're overwriting an existing function that calls this.__super, do a little super magic.
-				if(typeof obj[name] == "function" && typeof _this.prototype[name] == "function" && _doesCallSuper.test(obj[name])){
-					_proto[name] = (function(name, fn){
-						return function() {
-							var tmp = this.__super;
+				if(name != "__static"){
+					// If we're overwriting an existing function that calls this.__super, do a little super magic.
+					if(typeof obj[name] == "function" && typeof _this.prototype[name] == "function" && _doesCallSuper.test(obj[name])){
+						_proto[name] = (function(name, fn){
+							return function() {
+								var tmp = this.__super;
 
-							// Reference the prototypes method, as super temporarily
-							this.__super = _this.prototype[name];
+								// Reference the prototypes method, as super temporarily
+								this.__super = _this.prototype[name];
 
-							var ret = fn.apply(this, arguments);
+								var ret = fn.apply(this, arguments);
 
-							// Reset this.__super
-							this.__super = tmp;
+								// Reset this.__super
+								this.__super = tmp;
 
-							return ret;
-						};
-					})(name, obj[name]);
-				}
-				else{
-					_proto[name] = obj[name];
+								return ret;
+							};
+						})(name, obj[name]);
+					}
+					else{
+						_proto[name] = obj[name];
+					}
 				}
 
 				/*
@@ -930,18 +945,23 @@ f0xy.define("f0xy", {
 						to be responsible, at the end of every method.
 					*/
 					if(!_class.prototype.hasOwnProperty("__imports")){
-						this.__imports = f0xy.use(this.__dependencies, {});
+						_class.prototype.__imports = f0xy.use(this.__dependencies, {});
 					}
 
-					if(!obj.__isSingleton){
+					if(!this.__isSingleton){
 
 						for(var attr in _perInstanceProps) {
 							this[attr] = _copy(_perInstanceProps[attr]);
 						};
+
+						// All real construction is actually done in the init method
+						return this.init.apply(this, arguments);
+					}
+					
+					else{
+						return this.__preInit.apply(this, arguments);
 					}
 
-					// All real construction is actually done in the init method
-					return this.init.apply(this, arguments);
 				}
 			};
 
@@ -981,6 +1001,32 @@ f0xy.define("f0xy", {
 				_class.__dependencies = obj.__dependencies;
 			};
 
+			/*
+				Add all static methods and properties that are defined in the __static object.
+				Only write to it if it doesn't already exist, to disable overwriting things we actually need for f0xy by malicious or
+				plain bad code.
+			*/
+			if(obj.__static){
+				_class.__static = _class.__static || {};
+				for(var prop in obj.__static){
+					if(!_class[prop]){
+						_class[prop] = obj.__static[prop];
+						_class.__static[prop] = obj.__static[prop];
+					}
+				}
+				_class.__static = obj.__static;
+			}
+
+			if(this.__static){
+				_class.__static = _class.__static || {};				
+				for(var prop in this.__static){
+					if(!_class[prop]){
+						_class[prop] = this.__static[prop];
+						_class.__static[prop] = this.__static[prop];
+					}
+				}
+			}
+
 			return _class;
 		};
 		
@@ -1003,7 +1049,9 @@ f0xy.define("f0xy", {
 		* @constructs
 		*/
 		init: function(){
-			
+			if(!this._interestHandlers){
+				this._interestHandlers = [];
+			}
 		},
 
 		/** 
@@ -1070,7 +1118,7 @@ f0xy.define("f0xy", {
 		},
 
 		removeInterest : function(name){
-			if(this._interestHandlers[name]){
+			if(this._interestHandlers && this._interestHandlers[name]){
 				this._interestHandlers[name] = null;
 				delete this._interestHandlers[name];
 			}
@@ -1101,57 +1149,93 @@ f0xy.define("f0xy", {
 			}
 		}
 	})
-});(function(){
+});f0xy.define("f0xy", {
 
-	f0xy.define("f0xy", {
-		require: [
-			"f0xy.Class"
-		],
+	require: [
+		"f0xy.Class"
+	],
 
-		/**
-		*
-		* Yep pretty much exactly what it seems like it does
-		* 
-		*/
+	/**
+	*
+	* Yep pretty much exactly what it seems like it does
+	* 
+	*/
 
-		Static : (function() {
+	Static : (function() {
 
-			var _staticClass = function() {;}
+		var _staticClass = function() {;}
 
-			_staticClass.__isDefined = true;
-			_staticClass.__isStatic = true;
+		_staticClass.__isDefined = true;
+		_staticClass.__isStatic = true;
 
-			_staticClass.__extend = function(obj){
-				var _class = function() {;}
+		_staticClass.__extend = function(obj){
+			var _class = function() {;}
 
-				for(var prop in obj){
-					if(obj.hasOwnProperty(prop)){
-						_class[prop] = obj[prop];
-					}
+			for(var prop in obj){
+				if(obj.hasOwnProperty(prop)){
+					_class[prop] = obj[prop];
 				}
-
-				for(var prop in this){
-					if(this.hasOwnProperty(prop)){
-						_class[prop] = this[prop];
-					}
-				}
-
-				for(var prop in f0xy.Class.prototype){
-					if(f0xy.Class.prototype.hasOwnProperty(prop)){
-						_class[prop] = f0xy.Class.prototype[prop];
-					}
-				}
-
-				return _class;
 			}
 
-			return _staticClass;
+			for(var prop in this){
+				if(this.hasOwnProperty(prop)){
+					_class[prop] = this[prop];
+				}
+			}
 
-		})()
+			for(var prop in f0xy.Class.prototype){
+				if(f0xy.Class.prototype.hasOwnProperty(prop)){
+					_class[prop] = f0xy.Class.prototype[prop];
+				}
+			}
 
-	});
+			return _class;
+		}
 
-})();f0xy.define("f0xy", {
+		return _staticClass;
+
+	})()
+
+});f0xy.define("f0xy", {
+
+	/**
+	*
+	* Yep pretty much exactly what it seems like it does
+	* 
+	*/
+
+	Singleton : f0xy.extend("f0xy.Class", {
+
+		__isSingleton: true,
+
+		__preInit : function(){
+			if(this.constructor.__instance){
+				return this.constructor.__instance;
+			}
+			
+			this.init.apply(this, arguments);
+
+			this.constructor.__instance = this;
+			return this.constructor.__instance;
+		},
+
+		init : function(){
+
+		},
+
+		// You can add static methods and properties to a non static class through __static...
+		__static : {
+
+			getInstance : function(){
+				if(!this.__instance){
+					this.__instance =  new this();
+					return this.__instance;
+				}
+				return this.__instance;
+			}
+		}
+	})
+});f0xy.define("f0xy", {
 
 	NotificationManager : f0xy.extend("f0xy.Class", {
 
@@ -1164,10 +1248,11 @@ f0xy.define("f0xy", {
 		},
 		
 		addInterest : function(obj, name, priority){
+			priority = (priority || priority === 0) ? priority : -1;
 			if(typeof this._interests[name] === "undefined"){
 				this._interests[name] = [];
 			}
-			if(priority <= -1 || typeof this._interests[name] !== undefined && priority >= this._interests[name].length){
+			if(priority <= -1 || priority >= this._interests[name].length){
 				this._interests[name].push(obj);
 			}
 			else{
@@ -1181,7 +1266,7 @@ f0xy.define("f0xy", {
 					this.addInterest(obj, names[i]);
 				}
 				else if(typeof names[i] === "object" || typeof names[i] === "array"){
-					var priority = (names[i]['priority'] != null && names[i]['priority'] != undefined) ? names[i]['priority'] : 0;
+					var priority = (names[i]['priority'] != null && names[i]['priority'] != undefined) ? names[i]['priority'] : -1;
 					this.addInterest(obj, names[i]['name'], priority);
 				}
 			}

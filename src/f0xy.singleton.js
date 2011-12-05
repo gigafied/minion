@@ -1,32 +1,40 @@
-(function(){
+f0xy.define("f0xy", {
 
-	f0xy.define("f0xy", {
+	/**
+	*
+	* Yep pretty much exactly what it seems like it does
+	* 
+	*/
 
-		/**
-		*
-		* Yep pretty much exactly what it seems like it does
-		* 
-		*/
+	Singleton : f0xy.extend("f0xy.Class", {
 
-		Singleton : f0xy.extend("f0xy.Class", {
+		__isSingleton: true,
 
-			__isSingleton: true,
-
-			init : function(){
-				if(!this.constructor._instance){
-					this.constructor._instance = this;
-				}
-				return this.constructor._instance;
+		__preInit : function(){
+			if(this.constructor.__instance){
+				return this.constructor.__instance;
 			}
-		})
-	});
+			
+			this.init.apply(this, arguments);
 
-	f0xy.Singleton.prototype.getInstance = function(){
-		if(!this._instance){
-			return this.init.apply(this, Array.prototype.slice.call(arguments));
+			this.constructor.__instance = this;
+			return this.constructor.__instance;
+		},
+
+		init : function(){
+
+		},
+
+		// You can add static methods and properties to a non static class through __static...
+		__static : {
+
+			getInstance : function(){
+				if(!this.__instance){
+					this.__instance =  new this();
+					return this.__instance;
+				}
+				return this.__instance;
+			}
 		}
-		this._instance = new this.apply(this, Array.prototype.slice.call(arguments));
-		return this._instance;
-	}
-
-})();
+	})
+});

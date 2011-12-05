@@ -37,6 +37,7 @@ THE SOFTWARE.</p>
 		- Independent library support, i.e. ability to do f0xy.require("f0xy.libs.jquery") to load jquery
 		- AMD adherence?
 		- NodeJS implementation (almost there)
+		- __preDefine method on Classes, takes 1 argument, a callback that gets called once __preDefine does all it needs to do
 */
 
 var f0xy = (function (root) {
@@ -68,6 +69,8 @@ var f0xy = (function (root) {
 
 	var _separator = ".";
 	var _class_path = "";
+	var _file_suffix = "";
+		
 	var _classes = {};
 
 	var _origRootNS = {};
@@ -177,8 +180,9 @@ var f0xy = (function (root) {
 	/** @private */
 	var _checkLoadQueue = function () {
 		var i, j, q, dependenciesLoaded;
+		q = {};
 
-		for (i = _loadQueue.length -1; i >= 0; i --) {
+		for (i = _loadQueue.length - 1; i >= 0; i --) {
 
 			q = _loadQueue[i];
 			dependenciesLoaded = true;
@@ -204,7 +208,7 @@ var f0xy = (function (root) {
 		var eq = _extendQueue;
 		var i, superClass, ns, id;
 
-		for (i = eq.length - 1; i >= 0; i -= 1) {
+		for (i = eq.length - 1; i >= 0; i --) {
 
 			ns = eq[i].split(_separator);
 			id = ns.splice(ns.length - 1, 1)[0];
@@ -243,10 +247,10 @@ var f0xy = (function (root) {
 			o.e += 50;
 			
 			if (_f0xy.isDefined(o.c)) {
-				o.s.onload();
+				//o.s.onload();
 			}
 			
-			if (o.e >= _f0xy.errorTimeout) {
+			else if (o.e >= _f0xy.errorTimeout) {
 				o.s.onerror();
 			}
 		}
@@ -268,7 +272,6 @@ var f0xy = (function (root) {
 
 		var doc = document;
 		var head = "head";
-
 		_loadQueue.push(q);
 
 		/** @ignore */
@@ -289,7 +292,7 @@ var f0xy = (function (root) {
 					f : f, 		// File
 					c : c, 		// Class
 					e : 0, 		// Elapsed Time
-					s : script 	// Script
+					s : script // Script
 				};
 
 				_requestedFiles.push(f);	
@@ -299,13 +302,13 @@ var f0xy = (function (root) {
 				script.onreadystatechange = /** @ignore */ script.onload = function (e) {
 					if (_f0xy.isDefined(c)) {
 						injectObj.s.onload = injectObj.s.onreadystatechange = null;
+						injectObj.s.onerror = null;
 						_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 				 	}
 				};
 
 				/** @ignore */
 				script.onerror = function (e) {
-					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 					throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
 					injectObj.s.onerror = null;
 					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
@@ -446,17 +449,28 @@ var f0xy = (function (root) {
 	_f0xy.errorTimeout = 1e4;
 
 	/**
-	* Configure f0xy. Call to update the base class path, or to change the default _separator (".").
+	* Configure f0xy.
 	* 
 	* @public
-	* @param		 {String}		[new_separator="."]		Namespace _separator
-	* @param		 {String}		[new_class_path="js/"]	The root path of all your classes. Can be absolute or relative.
+	* @param		 {Object}		configObj					Configuration object, possible properties are : rootPath, separator and fileSuffix
 	*/
 
-	_f0xy.configure = function (new_class_path, new_separator, useRootNS) {
-		_class_path = new_class_path || _class_path;
-		_separator = new_separator || _separator;
+	_f0xy.configure = function (configObj) {
+		
+		configObj = configObj || {};
+
+		_class_path = configObj.rootPath || _class_path;
 		_class_path = (_class_path.lastIndexOf("/") === _class_path.length - 1) ? _class_path : _class_path + "/";
+
+		_separator = configObj.separator || _separator;
+		_file_suffix = configObj.fileSuffix || _file_suffix;
+
+		var useRootNS = true;
+
+		if(configObj.noPollution){
+			useRootNS = !!configObj.noPollution;
+		};
+
 		var i;
 
 		if (!_initialized) {
@@ -511,8 +525,8 @@ var f0xy = (function (root) {
 		if (_classMappings[id]) {
 			return _classMappings[id];
 		}
-
-		return (_class_path + id).replace(new RegExp('\\' + _separator, 'g'), '/') + '.js';
+		var url = (_class_path + id).replace(new RegExp('\\' + _separator, 'g'), '/') + '.js' + ((_file_suffix) ? "?" + _file_suffix : "");
+		return url;
 	}
 
 	/**
@@ -718,14 +732,9 @@ var f0xy = (function (root) {
 				c	: classList,
 				cb : callback
 			};
-
-			/*
-				Really, really nasty bug in IE if we call _load immediately vs on a setTimeout.
-				I would seriously give $10 to the person who could explain it to me. IE9 (and maybe IE7 and IE8)
-				It's so weird bizarrea and complicated that I can't even explain it here... I'm not kidding.
-			*/
-			_sTimeout(function(){_load(q);}, 0);
+			
 			//_load(q);
+			_sTimeout(function(){_load(q);}, 0);
 		}
 
 		else if (callback) {

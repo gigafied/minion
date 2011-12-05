@@ -16,6 +16,7 @@ FILES = ${HEADER}\
 	${SRC_DIR}/f0xy.baseclass.js\
 	${SRC_DIR}/f0xy.class.js\
 	${SRC_DIR}/f0xy.static.js\
+	${SRC_DIR}/f0xy.singleton.js\
 	${SRC_DIR}/f0xy.notifications.js\
 
 F0XY = ${BIN_DIR}/f0xy.js
@@ -56,6 +57,11 @@ min: f0xy
 		sed 's/@VERSION/'"${VER}"'/' > bin/tmp
 
 	@@mv bin/tmp ${F0XY_MIN}
+
+toyota: f0xy min
+
+	@@cp $(F0XY) ../saatchi-toyota-shareathon/project/static/js/libs/f0xy.js
+	@@cp $(F0XY_MIN) ../saatchi-toyota-shareathon/project/static/js/libs/f0xy.min.js
 
 docs: f0xy
 

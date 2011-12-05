@@ -11,10 +11,11 @@ f0xy.define("f0xy", {
 		},
 		
 		addInterest : function(obj, name, priority){
+			priority = (priority || priority === 0) ? priority : -1;
 			if(typeof this._interests[name] === "undefined"){
 				this._interests[name] = [];
 			}
-			if(priority <= -1 || typeof this._interests[name] !== undefined && priority >= this._interests[name].length){
+			if(priority <= -1 || priority >= this._interests[name].length){
 				this._interests[name].push(obj);
 			}
 			else{
@@ -28,7 +29,7 @@ f0xy.define("f0xy", {
 					this.addInterest(obj, names[i]);
 				}
 				else if(typeof names[i] === "object" || typeof names[i] === "array"){
-					var priority = (names[i]['priority'] != null && names[i]['priority'] != undefined) ? names[i]['priority'] : 0;
+					var priority = (names[i]['priority'] != null && names[i]['priority'] != undefined) ? names[i]['priority'] : -1;
 					this.addInterest(obj, names[i]['name'], priority);
 				}
 			}
