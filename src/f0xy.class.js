@@ -14,7 +14,9 @@ f0xy.define("f0xy", {
 		* @constructs
 		*/
 		init: function(){
-			
+			if(!this._interestHandlers){
+				this._interestHandlers = [];
+			}
 		},
 
 		/** 
@@ -81,7 +83,7 @@ f0xy.define("f0xy", {
 		},
 
 		removeInterest : function(name){
-			if(this._interestHandlers[name]){
+			if(this._interestHandlers && this._interestHandlers[name]){
 				this._interestHandlers[name] = null;
 				delete this._interestHandlers[name];
 			}

@@ -247,7 +247,7 @@ var f0xy = (function (root) {
 				//o.s.onload();
 			}
 			
-			if (o.e >= _f0xy.errorTimeout) {
+			else if (o.e >= _f0xy.errorTimeout) {
 				o.s.onerror();
 			}
 		}
@@ -289,7 +289,7 @@ var f0xy = (function (root) {
 					f : f, 		// File
 					c : c, 		// Class
 					e : 0, 		// Elapsed Time
-					s : script 	// Script
+					s : script // Script
 				};
 
 				_requestedFiles.push(f);	
@@ -299,13 +299,13 @@ var f0xy = (function (root) {
 				script.onreadystatechange = /** @ignore */ script.onload = function (e) {
 					if (_f0xy.isDefined(c)) {
 						injectObj.s.onload = injectObj.s.onreadystatechange = null;
+						injectObj.s.onerror = null;
 						_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 				 	}
 				};
 
 				/** @ignore */
 				script.onerror = function (e) {
-					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 					throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
 					injectObj.s.onerror = null;
 					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
@@ -718,7 +718,9 @@ var f0xy = (function (root) {
 				c	: classList,
 				cb : callback
 			};
-			_load(q);
+			
+			//_load(q);
+			_sTimeout(function(){_load(q);}, 0);
 		}
 
 		else if (callback) {

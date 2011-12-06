@@ -28,7 +28,7 @@ f0xy.define("f0xy", {
 					this.addInterest(obj, names[i]);
 				}
 				else if(typeof names[i] === "object" || typeof names[i] === "array"){
-					var priority = (names[i]['priority'] != null && names[i]['priority'] != undefined) ? names[i]['priority'] : 0;
+					var priority = (names[i]['priority'] != null && names[i]['priority'] != undefined) ? names[i]['priority'] : -1;
 					this.addInterest(obj, names[i]['name'], priority);
 				}
 			}

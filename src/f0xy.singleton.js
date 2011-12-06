@@ -13,7 +13,7 @@ f0xy.define("f0xy", {
 		__preInit : function(){
 			if(this.constructor.prototype._instance){return this.constructor.prototype._instance;}
 			
-			this.init();
+			this.init.apply(this, arguments);
 
 			this.constructor.prototype._instance = this;
 			return this.constructor.prototype._instance;

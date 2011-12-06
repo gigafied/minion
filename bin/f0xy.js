@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Sat Dec 3 07:05:29 2011 -0800
+ * Date: Sun Dec 4 19:28:01 2011 -0800
  */
  /**
 
@@ -256,7 +256,7 @@ var f0xy = (function (root) {
 				//o.s.onload();
 			}
 			
-			if (o.e >= _f0xy.errorTimeout) {
+			else if (o.e >= _f0xy.errorTimeout) {
 				o.s.onerror();
 			}
 		}
@@ -298,7 +298,7 @@ var f0xy = (function (root) {
 					f : f, 		// File
 					c : c, 		// Class
 					e : 0, 		// Elapsed Time
-					s : script 	// Script
+					s : script // Script
 				};
 
 				_requestedFiles.push(f);	
@@ -308,13 +308,13 @@ var f0xy = (function (root) {
 				script.onreadystatechange = /** @ignore */ script.onload = function (e) {
 					if (_f0xy.isDefined(c)) {
 						injectObj.s.onload = injectObj.s.onreadystatechange = null;
+						injectObj.s.onerror = null;
 						_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 				 	}
 				};
 
 				/** @ignore */
 				script.onerror = function (e) {
-					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 					throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
 					injectObj.s.onerror = null;
 					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
@@ -727,7 +727,9 @@ var f0xy = (function (root) {
 				c	: classList,
 				cb : callback
 			};
-			_load(q);
+			
+			//_load(q);
+			_sTimeout(function(){_load(q);}, 0);
 		}
 
 		else if (callback) {
@@ -1005,7 +1007,9 @@ f0xy.define("f0xy", {
 		* @constructs
 		*/
 		init: function(){
-			
+			if(!this._interestHandlers){
+				this._interestHandlers = [];
+			}
 		},
 
 		/** 
@@ -1072,7 +1076,7 @@ f0xy.define("f0xy", {
 		},
 
 		removeInterest : function(name){
-			if(this._interestHandlers[name]){
+			if(this._interestHandlers && this._interestHandlers[name]){
 				this._interestHandlers[name] = null;
 				delete this._interestHandlers[name];
 			}
@@ -1165,7 +1169,7 @@ f0xy.define("f0xy", {
 		__preInit : function(){
 			if(this.constructor.prototype._instance){return this.constructor.prototype._instance;}
 			
-			this.init();
+			this.init.apply(this, arguments);
 
 			this.constructor.prototype._instance = this;
 			return this.constructor.prototype._instance;
@@ -1210,7 +1214,7 @@ f0xy.define("f0xy", {
 					this.addInterest(obj, names[i]);
 				}
 				else if(typeof names[i] === "object" || typeof names[i] === "array"){
-					var priority = (names[i]['priority'] != null && names[i]['priority'] != undefined) ? names[i]['priority'] : 0;
+					var priority = (names[i]['priority'] != null && names[i]['priority'] != undefined) ? names[i]['priority'] : -1;
 					this.addInterest(obj, names[i]['name'], priority);
 				}
 			}
