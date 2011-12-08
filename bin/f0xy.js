@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Tue Dec 6 15:24:02 2011 -0800
+ * Date: Wed Dec 7 22:31:06 2011 -0800
  */
  /**
 
@@ -46,6 +46,7 @@ THE SOFTWARE.</p>
 		- Independent library support, i.e. ability to do f0xy.require("f0xy.libs.jquery") to load jquery
 		- AMD adherence?
 		- NodeJS implementation (almost there)
+		- __preDefine method on Classes, takes 1 argument, a callback that gets called once __preDefine does all it needs to do
 */
 
 var f0xy = (function (root) {
@@ -899,26 +900,28 @@ f0xy.define("f0xy", {
 			// Copy the object's properties onto the prototype
 			for(var name in obj) {
 
-				// If we're overwriting an existing function that calls this.__super, do a little super magic.
-				if(typeof obj[name] == "function" && typeof _this.prototype[name] == "function" && _doesCallSuper.test(obj[name])){
-					_proto[name] = (function(name, fn){
-						return function() {
-							var tmp = this.__super;
+				if(name != "__static"){
+					// If we're overwriting an existing function that calls this.__super, do a little super magic.
+					if(typeof obj[name] == "function" && typeof _this.prototype[name] == "function" && _doesCallSuper.test(obj[name])){
+						_proto[name] = (function(name, fn){
+							return function() {
+								var tmp = this.__super;
 
-							// Reference the prototypes method, as super temporarily
-							this.__super = _this.prototype[name];
+								// Reference the prototypes method, as super temporarily
+								this.__super = _this.prototype[name];
 
-							var ret = fn.apply(this, arguments);
+								var ret = fn.apply(this, arguments);
 
-							// Reset this.__super
-							this.__super = tmp;
+								// Reset this.__super
+								this.__super = tmp;
 
-							return ret;
-						};
-					})(name, obj[name]);
-				}
-				else{
-					_proto[name] = obj[name];
+								return ret;
+							};
+						})(name, obj[name]);
+					}
+					else{
+						_proto[name] = obj[name];
+					}
 				}
 
 				/*
@@ -942,7 +945,7 @@ f0xy.define("f0xy", {
 						to be responsible, at the end of every method.
 					*/
 					if(!_class.prototype.hasOwnProperty("__imports")){
-						this.__imports = f0xy.use(this.__dependencies, {});
+						_class.prototype.__imports = f0xy.use(this.__dependencies, {});
 					}
 
 					if(!this.__isSingleton){
@@ -997,6 +1000,32 @@ f0xy.define("f0xy", {
 			if(obj.__dependencies) {
 				_class.__dependencies = obj.__dependencies;
 			};
+
+			/*
+				Add all static methods and properties that are defined in the __static object.
+				Only write to it if it doesn't already exist, to disable overwriting things we actually need for f0xy by malicious or
+				plain bad code.
+			*/
+			if(obj.__static){
+				_class.__static = _class.__static || {};
+				for(var prop in obj.__static){
+					if(!_class[prop]){
+						_class[prop] = obj.__static[prop];
+						_class.__static[prop] = obj.__static[prop];
+					}
+				}
+				_class.__static = obj.__static;
+			}
+
+			if(this.__static){
+				_class.__static = _class.__static || {};				
+				for(var prop in this.__static){
+					if(!_class[prop]){
+						_class[prop] = this.__static[prop];
+						_class.__static[prop] = this.__static[prop];
+					}
+				}
+			}
 
 			return _class;
 		};
@@ -1180,22 +1209,31 @@ f0xy.define("f0xy", {
 		__isSingleton: true,
 
 		__preInit : function(){
-			if(this.constructor.prototype._instance){return this.constructor.prototype._instance;}
+			if(this.constructor.__instance){
+				return this.constructor.__instance;
+			}
 			
 			this.init.apply(this, arguments);
 
-			this.constructor.prototype._instance = this;
-			return this.constructor.prototype._instance;
+			this.constructor.__instance = this;
+			return this.constructor.__instance;
 		},
 
 		init : function(){
 
 		},
 
-		getInstance : function(){
-			return this.__preInit();
+		// You can add static methods and properties to a non static class through __static...
+		__static : {
+
+			getInstance : function(){
+				if(!this.__instance){
+					this.__instance =  new this();
+					return this.__instance;
+				}
+				return this.__instance;
+			}
 		}
-		
 	})
 });f0xy.define("f0xy", {
 

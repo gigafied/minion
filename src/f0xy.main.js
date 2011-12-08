@@ -37,6 +37,7 @@ THE SOFTWARE.</p>
 		- Independent library support, i.e. ability to do f0xy.require("f0xy.libs.jquery") to load jquery
 		- AMD adherence?
 		- NodeJS implementation (almost there)
+		- __preDefine method on Classes, takes 1 argument, a callback that gets called once __preDefine does all it needs to do
 */
 
 var f0xy = (function (root) {

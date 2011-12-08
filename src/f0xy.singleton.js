@@ -11,21 +11,30 @@ f0xy.define("f0xy", {
 		__isSingleton: true,
 
 		__preInit : function(){
-			if(this.constructor.prototype._instance){return this.constructor.prototype._instance;}
+			if(this.constructor.__instance){
+				return this.constructor.__instance;
+			}
 			
 			this.init.apply(this, arguments);
 
-			this.constructor.prototype._instance = this;
-			return this.constructor.prototype._instance;
+			this.constructor.__instance = this;
+			return this.constructor.__instance;
 		},
 
 		init : function(){
 
 		},
 
-		getInstance : function(){
-			return this.__preInit();
+		// You can add static methods and properties to a non static class through __static...
+		__static : {
+
+			getInstance : function(){
+				if(!this.__instance){
+					this.__instance =  new this();
+					return this.__instance;
+				}
+				return this.__instance;
+			}
 		}
-		
 	})
 });

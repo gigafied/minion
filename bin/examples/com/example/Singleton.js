@@ -6,6 +6,7 @@ f0xy.define("com.example", {
 
 		init: function(a){
 			this.test = a;
+			console.log("f00000");
 			return this.__super();
 			
 		}
