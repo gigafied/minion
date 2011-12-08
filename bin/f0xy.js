@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Sun Dec 4 19:28:01 2011 -0800
+ * Date: Tue Dec 6 15:24:02 2011 -0800
  */
  /**
 
@@ -77,6 +77,8 @@ var f0xy = (function (root) {
 
 	var _separator = ".";
 	var _class_path = "";
+	var _file_suffix = "";
+		
 	var _classes = {};
 
 	var _origRootNS = {};
@@ -455,17 +457,28 @@ var f0xy = (function (root) {
 	_f0xy.errorTimeout = 1e4;
 
 	/**
-	* Configure f0xy. Call to update the base class path, or to change the default _separator (".").
+	* Configure f0xy.
 	* 
 	* @public
-	* @param		 {String}		[new_separator="."]		Namespace _separator
-	* @param		 {String}		[new_class_path="js/"]	The root path of all your classes. Can be absolute or relative.
+	* @param		 {Object}		configObj					Configuration object, possible properties are : rootPath, separator and fileSuffix
 	*/
 
-	_f0xy.configure = function (new_class_path, new_separator, useRootNS) {
-		_class_path = new_class_path || _class_path;
-		_separator = new_separator || _separator;
+	_f0xy.configure = function (configObj) {
+		
+		configObj = configObj || {};
+
+		_class_path = configObj.rootPath || _class_path;
 		_class_path = (_class_path.lastIndexOf("/") === _class_path.length - 1) ? _class_path : _class_path + "/";
+
+		_separator = configObj.separator || _separator;
+		_file_suffix = configObj.fileSuffix || _file_suffix;
+
+		var useRootNS = true;
+
+		if(configObj.noPollution){
+			useRootNS = !!configObj.noPollution;
+		};
+
 		var i;
 
 		if (!_initialized) {
@@ -520,8 +533,8 @@ var f0xy = (function (root) {
 		if (_classMappings[id]) {
 			return _classMappings[id];
 		}
-
-		return (_class_path + id).replace(new RegExp('\\' + _separator, 'g'), '/') + '.js';
+		var url = (_class_path + id).replace(new RegExp('\\' + _separator, 'g'), '/') + '.js' + ((_file_suffix) ? "?" + _file_suffix : "");
+		return url;
 	}
 
 	/**
@@ -1197,10 +1210,11 @@ f0xy.define("f0xy", {
 		},
 		
 		addInterest : function(obj, name, priority){
+			priority = (priority || priority === 0) ? priority : -1;
 			if(typeof this._interests[name] === "undefined"){
 				this._interests[name] = [];
 			}
-			if(priority <= -1 || typeof this._interests[name] !== undefined && priority >= this._interests[name].length){
+			if(priority <= -1 || priority >= this._interests[name].length){
 				this._interests[name].push(obj);
 			}
 			else{
