@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Thu Dec 8 00:01:02 2011 -0800
+ * Date: Thu Dec 8 00:18:25 2011 -0800
  */
  /**
 
@@ -269,6 +269,61 @@ var f0xy = (function (root) {
 		}
 	};
 
+	/** @ignore */
+	var _inject = function(f, c) {
+
+		var doc = document;
+		var body = "body";
+
+		var injectObj, script;
+
+		if (_requestedFiles.indexOf(f) < 0) {
+
+			if (!doc[body]) {
+				console.log("queuing _inject ... loading : " + f);
+				return _sTimeout(function(){
+					_inject(f,c);
+				}, 0);
+			}
+
+			script = doc.createElement("script");
+		 	script.async = true;
+		
+			injectObj = {
+				f : f, 		// File
+				c : c, 		// Class
+				e : 0, 		// Elapsed Time
+				s : script // Script
+			};
+
+			_requestedFiles.push(f);	
+			_waitingForLoad.push(injectObj);
+
+			/** @ignore */
+			script.onreadystatechange = /** @ignore */ script.onload = function (e) {
+				if (_f0xy.isDefined(c)) {
+					injectObj.s.onload = injectObj.s.onreadystatechange = null;
+					injectObj.s.onerror = null;
+					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
+			 	}
+			};
+
+			/** @ignore */
+			script.onerror = function (e) {
+				throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
+				injectObj.s.onerror = null;
+				_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
+			}
+
+			script.src = f;
+
+			console.log("_inject ... loading : " + f);
+			
+			// Append the script to the document body
+		 	doc[body].appendChild(script);
+		}
+	}
+
 	/**
 	* Does all the loading of JS files
 	*
@@ -279,59 +334,12 @@ var f0xy = (function (root) {
 
 	var _load = function (q) {
 
-		var doc = document;
-		var head = "head";
 		_loadQueue.push(q);
 
-		/** @ignore */
-		function inject(f, c) {
-
-			var injectObj, script;
-
-			if (_requestedFiles.indexOf(f) < 0) {
-
-				if (!doc[head]) {
-					return _sTimeout(inject, 0, f, c);
-				}
-
-				script = doc.createElement("script");
-			 	script.async = true;
-			
-				injectObj = {
-					f : f, 		// File
-					c : c, 		// Class
-					e : 0, 		// Elapsed Time
-					s : script // Script
-				};
-
-				_requestedFiles.push(f);	
-				_waitingForLoad.push(injectObj);
-
-				/** @ignore */
-				script.onreadystatechange = /** @ignore */ script.onload = function (e) {
-					if (_f0xy.isDefined(c)) {
-						injectObj.s.onload = injectObj.s.onreadystatechange = null;
-						injectObj.s.onerror = null;
-						_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-				 	}
-				};
-
-				/** @ignore */
-				script.onerror = function (e) {
-					throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
-					injectObj.s.onerror = null;
-					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-				}
-
-				script.src = f;
-				
-				// Append the script to the document head
-			 	doc[head].appendChild(script);
-			}
-		}
+		console.log("_load ... loading : " + q.f);
 
 		for (var i = 0; i < q.f.length; i += 1) {
-			inject(q.f[i], q.c[i]);
+			_inject(q.f[i], q.c[i]);
 		}
 
 		/*
@@ -743,6 +751,7 @@ var f0xy = (function (root) {
 			};
 			
 			//_load(q);
+			console.log("require.... loading : " + q.f)
 			_sTimeout(function(){_load(q);}, 0);
 		}
 
@@ -1111,7 +1120,7 @@ f0xy.define("f0xy", {
 			if(!this._interestHandlers){
 				this._interestHandlers = [];
 			}
-			if(handler){
+			if(handler && !this._interestHandlers[name]){
 				f0xy.addInterest(this, name, priority);
 				this._interestHandlers[name] = handler;
 			}

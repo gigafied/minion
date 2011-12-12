@@ -76,7 +76,7 @@ f0xy.define("f0xy", {
 			if(!this._interestHandlers){
 				this._interestHandlers = [];
 			}
-			if(handler){
+			if(handler && !this._interestHandlers[name]){
 				f0xy.addInterest(this, name, priority);
 				this._interestHandlers[name] = handler;
 			}

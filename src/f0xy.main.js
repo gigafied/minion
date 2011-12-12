@@ -260,6 +260,58 @@ var f0xy = (function (root) {
 		}
 	};
 
+	/** @ignore */
+	var _inject = function(f, c) {
+
+		var doc = document;
+		var body = "body";
+
+		var injectObj, script;
+
+		if (_requestedFiles.indexOf(f) < 0) {
+
+			if (!doc[body]) {
+				return _sTimeout(function(){
+					_inject(f,c);
+				}, 0);
+			}
+
+			script = doc.createElement("script");
+		 	script.async = true;
+		
+			injectObj = {
+				f : f, 		// File
+				c : c, 		// Class
+				e : 0, 		// Elapsed Time
+				s : script // Script
+			};
+
+			_requestedFiles.push(f);	
+			_waitingForLoad.push(injectObj);
+
+			/** @ignore */
+			script.onreadystatechange = /** @ignore */ script.onload = function (e) {
+				if (_f0xy.isDefined(c)) {
+					injectObj.s.onload = injectObj.s.onreadystatechange = null;
+					injectObj.s.onerror = null;
+					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
+			 	}
+			};
+
+			/** @ignore */
+			script.onerror = function (e) {
+				throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
+				injectObj.s.onerror = null;
+				_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
+			}
+
+			script.src = f;
+			
+			// Append the script to the document body
+		 	doc[body].appendChild(script);
+		}
+	}
+
 	/**
 	* Does all the loading of JS files
 	*
@@ -270,59 +322,10 @@ var f0xy = (function (root) {
 
 	var _load = function (q) {
 
-		var doc = document;
-		var head = "head";
 		_loadQueue.push(q);
 
-		/** @ignore */
-		function inject(f, c) {
-
-			var injectObj, script;
-
-			if (_requestedFiles.indexOf(f) < 0) {
-
-				if (!doc[head]) {
-					return _sTimeout(inject, 0, f, c);
-				}
-
-				script = doc.createElement("script");
-			 	script.async = true;
-			
-				injectObj = {
-					f : f, 		// File
-					c : c, 		// Class
-					e : 0, 		// Elapsed Time
-					s : script // Script
-				};
-
-				_requestedFiles.push(f);	
-				_waitingForLoad.push(injectObj);
-
-				/** @ignore */
-				script.onreadystatechange = /** @ignore */ script.onload = function (e) {
-					if (_f0xy.isDefined(c)) {
-						injectObj.s.onload = injectObj.s.onreadystatechange = null;
-						injectObj.s.onerror = null;
-						_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-				 	}
-				};
-
-				/** @ignore */
-				script.onerror = function (e) {
-					throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
-					injectObj.s.onerror = null;
-					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-				}
-
-				script.src = f;
-				
-				// Append the script to the document head
-			 	doc[head].appendChild(script);
-			}
-		}
-
 		for (var i = 0; i < q.f.length; i += 1) {
-			inject(q.f[i], q.c[i]);
+			_inject(q.f[i], q.c[i]);
 		}
 
 		/*
