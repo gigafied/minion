@@ -4,3 +4,6 @@
 [submodule "gh-pages"]
 	path = gh-pages
 	url = git@github.com:gigafied/f0xy.git
+[submodule "test/qunit"]
+	path = test/qunit
+	url = git://github.com/jquery/qunit.git
