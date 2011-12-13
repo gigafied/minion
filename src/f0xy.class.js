@@ -4,7 +4,9 @@ f0xy.define("f0xy", {
 
 	Class : f0xy.extend("f0xy.__BaseClass__", {
 
-		__isDefined: true,
+		__static : {
+			__isDefined: true
+		},
 		
 		/**
 		*
@@ -90,12 +92,6 @@ f0xy.define("f0xy", {
 			f0xy.removeInterest(this, name);
 		},
 
-		removeInterests : function(names){
-			for(var i = 0; i < names.length; i ++){
-				this.removeInterest(names[i]);
-			}
-		},
-
 		removeAllInterests : function(){
 			f0xy.removeAllInterests(this);
 			this._interestHandlers = [];
@@ -112,6 +108,22 @@ f0xy.define("f0xy", {
 			if(handler){
 				this.proxy(handler)(n);
 			}
+		},
+
+		publish : function(name, data){
+			this.notify(name, data);
+		},
+
+		subscribe : function(name, handler, priority){
+			this.addInterest(name, handler, priority);
+		},
+
+		unsubscribe : function(name){
+			this.removeInterest(name);
+		},
+
+		unsubscribeAll : function(){
+			this.removeAllInterests();
 		}
 	})
 });

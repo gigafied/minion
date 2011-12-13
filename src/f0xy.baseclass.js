@@ -91,7 +91,7 @@ f0xy.define("f0xy", {
 					If it's an array or an object, we need to make a per instance copy of these values, so as to not affect other
 					instances when dealing with Arrays or Objects.
 				*/
-				if (typeof obj[name] === "object" && name.indexOf("__") !== 0) {
+				else if (typeof obj[name] === "object" && name.indexOf("__") !== 0) {
 					_perInstanceProps[name] = obj[name];
 				}
 			};
@@ -142,27 +142,11 @@ f0xy.define("f0xy", {
 				The "__" prefix is used to avoid naming conflictions with developers, and allows
 				us to not have to impose a list of reserved words on developers.
 			*/
-			_class.__isDefined = true;
 
-			if(obj.__isSingleton) {
-				_class.__isSingleton = obj.__isSingleton;
-			}
-
-			if(obj.__ns) {
-				_class.__ns = obj.__ns;
-			};
-			
-			if(obj.__nsID) {
-				_class.__nsID = obj.__nsID;
-			};
-			
-			if(obj._class) {
-				_class._class = obj._class;
-			};
-
-			if(obj.__dependencies) {
-				_class.__dependencies = obj.__dependencies;
-			};
+			_class.__ns = obj.__ns || "";
+			_class.__nsID = obj.__nsID || "";
+			_class._class = obj._class || "";
+			_class.__dependencies = obj.__dependencies || [];
 
 			/*
 				Add all static methods and properties that are defined in the __static object.

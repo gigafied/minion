@@ -58,11 +58,6 @@ min: f0xy
 
 	@@mv bin/tmp ${F0XY_MIN}
 
-toyota: f0xy min
-
-	@@cp $(F0XY) ../saatchi-toyota-shareathon/project/static/js/libs/f0xy.js
-	@@cp $(F0XY_MIN) ../saatchi-toyota-shareathon/project/static/js/libs/f0xy.min.js
-
 docs: f0xy
 
 	lib/node-jsdoc-toolkit/app/run.js -c=lib/jsdoc.conf

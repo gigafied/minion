@@ -32,7 +32,6 @@ THE SOFTWARE.</p>
 
 /*
 	TODO:
-		- Notification Support Toggling? 
 		- Multiple inheritance
 		- Independent library support, i.e. ability to do f0xy.require("f0xy.libs.jquery") to load jquery
 		- AMD adherence?
@@ -84,7 +83,10 @@ var f0xy = (function (root) {
 	var _requestedFiles = [];
 	var _notificationManager;
 	var _waitInterval = 500;
+	var _defaultClassFile = null;
 
+	var _rootNS = {};
+	var _errorTimeout = 1e4;
 
 	/*
 	If this is an iFrame or a new window, check for a parent, and if said parent has a f0xy root object, 
@@ -247,16 +249,22 @@ var f0xy = (function (root) {
 			o.e += 50;
 			
 			if (_f0xy.isDefined(o.c)) {
-				//o.s.onload();
+				o.s.onload();
 			}
 			
-			else if (o.e >= _f0xy.errorTimeout) {
+			else if (o.e >= _errorTimeout) {
 				o.s.onerror();
 			}
 		}
 
 		if (w.length > 0) {
 			_waitID = _sTimeout(_checkWaitQueue, _waitInterval);
+		}
+		
+		else{
+			for(var i = 0; i < w.length; i ++){
+				//console.log("still waiting on..." + w[i].f);
+			}
 		}
 	};
 
@@ -329,8 +337,8 @@ var f0xy = (function (root) {
 		}
 
 		/*
-			If the load times out, fire onerror after the time defined by f0xy.errorTimeout (default is 10 seconds)
-			(can be changed through setting f0xy.errorTimeout = ms)
+			If the load times out, fire onerror after the time defined by _errorTimeout (default is 10 seconds)
+			(can be changed through f0xy.config({f0xy.errorTimeout : ms});
 		*/
 		_waitID = _sTimeout(_checkWaitQueue, _waitInterval);
 	}
@@ -350,7 +358,7 @@ var f0xy = (function (root) {
 		id = id || "";
 		definitions = definitions || false;
 
-		var ns = _f0xy.ns;
+		var ns = _rootNS;
 		var ns2 = _classes;
 		var i;
 
@@ -406,6 +414,8 @@ var f0xy = (function (root) {
 							_extendQueue.push(qualifiedName);
 						}
 					}
+
+					c.__static = c.__static || {}
 				
 					c.__nsID = id;
 					c.__ns = ns;
@@ -445,12 +455,6 @@ var f0xy = (function (root) {
 	*/
 	var _f0xy = {};
 
-	// Set the root namespace
-	_f0xy.ns = {};
-
-	// Set the default error timeout to 10 seconds.
-	_f0xy.errorTimeout = 1e4;
-
 	/**
 	* Configure f0xy.
 	* 
@@ -478,12 +482,12 @@ var f0xy = (function (root) {
 
 		if (!_initialized) {
 			if (useRootNS !== false) {
-				for (i in _f0xy.ns) {
+				for (i in _rootNS) {
 					if (!root[i]) {
-						root[i] = _f0xy.ns[i];
+						root[i] = _rootNS[i];
 					}
 				}
-				_f0xy.ns = root;
+				_rootNS = root;
 			}
 			_initialized = true;
 		}
@@ -524,6 +528,10 @@ var f0xy = (function (root) {
 	*/
 
 	_f0xy.getURL = function (id) {
+
+		if(_defaultClassFile){
+			return _defaultClassFile;
+		}
 	
 		if (_classMappings[id]) {
 			return _classMappings[id];
@@ -571,7 +579,7 @@ var f0xy = (function (root) {
 	}
 
 	/**
-	* Imports properties from the specified namespace to the global space (ie. under f0xy.ns, or _root)
+	* Imports properties from the specified namespace to the global space (ie. under _rootNS, or _root)
 	* This is only meant to be used as a utility, and for temporary purposes. Please clean up with f0xy.unuse()
 	* You are responsible for not polluting the global namespace.
 	*
@@ -591,9 +599,9 @@ var f0xy = (function (root) {
 
 		ids = ids || [];
 		ids = _strToArray(ids);
-		scope = scope || _f0xy.ns;
+		scope = scope || _rootNS;
 
-		if (scope === _f0xy.ns) {
+		if (scope === _rootNS) {
 			_f0xy.unuse();
 		}
 
@@ -611,7 +619,7 @@ var f0xy = (function (root) {
 			if (id === '*') {
 				// injects all ids under namespace into the root namespace
 				for (var n in ns) {
-					if (scope === _f0xy.ns) {
+					if (scope === _rootNS) {
 						_origRootNS[n] = (scope[n]) ? scope[n] : null;
 					}
 					scope[n] = ns[n];
@@ -620,7 +628,7 @@ var f0xy = (function (root) {
 			else{
 				// injects this id into the root namespace
 				if (ns[id]) {
-					if (scope === _f0xy.ns) {
+					if (scope === _rootNS) {
 						_origRootNS[id] = (scope[id]) ? scope[id] : null;
 					}
 					scope[id] = ns[id];
@@ -642,9 +650,9 @@ var f0xy = (function (root) {
 
 	_f0xy.unuse = function () {
 		for (var prop in _origRootNS) {
-			_f0xy.ns[prop] = _origRootNS[prop];
-			if (_f0xy.ns[prop] === null) {
-				delete _f0xy.ns[prop];
+			_rootNS[prop] = _origRootNS[prop];
+			if (_rootNS[prop] === null) {
+				delete _rootNS[prop];
 			}
 		}
 		_origRootNS = {};
@@ -663,7 +671,7 @@ var f0xy = (function (root) {
 		ns.f0xy = f0xy;
 
 		for (var n in _classes) {
-			ns[n] = _f0xy.ns[n];
+			ns[n] = _rootNS[n];
 		}
 	}
 
@@ -682,6 +690,11 @@ var f0xy = (function (root) {
 	*/
 
 	_f0xy.provides = function (file, definitions, doLoad, callback) {
+
+		if(definitions === "*"){
+			_defaultClassFile = file;
+			return;
+		}
 
 		// If classes is a String, create an array
 		definitions = _strToArray(definitions);
@@ -735,7 +748,7 @@ var f0xy = (function (root) {
 				c	: classList,
 				cb : callback
 			};
-			
+									
 			//_load(q);
 			_sTimeout(function(){_load(q);}, 0);
 		}
@@ -814,6 +827,13 @@ var f0xy = (function (root) {
 	_f0xy.cancelNotification = function () {
 		if (_notificationManager) {
 			_notificationManager.cancelNotification.apply(_notificationManager, arguments);
+		}
+	}
+
+	_f0xy.publish = _f0xy.notify = function (name, data) {
+		if (_notificationManager) {
+			var notification = new f0xy.Notification(name, data);
+			notification.dispatch(_f0xy);
 		}
 	}
 

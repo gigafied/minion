@@ -8,7 +8,19 @@ f0xy.define("f0xy", {
 
 	Singleton : f0xy.extend("f0xy.Class", {
 
-		__isSingleton: true,
+		// You can add static methods and properties to a non static class through __static...
+		__static : {
+
+			__isSingleton: true,
+			
+			getInstance : function(){
+				if(!this.__instance){
+					this.__instance =  new this();
+					return this.__instance;
+				}
+				return this.__instance;
+			}
+		},
 
 		__preInit : function(){
 			if(this.constructor.__instance){
@@ -23,18 +35,7 @@ f0xy.define("f0xy", {
 
 		init : function(){
 
-		},
-
-		// You can add static methods and properties to a non static class through __static...
-		__static : {
-
-			getInstance : function(){
-				if(!this.__instance){
-					this.__instance =  new this();
-					return this.__instance;
-				}
-				return this.__instance;
-			}
 		}
+
 	})
 });

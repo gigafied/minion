@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Thu Dec 8 00:18:25 2011 -0800
+ * Date: Sun Dec 11 21:35:25 2011 -0800
  */
  /**
 
@@ -41,7 +41,6 @@ THE SOFTWARE.</p>
 
 /*
 	TODO:
-		- Notification Support Toggling? 
 		- Multiple inheritance
 		- Independent library support, i.e. ability to do f0xy.require("f0xy.libs.jquery") to load jquery
 		- AMD adherence?
@@ -93,7 +92,10 @@ var f0xy = (function (root) {
 	var _requestedFiles = [];
 	var _notificationManager;
 	var _waitInterval = 500;
+	var _defaultClassFile = null;
 
+	var _rootNS = {};
+	var _errorTimeout = 1e4;
 
 	/*
 	If this is an iFrame or a new window, check for a parent, and if said parent has a f0xy root object, 
@@ -256,16 +258,22 @@ var f0xy = (function (root) {
 			o.e += 50;
 			
 			if (_f0xy.isDefined(o.c)) {
-				//o.s.onload();
+				o.s.onload();
 			}
 			
-			else if (o.e >= _f0xy.errorTimeout) {
+			else if (o.e >= _errorTimeout) {
 				o.s.onerror();
 			}
 		}
 
 		if (w.length > 0) {
 			_waitID = _sTimeout(_checkWaitQueue, _waitInterval);
+		}
+		
+		else{
+			for(var i = 0; i < w.length; i ++){
+				//console.log("still waiting on..." + w[i].f);
+			}
 		}
 	};
 
@@ -280,7 +288,6 @@ var f0xy = (function (root) {
 		if (_requestedFiles.indexOf(f) < 0) {
 
 			if (!doc[body]) {
-				console.log("queuing _inject ... loading : " + f);
 				return _sTimeout(function(){
 					_inject(f,c);
 				}, 0);
@@ -316,8 +323,6 @@ var f0xy = (function (root) {
 			}
 
 			script.src = f;
-
-			console.log("_inject ... loading : " + f);
 			
 			// Append the script to the document body
 		 	doc[body].appendChild(script);
@@ -336,15 +341,13 @@ var f0xy = (function (root) {
 
 		_loadQueue.push(q);
 
-		console.log("_load ... loading : " + q.f);
-
 		for (var i = 0; i < q.f.length; i += 1) {
 			_inject(q.f[i], q.c[i]);
 		}
 
 		/*
-			If the load times out, fire onerror after the time defined by f0xy.errorTimeout (default is 10 seconds)
-			(can be changed through setting f0xy.errorTimeout = ms)
+			If the load times out, fire onerror after the time defined by _errorTimeout (default is 10 seconds)
+			(can be changed through f0xy.config({f0xy.errorTimeout : ms});
 		*/
 		_waitID = _sTimeout(_checkWaitQueue, _waitInterval);
 	}
@@ -364,7 +367,7 @@ var f0xy = (function (root) {
 		id = id || "";
 		definitions = definitions || false;
 
-		var ns = _f0xy.ns;
+		var ns = _rootNS;
 		var ns2 = _classes;
 		var i;
 
@@ -420,6 +423,8 @@ var f0xy = (function (root) {
 							_extendQueue.push(qualifiedName);
 						}
 					}
+
+					c.__static = c.__static || {}
 				
 					c.__nsID = id;
 					c.__ns = ns;
@@ -459,12 +464,6 @@ var f0xy = (function (root) {
 	*/
 	var _f0xy = {};
 
-	// Set the root namespace
-	_f0xy.ns = {};
-
-	// Set the default error timeout to 10 seconds.
-	_f0xy.errorTimeout = 1e4;
-
 	/**
 	* Configure f0xy.
 	* 
@@ -492,12 +491,12 @@ var f0xy = (function (root) {
 
 		if (!_initialized) {
 			if (useRootNS !== false) {
-				for (i in _f0xy.ns) {
+				for (i in _rootNS) {
 					if (!root[i]) {
-						root[i] = _f0xy.ns[i];
+						root[i] = _rootNS[i];
 					}
 				}
-				_f0xy.ns = root;
+				_rootNS = root;
 			}
 			_initialized = true;
 		}
@@ -538,6 +537,10 @@ var f0xy = (function (root) {
 	*/
 
 	_f0xy.getURL = function (id) {
+
+		if(_defaultClassFile){
+			return _defaultClassFile;
+		}
 	
 		if (_classMappings[id]) {
 			return _classMappings[id];
@@ -585,7 +588,7 @@ var f0xy = (function (root) {
 	}
 
 	/**
-	* Imports properties from the specified namespace to the global space (ie. under f0xy.ns, or _root)
+	* Imports properties from the specified namespace to the global space (ie. under _rootNS, or _root)
 	* This is only meant to be used as a utility, and for temporary purposes. Please clean up with f0xy.unuse()
 	* You are responsible for not polluting the global namespace.
 	*
@@ -605,9 +608,9 @@ var f0xy = (function (root) {
 
 		ids = ids || [];
 		ids = _strToArray(ids);
-		scope = scope || _f0xy.ns;
+		scope = scope || _rootNS;
 
-		if (scope === _f0xy.ns) {
+		if (scope === _rootNS) {
 			_f0xy.unuse();
 		}
 
@@ -625,7 +628,7 @@ var f0xy = (function (root) {
 			if (id === '*') {
 				// injects all ids under namespace into the root namespace
 				for (var n in ns) {
-					if (scope === _f0xy.ns) {
+					if (scope === _rootNS) {
 						_origRootNS[n] = (scope[n]) ? scope[n] : null;
 					}
 					scope[n] = ns[n];
@@ -634,7 +637,7 @@ var f0xy = (function (root) {
 			else{
 				// injects this id into the root namespace
 				if (ns[id]) {
-					if (scope === _f0xy.ns) {
+					if (scope === _rootNS) {
 						_origRootNS[id] = (scope[id]) ? scope[id] : null;
 					}
 					scope[id] = ns[id];
@@ -656,9 +659,9 @@ var f0xy = (function (root) {
 
 	_f0xy.unuse = function () {
 		for (var prop in _origRootNS) {
-			_f0xy.ns[prop] = _origRootNS[prop];
-			if (_f0xy.ns[prop] === null) {
-				delete _f0xy.ns[prop];
+			_rootNS[prop] = _origRootNS[prop];
+			if (_rootNS[prop] === null) {
+				delete _rootNS[prop];
 			}
 		}
 		_origRootNS = {};
@@ -677,7 +680,7 @@ var f0xy = (function (root) {
 		ns.f0xy = f0xy;
 
 		for (var n in _classes) {
-			ns[n] = _f0xy.ns[n];
+			ns[n] = _rootNS[n];
 		}
 	}
 
@@ -696,6 +699,11 @@ var f0xy = (function (root) {
 	*/
 
 	_f0xy.provides = function (file, definitions, doLoad, callback) {
+
+		if(definitions === "*"){
+			_defaultClassFile = file;
+			return;
+		}
 
 		// If classes is a String, create an array
 		definitions = _strToArray(definitions);
@@ -749,9 +757,8 @@ var f0xy = (function (root) {
 				c	: classList,
 				cb : callback
 			};
-			
+									
 			//_load(q);
-			console.log("require.... loading : " + q.f)
 			_sTimeout(function(){_load(q);}, 0);
 		}
 
@@ -829,6 +836,13 @@ var f0xy = (function (root) {
 	_f0xy.cancelNotification = function () {
 		if (_notificationManager) {
 			_notificationManager.cancelNotification.apply(_notificationManager, arguments);
+		}
+	}
+
+	_f0xy.publish = _f0xy.notify = function (name, data) {
+		if (_notificationManager) {
+			var notification = new f0xy.Notification(name, data);
+			notification.dispatch(_f0xy);
 		}
 	}
 
@@ -937,7 +951,7 @@ f0xy.define("f0xy", {
 					If it's an array or an object, we need to make a per instance copy of these values, so as to not affect other
 					instances when dealing with Arrays or Objects.
 				*/
-				if (typeof obj[name] === "object" && name.indexOf("__") !== 0) {
+				else if (typeof obj[name] === "object" && name.indexOf("__") !== 0) {
 					_perInstanceProps[name] = obj[name];
 				}
 			};
@@ -988,27 +1002,11 @@ f0xy.define("f0xy", {
 				The "__" prefix is used to avoid naming conflictions with developers, and allows
 				us to not have to impose a list of reserved words on developers.
 			*/
-			_class.__isDefined = true;
 
-			if(obj.__isSingleton) {
-				_class.__isSingleton = obj.__isSingleton;
-			}
-
-			if(obj.__ns) {
-				_class.__ns = obj.__ns;
-			};
-			
-			if(obj.__nsID) {
-				_class.__nsID = obj.__nsID;
-			};
-			
-			if(obj._class) {
-				_class._class = obj._class;
-			};
-
-			if(obj.__dependencies) {
-				_class.__dependencies = obj.__dependencies;
-			};
+			_class.__ns = obj.__ns || "";
+			_class.__nsID = obj.__nsID || "";
+			_class._class = obj._class || "";
+			_class.__dependencies = obj.__dependencies || [];
 
 			/*
 				Add all static methods and properties that are defined in the __static object.
@@ -1048,7 +1046,9 @@ f0xy.define("f0xy", {
 
 	Class : f0xy.extend("f0xy.__BaseClass__", {
 
-		__isDefined: true,
+		__static : {
+			__isDefined: true
+		},
 		
 		/**
 		*
@@ -1156,7 +1156,16 @@ f0xy.define("f0xy", {
 			if(handler){
 				this.proxy(handler)(n);
 			}
+		},
+
+		publish : function(name, data){
+			this.notify(name, data);
+		},
+
+		subscribe : function(name, handler, priority){
+			this.addInterest(name, handler, priority);
 		}
+		
 	})
 });f0xy.define("f0xy", {
 
@@ -1215,7 +1224,19 @@ f0xy.define("f0xy", {
 
 	Singleton : f0xy.extend("f0xy.Class", {
 
-		__isSingleton: true,
+		// You can add static methods and properties to a non static class through __static...
+		__static : {
+
+			__isSingleton: true,
+			
+			getInstance : function(){
+				if(!this.__instance){
+					this.__instance =  new this();
+					return this.__instance;
+				}
+				return this.__instance;
+			}
+		},
 
 		__preInit : function(){
 			if(this.constructor.__instance){
@@ -1230,19 +1251,8 @@ f0xy.define("f0xy", {
 
 		init : function(){
 
-		},
-
-		// You can add static methods and properties to a non static class through __static...
-		__static : {
-
-			getInstance : function(){
-				if(!this.__instance){
-					this.__instance =  new this();
-					return this.__instance;
-				}
-				return this.__instance;
-			}
 		}
+
 	})
 });f0xy.define("f0xy", {
 
