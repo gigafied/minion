@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Wed Dec 14 01:52:17 2011 -0800
+ * Date: Wed Dec 14 01:59:21 2011 -0800
  */
  /**
 
@@ -924,7 +924,7 @@ var f0xy = (function (root) {
 							_class.prototype.__imports = f0xy.use(this.__dependencies, {});
 						}
 
-						if(!this.constructor.__isSingleton){
+						if(!this.__preInit){
 
 							for (var attr in _perInstanceProps) {
 								if (_perInstanceProps.hasOwnProperty(attr)) {

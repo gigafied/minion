@@ -121,7 +121,7 @@
 							_class.prototype.__imports = f0xy.use(this.__dependencies, {});
 						}
 
-						if(!this.constructor.__isSingleton){
+						if(!this.__preInit){
 
 							for (var attr in _perInstanceProps) {
 								if (_perInstanceProps.hasOwnProperty(attr)) {
