@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Tue Dec 13 15:35:50 2011 -0800
+ * Date: Tue Dec 13 17:03:30 2011 -0800
  */
  /**
 
@@ -92,12 +92,15 @@ var f0xy = (function (root) {
 	var _waitInterval = 500;
 	var _defaultClassFile = null;
 
-	var _rootNS = {};
-	var _useRootNS = false;
+	var _root = root;
+	var _ns = {};
+	var _pollute = false;
 	var _errorTimeout = 1e4;
 
-
 	/*================= HELPER FUNCTIONS =================*/
+
+	/** @private */
+	var _sTimeout = setTimeout;
 
 	/** @private */
 	var _isArray = Array._isArray || function (a) {
@@ -144,8 +147,18 @@ var f0xy = (function (root) {
 		return b;
 	};
 
-	/** @private */
-	var _sTimeout = setTimeout;
+	var _copyToNS = function(o1,o2){
+		for (var i in o1) {
+			o2[i] = o1[i];
+		}
+	}
+
+	var _removeFromNS = function(o1,o2){
+		for (var i in o1) {
+			o2[i] = null;
+			delete o2[i];
+		}
+	}
 
 	// Recursively checks dependencies
 	/** @private */
@@ -345,7 +358,7 @@ var f0xy = (function (root) {
 		id = id || "";
 		definitions = definitions || false;
 
-		var ns = _rootNS;
+		var ns = _ns;
 		var i;
 
 		if (id && !_isObject(id) && !_isFunction(id)) {
@@ -423,6 +436,10 @@ var f0xy = (function (root) {
 					ns[className] = c;
 				}
 			}
+
+			if(_pollute){
+				_copyToNS(_ns, _root);
+			}
 		}
 
 		return ns;
@@ -454,24 +471,22 @@ var f0xy = (function (root) {
 		_separator = configObj.separator || _separator;
 		_file_suffix = configObj.fileSuffix || _file_suffix;
 
-		var useRootNS = true;
+		var pollute = true;
 
 		if(configObj.noPollution){
-			useRootNS = !configObj.noPollution;
+			pollute = !configObj.noPollution;
 		};
 
 		var i;
 
 		if (_initialized && configObj.noPollution !== true) {
-			if (useRootNS !== false) {
-				for (i in _rootNS) {
-					if (!root[i]) {
-						root[i] = _rootNS[i];
-					}
-				}
-				_useRootNS = true;
-				_rootNS = root;
+			if (pollute !== false) {
+				_copyToNS(_ns, _root);
+				_pollute = true;
 			}
+		}
+		else{
+			_removeFromNS(_ns, _root);
 		}
 
 		_initialized = true;
@@ -563,7 +578,7 @@ var f0xy = (function (root) {
 	}
 
 	/**
-	* Imports properties from the specified namespace to the global space (ie. under _rootNS, or _root)
+	* Imports properties from the specified namespace to the global space (ie. under _ns, or _root)
 	* This is only meant to be used as a utility, and for temporary purposes. Please clean up with f0xy.unuse()
 	* You are responsible for not polluting the global namespace.
 	*
@@ -583,9 +598,9 @@ var f0xy = (function (root) {
 
 		ids = ids || [];
 		ids = _strToArray(ids);
-		scope = scope || _rootNS;
+		scope = scope || _ns;
 
-		if (scope === _rootNS) {
+		if (scope === _ns) {
 			_f0xy.unuse();
 		}
 
@@ -603,7 +618,7 @@ var f0xy = (function (root) {
 			if (id === '*') {
 				// injects all ids under namespace into the root namespace
 				for (var n in ns) {
-					if (scope === _rootNS) {
+					if (scope === _ns) {
 						_origRootNS[n] = (scope[n]) ? scope[n] : null;
 					}
 					scope[n] = ns[n];
@@ -612,7 +627,7 @@ var f0xy = (function (root) {
 			else{
 				// injects this id into the root namespace
 				if (ns[id]) {
-					if (scope === _rootNS) {
+					if (scope === _ns) {
 						_origRootNS[id] = (scope[id]) ? scope[id] : null;
 					}
 					scope[id] = ns[id];
@@ -634,9 +649,9 @@ var f0xy = (function (root) {
 
 	_f0xy.unuse = function () {
 		for (var prop in _origRootNS) {
-			_rootNS[prop] = _origRootNS[prop];
-			if (_rootNS[prop] === null) {
-				delete _rootNS[prop];
+			_ns[prop] = _origRootNS[prop];
+			if (_ns[prop] === null) {
+				delete _ns[prop];
 			}
 		}
 		_origRootNS = {};
