@@ -1,11 +1,11 @@
 /*
- * f0xy.JS v1.3
+ * f0xy.JS v1.4
  * http://f0xy.org
  *
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Sun Dec 11 21:35:25 2011 -0800
+ * Date: Tue Dec 13 15:35:50 2011 -0800
  */
  /**
 
@@ -78,8 +78,6 @@ var f0xy = (function (root) {
 	var _separator = ".";
 	var _class_path = "";
 	var _file_suffix = "";
-		
-	var _classes = {};
 
 	var _origRootNS = {};
 	var _initialized;
@@ -95,28 +93,8 @@ var f0xy = (function (root) {
 	var _defaultClassFile = null;
 
 	var _rootNS = {};
+	var _useRootNS = false;
 	var _errorTimeout = 1e4;
-
-	/*
-	If this is an iFrame or a new window, check for a parent, and if said parent has a f0xy root object, 
-	copy the reference locally, along with all defined Classes and whatnot.
-
-	Makes for some awesome goodness, being able to easily communicate between windows and iframes through notifications
-	and not having to load classes more than once.
-	*/
-
-	var nsTarget;
-	nsTarget = (root.parent && root.parent.f0xy) ? root.parent.f0xy : nsTarget;
-	nsTarget = (root.opener && root.opener.f0xy) ? root.opener.f0xy : nsTarget;
-	
-	if (nsTarget) {
-		try{
-			nsTarget.copyToNS(root);
-			return nsTarget;
-		}
-		catch(e){;}
-	}
-	//
 
 
 	/*================= HELPER FUNCTIONS =================*/
@@ -368,7 +346,6 @@ var f0xy = (function (root) {
 		definitions = definitions || false;
 
 		var ns = _rootNS;
-		var ns2 = _classes;
 		var i;
 
 		if (id && !_isObject(id) && !_isFunction(id)) {
@@ -376,8 +353,6 @@ var f0xy = (function (root) {
 
 			if (parts[0] === "f0xy") {
 				ns = _f0xy;
-				ns2 = ns2.f0xy || {};
-				ns2.f0xy = ns2;
 				parts.splice(0,1);
 			}
 
@@ -385,7 +360,6 @@ var f0xy = (function (root) {
 				if (!ns[parts[i]]) {
 					if (autoCreate) {
 						ns[parts[i]] = {};
-						ns2[parts[i]] = {};
 					}
 					else{
 						return false;
@@ -447,7 +421,6 @@ var f0xy = (function (root) {
 					}
 
 					ns[className] = c;
-					ns2[className] = c;
 				}
 			}
 		}
@@ -484,22 +457,24 @@ var f0xy = (function (root) {
 		var useRootNS = true;
 
 		if(configObj.noPollution){
-			useRootNS = !!configObj.noPollution;
+			useRootNS = !configObj.noPollution;
 		};
 
 		var i;
 
-		if (!_initialized) {
+		if (_initialized && configObj.noPollution !== true) {
 			if (useRootNS !== false) {
 				for (i in _rootNS) {
 					if (!root[i]) {
 						root[i] = _rootNS[i];
 					}
 				}
+				_useRootNS = true;
 				_rootNS = root;
 			}
-			_initialized = true;
 		}
+
+		_initialized = true;
 	}
 
 	/**
@@ -667,22 +642,6 @@ var f0xy = (function (root) {
 		_origRootNS = {};
 	}
 
-
-	/**
-	* Copies f0xy and all classes over to the specified Namespace (by reference)
-	* Awesome sauce!
-
-	* @public
-	* @param	 	{Object}	ns		An object representing the namespace
-	*/
-
-	_f0xy.copyToNS = function (ns) {
-		ns.f0xy = f0xy;
-
-		for (var n in _classes) {
-			ns[n] = _rootNS[n];
-		}
-	}
 
 	/**
 	* Tells f0xy that filePath provides the class definitions for these classes.
@@ -1134,12 +1093,6 @@ f0xy.define("f0xy", {
 			f0xy.removeInterest(this, name);
 		},
 
-		removeInterests : function(names){
-			for(var i = 0; i < names.length; i ++){
-				this.removeInterest(names[i]);
-			}
-		},
-
 		removeAllInterests : function(){
 			f0xy.removeAllInterests(this);
 			this._interestHandlers = [];
@@ -1164,8 +1117,15 @@ f0xy.define("f0xy", {
 
 		subscribe : function(name, handler, priority){
 			this.addInterest(name, handler, priority);
+		},
+
+		unsubscribe : function(name){
+			this.removeInterest(name);
+		},
+
+		unsubscribeAll : function(){
+			this.removeAllInterests();
 		}
-		
 	})
 });f0xy.define("f0xy", {
 

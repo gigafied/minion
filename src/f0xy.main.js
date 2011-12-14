@@ -69,8 +69,6 @@ var f0xy = (function (root) {
 	var _separator = ".";
 	var _class_path = "";
 	var _file_suffix = "";
-		
-	var _classes = {};
 
 	var _origRootNS = {};
 	var _initialized;
@@ -85,32 +83,15 @@ var f0xy = (function (root) {
 	var _waitInterval = 500;
 	var _defaultClassFile = null;
 
-	var _rootNS = {};
+	var _root = root;
+	var _ns = {};
+	var _pollute = false;
 	var _errorTimeout = 1e4;
 
-	/*
-	If this is an iFrame or a new window, check for a parent, and if said parent has a f0xy root object, 
-	copy the reference locally, along with all defined Classes and whatnot.
-
-	Makes for some awesome goodness, being able to easily communicate between windows and iframes through notifications
-	and not having to load classes more than once.
-	*/
-
-	var nsTarget;
-	nsTarget = (root.parent && root.parent.f0xy) ? root.parent.f0xy : nsTarget;
-	nsTarget = (root.opener && root.opener.f0xy) ? root.opener.f0xy : nsTarget;
-	
-	if (nsTarget) {
-		try{
-			nsTarget.copyToNS(root);
-			return nsTarget;
-		}
-		catch(e){;}
-	}
-	//
-
-
 	/*================= HELPER FUNCTIONS =================*/
+
+	/** @private */
+	var _sTimeout = setTimeout;
 
 	/** @private */
 	var _isArray = Array._isArray || function (a) {
@@ -157,8 +138,18 @@ var f0xy = (function (root) {
 		return b;
 	};
 
-	/** @private */
-	var _sTimeout = setTimeout;
+	var _copyToNS = function(o1,o2){
+		for (var i in o1) {
+			o2[i] = o1[i];
+		}
+	}
+
+	var _removeFromNS = function(o1,o2){
+		for (var i in o1) {
+			o2[i] = null;
+			delete o2[i];
+		}
+	}
 
 	// Recursively checks dependencies
 	/** @private */
@@ -358,8 +349,7 @@ var f0xy = (function (root) {
 		id = id || "";
 		definitions = definitions || false;
 
-		var ns = _rootNS;
-		var ns2 = _classes;
+		var ns = _ns;
 		var i;
 
 		if (id && !_isObject(id) && !_isFunction(id)) {
@@ -367,8 +357,6 @@ var f0xy = (function (root) {
 
 			if (parts[0] === "f0xy") {
 				ns = _f0xy;
-				ns2 = ns2.f0xy || {};
-				ns2.f0xy = ns2;
 				parts.splice(0,1);
 			}
 
@@ -376,7 +364,6 @@ var f0xy = (function (root) {
 				if (!ns[parts[i]]) {
 					if (autoCreate) {
 						ns[parts[i]] = {};
-						ns2[parts[i]] = {};
 					}
 					else{
 						return false;
@@ -438,8 +425,11 @@ var f0xy = (function (root) {
 					}
 
 					ns[className] = c;
-					ns2[className] = c;
 				}
+			}
+
+			if(_pollute){
+				_copyToNS(_ns, _root);
 			}
 		}
 
@@ -472,25 +462,25 @@ var f0xy = (function (root) {
 		_separator = configObj.separator || _separator;
 		_file_suffix = configObj.fileSuffix || _file_suffix;
 
-		var useRootNS = true;
+		var pollute = true;
 
 		if(configObj.noPollution){
-			useRootNS = !!configObj.noPollution;
+			pollute = !configObj.noPollution;
 		};
 
 		var i;
 
-		if (!_initialized) {
-			if (useRootNS !== false) {
-				for (i in _rootNS) {
-					if (!root[i]) {
-						root[i] = _rootNS[i];
-					}
-				}
-				_rootNS = root;
+		if (_initialized && configObj.noPollution !== true) {
+			if (pollute !== false) {
+				_copyToNS(_ns, _root);
+				_pollute = true;
 			}
-			_initialized = true;
 		}
+		else{
+			_removeFromNS(_ns, _root);
+		}
+
+		_initialized = true;
 	}
 
 	/**
@@ -579,7 +569,7 @@ var f0xy = (function (root) {
 	}
 
 	/**
-	* Imports properties from the specified namespace to the global space (ie. under _rootNS, or _root)
+	* Imports properties from the specified namespace to the global space (ie. under _ns, or _root)
 	* This is only meant to be used as a utility, and for temporary purposes. Please clean up with f0xy.unuse()
 	* You are responsible for not polluting the global namespace.
 	*
@@ -599,9 +589,9 @@ var f0xy = (function (root) {
 
 		ids = ids || [];
 		ids = _strToArray(ids);
-		scope = scope || _rootNS;
+		scope = scope || _ns;
 
-		if (scope === _rootNS) {
+		if (scope === _ns) {
 			_f0xy.unuse();
 		}
 
@@ -619,7 +609,7 @@ var f0xy = (function (root) {
 			if (id === '*') {
 				// injects all ids under namespace into the root namespace
 				for (var n in ns) {
-					if (scope === _rootNS) {
+					if (scope === _ns) {
 						_origRootNS[n] = (scope[n]) ? scope[n] : null;
 					}
 					scope[n] = ns[n];
@@ -628,7 +618,7 @@ var f0xy = (function (root) {
 			else{
 				// injects this id into the root namespace
 				if (ns[id]) {
-					if (scope === _rootNS) {
+					if (scope === _ns) {
 						_origRootNS[id] = (scope[id]) ? scope[id] : null;
 					}
 					scope[id] = ns[id];
@@ -650,30 +640,14 @@ var f0xy = (function (root) {
 
 	_f0xy.unuse = function () {
 		for (var prop in _origRootNS) {
-			_rootNS[prop] = _origRootNS[prop];
-			if (_rootNS[prop] === null) {
-				delete _rootNS[prop];
+			_ns[prop] = _origRootNS[prop];
+			if (_ns[prop] === null) {
+				delete _ns[prop];
 			}
 		}
 		_origRootNS = {};
 	}
 
-
-	/**
-	* Copies f0xy and all classes over to the specified Namespace (by reference)
-	* Awesome sauce!
-
-	* @public
-	* @param	 	{Object}	ns		An object representing the namespace
-	*/
-
-	_f0xy.copyToNS = function (ns) {
-		ns.f0xy = f0xy;
-
-		for (var n in _classes) {
-			ns[n] = _rootNS[n];
-		}
-	}
 
 	/**
 	* Tells f0xy that filePath provides the class definitions for these classes.

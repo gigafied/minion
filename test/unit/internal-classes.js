@@ -1,9 +1,28 @@
 (function(){
 
 	var timeout = 2000;
+	var timeoutID;
 
-	function invokeTimeout(){
-		setTimeout(function(){start();}, timeout);
+	function invokeTimeout(numStarts){
+		numStarts = numStarts || 1;
+
+		if(timeoutID){clearTimeout(timeoutID);}
+		timeoutID = setTimeout(function(){
+			for(var i = 0; i < numStarts; i ++){
+				start();
+			}
+		}, timeout);
+	}
+
+	function invokeTimeout(numStarts){
+		numStarts = numStarts || 1;
+
+		if(timeoutID){clearTimeout(timeoutID);}
+		timeoutID = setTimeout(function(){
+			for(var i = 0; i < numStarts; i ++){
+				start();
+			}
+		}, timeout);
 	}
 
 	function f0xyRequireTest(className){
@@ -18,7 +37,7 @@
 		})
 	}
 
-	module("f0xy classes...");
+	module("f0xy internal classes...");
 
 	f0xyRequireTest("f0xy.__BaseClass__");
 	f0xyRequireTest("f0xy.Class");
