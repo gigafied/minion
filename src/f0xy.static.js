@@ -1,48 +1,55 @@
-f0xy.define("f0xy", {
+(function(){
+	
+	"use strict";
 
-	require: [
-		"f0xy.Class"
-	],
+	f0xy.define("f0xy", {
 
-	/**
-	*
-	* Yep pretty much exactly what it seems like it does
-	* 
-	*/
+		require: [
+			"f0xy.Class"
+		],
 
-	Static : (function() {
+		/**
+		*
+		* Yep pretty much exactly what it seems like it does
+		* 
+		*/
 
-		var _staticClass = function() {;}
+		Static : (function() {
 
-		_staticClass.__isDefined = true;
-		_staticClass.__isStatic = true;
+			var _staticClass = function() {};
 
-		_staticClass.__extend = function(obj){
-			var _class = function() {;}
+			_staticClass.__isDefined = true;
+			_staticClass.__isStatic = true;
 
-			for(var prop in obj){
-				if(obj.hasOwnProperty(prop)){
-					_class[prop] = obj[prop];
+			_staticClass.__extend = function(obj){
+				var _class = function() {};
+				var prop;
+
+				for(prop in obj){
+					if(obj.hasOwnProperty(prop)){
+						_class[prop] = obj[prop];
+					}
 				}
-			}
 
-			for(var prop in this){
-				if(this.hasOwnProperty(prop)){
-					_class[prop] = this[prop];
+				for(prop in this){
+					if(this.hasOwnProperty(prop)){
+						_class[prop] = this[prop];
+					}
 				}
-			}
 
-			for(var prop in f0xy.Class.prototype){
-				if(f0xy.Class.prototype.hasOwnProperty(prop)){
-					_class[prop] = f0xy.Class.prototype[prop];
+				for(prop in f0xy.Class.prototype){
+					if(f0xy.Class.prototype.hasOwnProperty(prop)){
+						_class[prop] = f0xy.Class.prototype[prop];
+					}
 				}
-			}
 
-			return _class;
-		}
+				return _class;
+			};
 
-		return _staticClass;
+			return _staticClass;
 
-	})()
+		})()
 
-});
+	});
+	
+})();

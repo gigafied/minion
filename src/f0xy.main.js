@@ -70,7 +70,6 @@ var f0xy = (function (root) {
 	var _class_path = "";
 	var _file_suffix = "";
 
-	var _origRootNS = {};
 	var _initialized;
 
 	var _loadQueue = [];
@@ -87,6 +86,12 @@ var f0xy = (function (root) {
 	var _ns = {};
 	var _pollute = false;
 	var _errorTimeout = 1e4;
+
+	/**
+	* @exports _f0xy as f0xy 
+	* @class
+	*/
+	var _f0xy = {};	
 
 	/*================= HELPER FUNCTIONS =================*/
 
@@ -140,16 +145,20 @@ var f0xy = (function (root) {
 
 	var _copyToNS = function(o1,o2){
 		for (var i in o1) {
-			o2[i] = o1[i];
+			if(o1.hasOwnProperty(i)){
+				o2[i] = o1[i];
+			}
 		}
-	}
+	};
 
 	var _removeFromNS = function(o1,o2){
 		for (var i in o1) {
-			o2[i] = null;
-			delete o2[i];
+			if(o1.hasOwnProperty(i)){
+				o2[i] = null;
+				delete o2[i];
+			}
 		}
-	}
+	};
 
 	// Recursively checks dependencies
 	/** @private */
@@ -251,12 +260,6 @@ var f0xy = (function (root) {
 		if (w.length > 0) {
 			_waitID = _sTimeout(_checkWaitQueue, _waitInterval);
 		}
-		
-		else{
-			for(var i = 0; i < w.length; i ++){
-				//console.log("still waiting on..." + w[i].f);
-			}
-		}
 	};
 
 	/** @ignore */
@@ -276,13 +279,13 @@ var f0xy = (function (root) {
 			}
 
 			script = doc.createElement("script");
-		 	script.async = true;
+			script.async = true;
 		
 			injectObj = {
-				f : f, 		// File
-				c : c, 		// Class
-				e : 0, 		// Elapsed Time
-				s : script // Script
+				f : f,		// File
+				c : c,		// Class
+				e : 0,		// Elapsed Time
+				s : script	// Script
 			};
 
 			_requestedFiles.push(f);	
@@ -294,27 +297,27 @@ var f0xy = (function (root) {
 					injectObj.s.onload = injectObj.s.onreadystatechange = null;
 					injectObj.s.onerror = null;
 					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-			 	}
+				}
 			};
 
 			/** @ignore */
 			script.onerror = function (e) {
-				throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
 				injectObj.s.onerror = null;
 				_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-			}
+				throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
+			};
 
 			script.src = f;
 			
 			// Append the script to the document body
-		 	doc[body].appendChild(script);
+			doc[body].appendChild(script);
 		}
-	}
+	};
 
 	/**
 	* Does all the loading of JS files
 	*
-	* @param		q 		The queue to be loaded
+	* @param		q		The queue to be loaded
 	* @ignore
 	* @private 
 	*/
@@ -332,7 +335,7 @@ var f0xy = (function (root) {
 			(can be changed through f0xy.config({f0xy.errorTimeout : ms});
 		*/
 		_waitID = _sTimeout(_checkWaitQueue, _waitInterval);
-	}
+	};
 
 	/**
 	* Used by f0xy.get() and f0xy.define(). 
@@ -373,7 +376,7 @@ var f0xy = (function (root) {
 			}
 		}
 
-		else if (id != "") {
+		else if (id !== "") {
 			ns = id;
 		}
 		else{
@@ -402,7 +405,7 @@ var f0xy = (function (root) {
 						}
 					}
 
-					c.__static = c.__static || {}
+					c.__static = c.__static || {};
 				
 					c.__nsID = id;
 					c.__ns = ns;
@@ -434,16 +437,10 @@ var f0xy = (function (root) {
 		}
 
 		return ns;
-	}
+	};
 
 	/*================= END OF HELPER FUNCTIONS =================*/
 
-
-	/**
-	* @exports _f0xy as f0xy 
-	* @class
-	*/
-	var _f0xy = {};
 
 	/**
 	* Configure f0xy.
@@ -466,7 +463,7 @@ var f0xy = (function (root) {
 
 		if(configObj.noPollution){
 			pollute = !configObj.noPollution;
-		};
+		}
 
 		var i;
 
@@ -481,7 +478,7 @@ var f0xy = (function (root) {
 		}
 
 		_initialized = true;
-	}
+	};
 
 	/**
 	* Gets the object by it's fully qualified identifier.
@@ -493,7 +490,7 @@ var f0xy = (function (root) {
 
 	_f0xy.get = function (id) {
 		return _namespace(id, false);
-	}
+	};
 
 	/**
 	* Defines Classes under the given namespace.
@@ -507,13 +504,13 @@ var f0xy = (function (root) {
 		var r = _namespace(id, true, definitions);
 		_checkExtendQueue();
 		return r;
-	}
+	};
 
 	/**
 	* Gets the URL for a given identifier.
 	*
 	* @public
-	* @param		 	{String}		id						The fully qualified name to look up.
+	* @param			{String}		id						The fully qualified name to look up.
 	* @returns		{String}								The URL of the file that maps to the fully qualified name.
 	*/
 
@@ -528,7 +525,7 @@ var f0xy = (function (root) {
 		}
 		var url = (_class_path + id).replace(new RegExp('\\' + _separator, 'g'), '/') + '.js' + ((_file_suffix) ? "?" + _file_suffix : "");
 		return url;
-	}
+	};
 
 	/**
 	* Checks to see whether the given fully qualified name or Object is defined as a f0xy class. (Checks for .__isDefined)<br>
@@ -542,7 +539,7 @@ var f0xy = (function (root) {
 	_f0xy.isDefined = function (id) {
 		id = (!_isObject(id) && !_isFunction(id)) ? _namespace(id, false) : id;
 		return (id) ? id.__isDefined : false;
-	}	
+	};
 
 	/**
 	* Extends a given class asynchronously.
@@ -566,88 +563,7 @@ var f0xy = (function (root) {
 		obj.__extendedFrom = id;
 
 		return obj;
-	}
-
-	/**
-	* Imports properties from the specified namespace to the global space (ie. under _ns, or _root)
-	* This is only meant to be used as a utility, and for temporary purposes. Please clean up with f0xy.unuse()
-	* You are responsible for not polluting the global namespace.
-	*
-	* By calling f0xy.use("com.test.Example"), you will be able to refer to com.test.Example as just Example.
-	* By calling f0xy.use("com.test"), you will be able to refer to com.test.Example as just test.Example.
-	* 
-	* Identifiers can contain the* wildcard character as its last segment (eg: com.test.*) 
-	* which will import all Classes under the given namespace.
-	*
-	* @see 		f0xy.unuse
-	* @public
-	* @param	 	{String|Array}	ids		The fully qualfiied name(s) to import into the global namespace.
-	* @param		{Object=[root]}			The scope to use.
-	*/
-	 
-	_f0xy.use = function (ids, scope) {
-
-		ids = ids || [];
-		ids = _strToArray(ids);
-		scope = scope || _ns;
-
-		if (scope === _ns) {
-			_f0xy.unuse();
-		}
-
-		var i, id, obj, ns, n;
-
-		for (i = 0; i < ids.length; i += 1) {
-		
-			id = ids[i];
-
-			obj = _f0xy.get(id, true);
-			ns = id.split(_separator);
-			id = ns.splice(ns.length - 1, 1)[0];
-			ns = _f0xy.get(ns.join(_separator), false);
-		
-			if (id === '*') {
-				// injects all ids under namespace into the root namespace
-				for (var n in ns) {
-					if (scope === _ns) {
-						_origRootNS[n] = (scope[n]) ? scope[n] : null;
-					}
-					scope[n] = ns[n];
-				}
-			}
-			else{
-				// injects this id into the root namespace
-				if (ns[id]) {
-					if (scope === _ns) {
-						_origRootNS[id] = (scope[id]) ? scope[id] : null;
-					}
-					scope[id] = ns[id];
-				}
-			}
-		}
-
-		return scope;
-	}
-
-	/**
-	* Clears all temporary global namespacing mappings created by f0xy.use(). This method has no arguments, it clears all
-	* temporary namespaces.
-	* 
-	* @see f0xy.use
-	*
-	* @public
-	*/
-
-	_f0xy.unuse = function () {
-		for (var prop in _origRootNS) {
-			_ns[prop] = _origRootNS[prop];
-			if (_ns[prop] === null) {
-				delete _ns[prop];
-			}
-		}
-		_origRootNS = {};
-	}
-
+	};
 
 	/**
 	* Tells f0xy that filePath provides the class definitions for these classes.
@@ -658,9 +574,9 @@ var f0xy = (function (root) {
 	*
 	* @public
 	* @param		{String}				file					The path of a JS file.
-	* @param	 	{String|Array}		definitions			Fully qualfiied name(s) of class(es)
+	* @param		{String|Array}		definitions			Fully qualfiied name(s) of class(es)
 	* @param		{Boolean}			[doLoad=false]		Whether or not to subsequently call f0xy.require()
-	* @param 	{Function}			[callback=null]	If doLoad=true, the callback function to call once the file has been loaded.
+	* @param		{Function}			[callback=null]	If doLoad=true, the callback function to call once the file has been loaded.
 	*/
 
 	_f0xy.provides = function (file, definitions, doLoad, callback) {
@@ -683,7 +599,7 @@ var f0xy = (function (root) {
 		if (doLoad) {
 			_f0xy.require(definitions, callback);
 		}
-	}
+	};
 
 	/**
 	* Asyncrhonously loads in js files for the classes specified.
@@ -730,7 +646,7 @@ var f0xy = (function (root) {
 		else if (callback) {
 			callback();
 		}
-	}
+	};
 	
 	/** @private */
 	_f0xy.enableNotifications = function () {
@@ -739,87 +655,86 @@ var f0xy = (function (root) {
 				_notificationManager = new f0xy.NotificationManager();
 			}
 		}
-	}
+	};
 
 	/** @private */
 	_f0xy.addInterest = function () {
 		if (_notificationManager) {
 			_notificationManager.addInterest.apply(_notificationManager, arguments);
 		}
-	}
+	};
 
 	/** @private */
 	_f0xy.addInterests = function () {
 		if (_notificationManager) {
 			_notificationManager.addInterests.apply(_notificationManager, arguments);
 		}
-	}
+	};
 
 	/** @private */
 	_f0xy.removeInterest = function () {
 		if (_notificationManager) {
 			_notificationManager.removeInterest.apply(_notificationManager, arguments);
 		}
-	}
+	};
 	
 	/** @private */
 	_f0xy.removeInterests = function () {
 		if (_notificationManager) {
 			_notificationManager.removeInterests.apply(_notificationManager, arguments);
 		}
-	}
+	};
 
 	/** @private */
 	_f0xy.removeAllInterests = function () {
 		if (_notificationManager) {
 			_notificationManager.removeAllInterests.apply(_notificationManager, arguments);
 		}
-	}
+	};
 
 	/** @private */
 	_f0xy.notify = function () {
 		if (_notificationManager) {
 			_notificationManager.notify.apply(_notificationManager, arguments);
 		}
-	}
+	};
 
 	/** @private */
 	_f0xy.holdNotification = function () {
 		if (_notificationManager) {
 			_notificationManager.holdNotification.apply(_notificationManager, arguments);
 		}
-	}
+	};
 
 	/** @private */
 	_f0xy.releaseNotification = function () {
 		if (_notificationManager) {
 			_notificationManager.releaseNotification.apply(_notificationManager, arguments);
 		}
-	}
+	};
 
 	/** @private */
 	_f0xy.cancelNotification = function () {
 		if (_notificationManager) {
 			_notificationManager.cancelNotification.apply(_notificationManager, arguments);
 		}
-	}
+	};
 
 	_f0xy.publish = _f0xy.notify = function (name, data) {
 		if (_notificationManager) {
 			var notification = new f0xy.Notification(name, data);
 			notification.dispatch(_f0xy);
 		}
-	}
+	};
 
 	/*
 	Define f0xy as an AMD module, if define is defined (and has .amd as a property)
 	*/
-
-	if (typeof define === "function" && define.amd) {
-		define([], function () {
+	if (typeof _root.define === "function" && _root.define.amd) {
+		_root.define([], function () {
 			return _f0xy;
 		});
-	}	
+	}
 
 	return _f0xy;
 
