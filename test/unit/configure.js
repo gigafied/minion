@@ -14,7 +14,7 @@
 		}, timeout);
 	}
 
-	module("f0xy configure...");
+	module("f0xy.configure()");
 
 	// Do the first configure test
 	f0xy.configure(

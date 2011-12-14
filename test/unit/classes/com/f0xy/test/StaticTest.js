@@ -1,15 +1,11 @@
 f0xy.define("com.f0xy.test", {
 
-	Test1 : f0xy.extend("f0xy.Class", {
+	StaticTest : f0xy.extend("f0xy.Static", {
 
 		testPropBool : true,
 		testPropStr : "f0xy",
 		testPropObj : {prop1 : "yay", prop2 : "awesome"},
-		testPropArr : ["yay", "awesome"],		
-
-		init : function(){
-
-		},
+		testPropArr : ["yay", "awesome"],
 
 		someTestMethod : function(){
 			return true;

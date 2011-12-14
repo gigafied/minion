@@ -50,7 +50,7 @@
 
 			var _createSuperFunction = function (fn, superFn) {
 				return function() {
-					var tmp = this.__super;
+					var tmp = this.__super || null;
 
 					// Reference the prototypes method, as super temporarily
 					this.__super = superFn;
@@ -58,8 +58,8 @@
 					var ret = fn.apply(this, arguments);
 
 					// Reset this.__super
-					this.__super = tmp;
-
+					if(tmp){this.__super = tmp;}
+					else{this.__super = null; delete this.__super;}
 					return ret;
 				};
 			};
@@ -121,7 +121,7 @@
 							_class.prototype.__imports = f0xy.use(this.__dependencies, {});
 						}
 
-						if(!this.__isSingleton){
+						if(!this.constructor.__isSingleton){
 
 							for (var attr in _perInstanceProps) {
 								if (_perInstanceProps.hasOwnProperty(attr)) {

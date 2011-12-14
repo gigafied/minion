@@ -37,7 +37,7 @@
 		})
 	}
 
-	module("f0xy internal classes...");
+	module("f0xy internal classes");
 
 	f0xyRequireTest("f0xy.__BaseClass__");
 	f0xyRequireTest("f0xy.Class");

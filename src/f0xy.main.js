@@ -647,6 +647,8 @@ var f0xy = (function (root) {
 			callback();
 		}
 	};
+
+	_f0xy.use = _copyToNS;
 	
 	/** @private */
 	_f0xy.enableNotifications = function () {

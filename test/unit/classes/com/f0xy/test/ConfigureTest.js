@@ -4,11 +4,7 @@ f0xy.define("com.f0xy.test", {
 
 		init : function(){
 
-		},
-
-		someTestMethod : function(){
-			return true;
 		}
-
+		
 	})
 });
