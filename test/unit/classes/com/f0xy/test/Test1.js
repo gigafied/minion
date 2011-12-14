@@ -11,7 +11,7 @@ f0xy.define("com.f0xy.test", {
 
 		},
 
-		someTestMethod : function(){
+		superTestMethod : function(){
 			return true;
 		}
 

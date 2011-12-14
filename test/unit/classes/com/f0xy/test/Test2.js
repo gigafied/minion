@@ -7,6 +7,10 @@ f0xy.define("com.f0xy.test", {
 		},
 
 		someTestMethod : function(){
+			return true;
+		},
+
+		superTestMethod : function(){
 			return this.__super();
 		}
 

@@ -88,7 +88,7 @@
 
 						if(name !== "__static"){
 							// If we're overwriting an existing function that calls this.__super, do a little super magic.
-							if(typeof obj[name] === "function" && typeof _this.prototype[name] === "function" && _doesCallSuper.test(obj[name])){
+							if(typeof obj[name] === "function" && typeof _proto[name] === "function" && _doesCallSuper.test(obj[name])){
 								_proto[name] = _createSuperFunction(obj[name], _proto[name]);
 							}
 							else{

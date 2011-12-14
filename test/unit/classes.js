@@ -28,8 +28,6 @@
 				var testInstance = new Test();
 				var testInstance2 = new Test();
 
-				//testInstance.testPropStr
-
 				ok(testInstance, "com.f0xy.test.Test2 was instantiated.")
 
 				ok(testInstance.someTestMethod(), "instance.someTestMethod exists and returns true.");
