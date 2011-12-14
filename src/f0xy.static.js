@@ -17,7 +17,7 @@
 		Static : (function() {
 
 			var _staticClass = function() {
-				throw new Error("This is a Static Class. Don't instantiate this Class.")
+				throw new Error("This is a Static Class. Don't instantiate this Class.");
 			};
 
 			_staticClass.__isDefined = true;
@@ -25,7 +25,7 @@
 
 			_staticClass.__extend = function(obj){
 				var _class = function() {
-					throw new Error("This is a Static Class. Don't instantiate this Class.")
+					throw new Error("This is a Static Class. Don't instantiate this Class.");
 				};
 				
 				var prop;

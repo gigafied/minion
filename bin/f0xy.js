@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Wed Dec 14 00:25:43 2011 -0800
+ * Date: Wed Dec 14 01:52:17 2011 -0800
  */
  /**
 
@@ -656,7 +656,61 @@ var f0xy = (function (root) {
 			callback();
 		}
 	};
-	
+
+	/**
+	* Imports classes from the specified namespace to the specified object/scope.
+	* You are responsible for not polluting the global namespace.
+	*
+	* By calling f0xy.use("com.test.Example", obj), you will be able to refer to com.test.Example as just obj.Example.
+	* 
+	* Identifiers can contain the* wildcard character as its last segment (eg: com.test.*) 
+	* which will import all Classes under the given namespace.
+	*
+	* @public
+	* @param		{String|Array}		ids		The fully qualfiied name(s) to import into the global namespace.
+	* @param		{Object=[root]}				The scope to use.
+	*/
+
+	_f0xy.use = function (ids, scope) {
+
+		ids = ids || [];
+		ids = _strToArray(ids);
+		scope = scope || _ns;
+
+		if (scope === _ns) {
+			_f0xy.unuse();
+		}
+
+		var i, id, obj, ns, n;
+
+		for (i = 0; i < ids.length; i += 1) {
+
+			id = ids[i];
+
+			obj = _f0xy.get(id, true);
+			ns = id.split(_separator);
+			id = ns.splice(ns.length - 1, 1)[0];
+			ns = _f0xy.get(ns.join(_separator), false);
+
+			if (id === '*') {
+				// injects all ids under namespace into the root namespace
+				for (n in ns) {
+					if(ns.hasOwnProperty(n)){
+						scope[n] = ns[n];
+					}
+				}
+			}
+			else{
+				// injects this id into the root namespace
+				if (ns[id]) {
+					scope[id] = ns[id];
+				}
+			}
+		}
+
+		return scope;
+	};	
+		
 	/** @private */
 	_f0xy.enableNotifications = function () {
 		if (_f0xy.isDefined("f0xy.NotificationManager")) {
@@ -799,7 +853,7 @@ var f0xy = (function (root) {
 
 			var _createSuperFunction = function (fn, superFn) {
 				return function() {
-					var tmp = this.__super;
+					var tmp = this.__super || null;
 
 					// Reference the prototypes method, as super temporarily
 					this.__super = superFn;
@@ -807,8 +861,8 @@ var f0xy = (function (root) {
 					var ret = fn.apply(this, arguments);
 
 					// Reset this.__super
-					this.__super = tmp;
-
+					if(tmp){this.__super = tmp;}
+					else{this.__super = null; delete this.__super;}
 					return ret;
 				};
 			};
@@ -870,7 +924,7 @@ var f0xy = (function (root) {
 							_class.prototype.__imports = f0xy.use(this.__dependencies, {});
 						}
 
-						if(!this.__isSingleton){
+						if(!this.constructor.__isSingleton){
 
 							for (var attr in _perInstanceProps) {
 								if (_perInstanceProps.hasOwnProperty(attr)) {
@@ -1081,13 +1135,18 @@ var f0xy = (function (root) {
 
 		Static : (function() {
 
-			var _staticClass = function() {};
+			var _staticClass = function() {
+				throw new Error("This is a Static Class. Don't instantiate this Class.");
+			};
 
 			_staticClass.__isDefined = true;
 			_staticClass.__isStatic = true;
 
 			_staticClass.__extend = function(obj){
-				var _class = function() {};
+				var _class = function() {
+					throw new Error("This is a Static Class. Don't instantiate this Class.");
+				};
+				
 				var prop;
 
 				for(prop in obj){

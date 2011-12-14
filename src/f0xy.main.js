@@ -648,8 +648,60 @@ var f0xy = (function (root) {
 		}
 	};
 
-	_f0xy.use = _copyToNS;
-	
+	/**
+	* Imports classes from the specified namespace to the specified object/scope.
+	* You are responsible for not polluting the global namespace.
+	*
+	* By calling f0xy.use("com.test.Example", obj), you will be able to refer to com.test.Example as just obj.Example.
+	* 
+	* Identifiers can contain the* wildcard character as its last segment (eg: com.test.*) 
+	* which will import all Classes under the given namespace.
+	*
+	* @public
+	* @param		{String|Array}		ids		The fully qualfiied name(s) to import into the global namespace.
+	* @param		{Object=[root]}				The scope to use.
+	*/
+
+	_f0xy.use = function (ids, scope) {
+
+		ids = ids || [];
+		ids = _strToArray(ids);
+		scope = scope || _ns;
+
+		if (scope === _ns) {
+			_f0xy.unuse();
+		}
+
+		var i, id, obj, ns, n;
+
+		for (i = 0; i < ids.length; i += 1) {
+
+			id = ids[i];
+
+			obj = _f0xy.get(id, true);
+			ns = id.split(_separator);
+			id = ns.splice(ns.length - 1, 1)[0];
+			ns = _f0xy.get(ns.join(_separator), false);
+
+			if (id === '*') {
+				// injects all ids under namespace into the root namespace
+				for (n in ns) {
+					if(ns.hasOwnProperty(n)){
+						scope[n] = ns[n];
+					}
+				}
+			}
+			else{
+				// injects this id into the root namespace
+				if (ns[id]) {
+					scope[id] = ns[id];
+				}
+			}
+		}
+
+		return scope;
+	};	
+		
 	/** @private */
 	_f0xy.enableNotifications = function () {
 		if (_f0xy.isDefined("f0xy.NotificationManager")) {
