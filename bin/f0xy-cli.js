@@ -1,16 +1,28 @@
-var argv = require('../../lib/node-optimist').argv;
+#!/usr/bin/env node
 
-f0xy = require('../f0xy.js');
+(function(){
 
-f0xy.configure({
-	rootPath : __dirname + "/classes"
-});
+	f0xy = require('./f0xy.js');
 
+	var argv = require('optimist').argv;
 
-f0xy.require("com.f0xy.test.Test2", function(){
-	var Test = f0xy.get("com.f0xy.test.Test2");
+	var method = argv._[0];
 
-	var testInstance = new Test();
-	console.log(this.com);
-	console.log(f0xy.getLoadedFiles());
-});
+	f0xy.provides("./f0xy.Client.js", "f0xy.Client");
+
+	f0xy.require("f0xy.Client", function(Client){
+
+		var client = Client.getInstance();
+		client.setArgs(argv);
+
+		if(method[0] !== "_" && client[method]){
+			return client[method]();
+		}
+
+		else{
+			console.log("Invalid command.");
+		}
+
+	});
+
+})();

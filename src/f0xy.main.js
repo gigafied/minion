@@ -34,8 +34,6 @@ THE SOFTWARE.</p>
 	TODO:
 		- Multiple inheritance
 		- Independent library support, i.e. ability to do f0xy.require("f0xy.libs.jquery") to load jquery
-		- AMD adherence?
-		- NodeJS implementation (almost there)
 		- __preDefine method on Classes, takes 1 argument, a callback that gets called once __preDefine does all it needs to do
 */
 
@@ -184,8 +182,10 @@ var f0xy = (function (root) {
 
 	/** @private */
 	var _checkLoadQueue = function () {
-		var i, j, q, dependenciesLoaded;
+		var i, j, q, dependenciesLoaded, classes, classesArray;
 		q = {};
+		classes = {};
+		classesArray = [];
 
 		for (i = _loadQueue.length - 1; i >= 0; i --) {
 
@@ -201,7 +201,7 @@ var f0xy = (function (root) {
 
 			if (dependenciesLoaded) {
 				if (q.cb) {
-					q.cb();
+					q.cb.apply(_root, _f0xy.get(q.c));
 				}
 				_loadQueue.splice(i, 1);
 			}
@@ -332,7 +332,6 @@ var f0xy = (function (root) {
 		for (var i = 0; i < q.f.length; i += 1) {
 			if(_isNode){
 				var c = require(q.f[i]);
-				if(q.cb){q.cb = q.cb.bind(_root);}
 			}
 			else{
 				_inject(q.f[i], q.c[i]);
@@ -503,7 +502,19 @@ var f0xy = (function (root) {
 	*/
 
 	_f0xy.get = function (id) {
-		return _namespace(id, false);
+		if(!_isArray(id)){
+			return _namespace(id, false);
+		}
+		else{
+			var classes = _f0xy.use(id, {});
+			var classesArray = [];
+
+			for(var c in classes){
+				classesArray.push(classes[c]);	
+			}
+
+			return classesArray;
+		}
 	};
 
 	/**
