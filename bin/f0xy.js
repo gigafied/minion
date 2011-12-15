@@ -1,11 +1,11 @@
 /*
- * f0xy.JS v1.4
+ * f0xy.JS v1.4.0
  * http://f0xy.org
  *
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Wed Dec 14 02:20:38 2011 -0800
+ * Date: Wed Dec 14 20:03:34 2011 -0800
  */
  /**
 

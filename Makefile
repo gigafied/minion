@@ -2,10 +2,9 @@ OVERRIDING=default
 
 SRC_DIR = src
 TEST_DIR = test
-BUILD_DIR = build
 
 PREFIX = .
-BIN_DIR = ${PREFIX}/bin
+DIST_DIR = ${PREFIX}/dist
 
 COMPILER = uglifyjs -nc --unsafe
 
@@ -19,10 +18,10 @@ FILES = ${HEADER}\
 	${SRC_DIR}/f0xy.singleton.js\
 	${SRC_DIR}/f0xy.notifications.js\
 
-F0XY = ${BIN_DIR}/f0xy.js
-F0XY_MIN = ${BIN_DIR}/f0xy.min.js
-
 VER = $(shell cat version.txt)
+
+F0XY = ${DIST_DIR}/f0xy.${VER}.js
+F0XY_MIN = ${DIST_DIR}/f0xy.${VER}.min.js
 
 DATE=$(shell git log -1 --pretty=format:%ad)
 
@@ -42,7 +41,7 @@ f0xy:
 	@@echo "Building" ${F0XY}
 	@@echo "Version:" ${VER}
 
-	@@mkdir -p ${BIN_DIR}
+	@@mkdir -p ${DIST_DIR}
 
 	@@cat ${FILES} | \
 		sed 's/@DATE/'"${DATE}"'/' | \
@@ -50,7 +49,7 @@ f0xy:
 
 	@@cat ${FILES} | \
 		sed 's/@DATE/'"${DATE}"'/' | \
-		sed 's/@VERSION/'"${VER}"'/' > ${PREFIX}/utils/f0xy.js;
+		sed 's/@VERSION/'"${VER}"'/' > ${PREFIX}/bin/f0xy.js;
 
 min: f0xy
 
@@ -64,7 +63,7 @@ min: f0xy
 
 docs: f0xy
 
-	lib/node-jsdoc-toolkit/app/run.js -c=lib/jsdoc.conf
+	node_modules/jsdoc-toolkit/app/run.js -c=${SRC_DIR}/jsdoc.conf
 
 size: f0xy min
 	@@gzip -c ${F0XY_MIN} > ${F0XY_MIN}.gz; \
