@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Wed Dec 14 22:33:41 2011 -0800
+ * Date: Thu Dec 15 01:49:52 2011 -0800
  */
  /**
 
@@ -90,7 +90,7 @@ var f0xy = (function (root) {
 	var _waitInterval = 500;
 	var _defaultClassFile = null;
 
-	var _isNode = (process && process.title === "node");
+	var _isNode = (typeof window === "undefined");
 
 	var _root = root;
 	var _ns = {};
