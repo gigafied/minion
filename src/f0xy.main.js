@@ -509,8 +509,10 @@ var f0xy = (function (root) {
 			var classes = _f0xy.use(id, {});
 			var classesArray = [];
 
-			for(var c in classes){
-				classesArray.push(classes[c]);	
+			for (var c in classes) {
+				if(classes.hasOwnProperty(c)) {
+					classesArray.push(classes[c]);
+				}	
 			}
 
 			return classesArray;
@@ -731,7 +733,7 @@ var f0xy = (function (root) {
 
 	_f0xy.getLoadedFiles = function () {
 		return _loadedFiles.concat();
-	}
+	};
 		
 	/** @private */
 	_f0xy.enableNotifications = function () {

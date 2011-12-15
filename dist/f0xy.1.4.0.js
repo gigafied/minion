@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Thu Dec 15 01:49:52 2011 -0800
+ * Date: Thu Dec 15 02:01:22 2011 -0800
  */
  /**
 
@@ -518,8 +518,10 @@ var f0xy = (function (root) {
 			var classes = _f0xy.use(id, {});
 			var classesArray = [];
 
-			for(var c in classes){
-				classesArray.push(classes[c]);	
+			for (var c in classes) {
+				if(classes.hasOwnProperty(c)) {
+					classesArray.push(classes[c]);
+				}	
 			}
 
 			return classesArray;
@@ -740,7 +742,7 @@ var f0xy = (function (root) {
 
 	_f0xy.getLoadedFiles = function () {
 		return _loadedFiles.concat();
-	}
+	};
 		
 	/** @private */
 	_f0xy.enableNotifications = function () {
