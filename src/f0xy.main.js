@@ -72,6 +72,7 @@ var f0xy = (function (root) {
 
 	var _initialized;
 
+	var _loadedFiles = [];
 	var _loadQueue = [];
 	var _extendQueue = [];
 
@@ -81,6 +82,8 @@ var f0xy = (function (root) {
 	var _notificationManager;
 	var _waitInterval = 500;
 	var _defaultClassFile = null;
+
+	var _isNode = (process && process.title === "node");
 
 	var _root = root;
 	var _ns = {};
@@ -327,7 +330,14 @@ var f0xy = (function (root) {
 		_loadQueue.push(q);
 
 		for (var i = 0; i < q.f.length; i += 1) {
-			_inject(q.f[i], q.c[i]);
+			if(_isNode){
+				var c = require(q.f[i]);
+				if(q.cb){q.cb = q.cb.bind(_root);}
+			}
+			else{
+				_inject(q.f[i], q.c[i]);
+			}
+			_loadedFiles.push(q.f[i]);
 		}
 
 		/*
@@ -465,6 +475,10 @@ var f0xy = (function (root) {
 			pollute = !configObj.noPollution;
 		}
 
+		if(configObj.rootNS) {
+			_root = configObj.rootNS;
+		}
+
 		var i;
 
 		if (_initialized && configObj.noPollution !== true) {
@@ -523,7 +537,9 @@ var f0xy = (function (root) {
 		if (_classMappings[id]) {
 			return _classMappings[id];
 		}
-		var url = (_class_path + id).replace(new RegExp('\\' + _separator, 'g'), '/') + '.js' + ((_file_suffix) ? "?" + _file_suffix : "");
+		
+		var url = _class_path + id.replace(new RegExp('\\' + _separator, 'g'), '/') + '.js' + ((_file_suffix) ? "?" + _file_suffix : "");
+
 		return url;
 	};
 
@@ -700,7 +716,11 @@ var f0xy = (function (root) {
 		}
 
 		return scope;
-	};	
+	};
+
+	_f0xy.getLoadedFiles = function () {
+		return _loadedFiles.concat();
+	}
 		
 	/** @private */
 	_f0xy.enableNotifications = function () {
@@ -788,6 +808,11 @@ var f0xy = (function (root) {
 		_root.define([], function () {
 			return _f0xy;
 		});
+	}
+
+	// Export for node
+	if (_isNode){
+		module.exports = _f0xy;
 	}
 
 	return _f0xy;

@@ -1,0 +1,37 @@
+{
+    "name" : "f0xy",
+    "version" : "1.4.0",
+    "description" : "F0xy Javascript Inheritance.",
+    "main" : "./bin/f0xy.js",
+    "directories" : {
+        "lib" : "lib",
+        "test" : "test",
+        "example" : "examples"
+    },
+    "dependencies" : {
+        "optimist" : ">= 0.3.0 < 1.0.0",
+        "uglify-js" : ">= 1.2.0 < 2.0.0",
+        "jsdoc-toolkit" : ">= 0.0.1 < 0.0.2"
+    },
+    "repository" : {
+        "type" : "git",
+        "url" : "https://gigafied@github.com/gigafied/f0xy.git"
+    },
+    "keywords" : [
+        "oop",
+        "inheritance",
+        "classes",
+        "class",
+        "dependency",
+        "extend"
+    ],
+    "author" : {
+        "name" : "Taka Kojimay",
+        "email" : "taka@gigafied.com",
+        "url" : "http://gigafied.github.com/f0xy/"
+    },
+    "license" : "MIT/X11",
+    "engine" : {
+        "node" : ">=0.4"
+    }
+}

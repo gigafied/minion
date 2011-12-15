@@ -48,6 +48,10 @@ f0xy:
 		sed 's/@DATE/'"${DATE}"'/' | \
 		sed 's/@VERSION/'"${VER}"'/' > ${F0XY};
 
+	@@cat ${FILES} | \
+		sed 's/@DATE/'"${DATE}"'/' | \
+		sed 's/@VERSION/'"${VER}"'/' > ${PREFIX}/utils/f0xy.js;
+
 min: f0xy
 
 	@@${COMPILER} ${F0XY} > ${F0XY_MIN}
