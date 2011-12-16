@@ -64,7 +64,7 @@ Minion is a micro-framework. Which means, Minion does all this, all while sporti
 	minion.require("com.example.Example3", function(Example3) {
 	
 	    var instance = new Example3();
-	    instance.someMethod();
+	    instance.doSomething();
 	  
 	})
 
