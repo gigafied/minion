@@ -57,7 +57,10 @@ The first argument of <code>minion.define()</code> is a namespace identifier. Th
 
 <code>init()</code> is the Constructor for all classes, it acts like a normal function, it can accept any number of arguments.
 
-You can also optionally specify a <code>require</code> array before your Class defintion, like this:
+
+## Class Goodies:
+
+You can optionally specify a <code>require</code> array before your Class defintion, like this:
 
 	minion.define("com.example", {
 
@@ -82,7 +85,7 @@ You can also optionally specify a <code>require</code> array before your Class d
 		
 	});
 	
-By doing this, you tell Minion that <code>com.example.Example</code> has two dependencies and two make sure those dependencies are imported and defined, before <code>com.example.Example</code> is defined.
+By doing this, you tell Minion that <code>com.example.Example</code> has two dependencies and to make sure those dependencies are loaded and defined before <code>com.example.Example</code> is defined.
 
 If you specify dependencies, Minion store's references to those dependencies under <code>this.__imports</code>
 
@@ -110,6 +113,20 @@ This means you can do things like this:
 		})
 		
 	});
+	
+	
+This is a quality of life thing, and ensures that you are remembering to import all your dependencies on a class-by-class basis.
+You can also get Classes, by calling <code>minion.get()</code> like so:
+
+	var Dependency1 = minion.get("com.example.Dependency1");
+	var someInstance = new Dependency1();
+	
+However, <code>minion.get()</code> does not synchronously load in the Class if it has not yet been loaded and defined, nothing in Minion is synchronous, so this will only work if you have already loaded in the Class.
+
+Thus, <code>minion.get()</code> has limited uses, instead you will most likely be using <code>minion.require()</code>
+
+
+## minion.require();
 
 
 ## Documentation
