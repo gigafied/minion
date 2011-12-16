@@ -8,7 +8,7 @@ Minion handles all the nitty-gritty, so you can focus on the important stuff, li
 
 ####Features:
 
-- Inheritance in JavaScript!?
+- Classical Inheritance in JavaScript
 - Dependency management
 - Singleton classes
 - Static classes, methods and properties
