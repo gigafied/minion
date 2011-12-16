@@ -219,6 +219,27 @@ To start using your classes, you'll need to call two methods, <code>minion.confi
 
 The callback function takes x number of arguments, where x = the number of classes you pass in the first argument. It provides an easy way to reference your classes. Any callback function argument specified will match up to the index of the array you provide in the first argument.
 
+
+## Packaging Your Classes Up
+
+If you are working inside Node.js this is unneccessary, however for browser-based development, you are going to need to combine all your classes into a nice neat little minified js file (or a couple minified js files).
+
+This is where the build tool comes in:
+
+	minion build com.example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js -i
+
+It's that easy! What this does is compile all your classes into one neat little minified js file (using UglifyJS for compression).
+
+<code>-p</code> The path to your class definitions.
+<code>-o</code> This specifies the file you want MinionJS to write the minified contents to.
+<code>-i</code> Whether or not to include MinionJS in the minified js file. Don't pass this if you want to include Minion separately
+
+The build tool is a major focus right now, soon we will have an option to run it with a config.json, making it easier on you :)
+
+## WOOT!!! 
+
+If you've made it here, you should now have a pretty solid understanding of MinionJS and how to use it. We also threw some [JSDocs](http://gigafied.github.com/minion/docs/) together, if you want to dive in even deeper.
+
 ## Documentation
 
 JSDocs available at: http://gigafied.github.com/minion/docs/
