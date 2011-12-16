@@ -10,7 +10,7 @@ Minion enables you to easily namespace, create and extend custom classes.
 - Dependency management
 - Singleton classes
 - Static classes, methods and properties
-- Intuitive pub/sub
+- Intuitive publish/subscribe model
 - this.__super() method support 
 - Build tool for easy deployment (for browser-based applications)
 
