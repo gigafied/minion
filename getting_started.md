@@ -58,7 +58,7 @@ The first argument of <code>minion.define()</code> is a namespace identifier. Th
 <code>init()</code> is the Constructor for all classes, it acts like a normal function, it can accept any number of arguments.
 
 
-## Class Goodies:
+## Class Goodies
 
 You can optionally specify a <code>require</code> array before your Class defintion, like this:
 
@@ -114,9 +114,108 @@ This means you can do things like this:
 		
 	});
 	
+
+####Extending your own classes
+
+Of course, you can extend your own classes as well, as long as somewhere up the chain, a class extends one of Minion's base Classes (<code>minion.Class</code>, <code>minion.Singleton</code> or <code>minion.Static</code>)
+
+
+	minion.define("com.example", {
+
+		Example2 : minion.extend("com.example.Example", {
+
+
+			init: function(){
+
+				this.__super();
+
+			},
+
+
+			doSomething : function(something){
+				this.__super(something);
+			}
+
+		})
+		
+	});
 	
+	
+You'll notice some calls to to <code>this.\_\_super()</code>. <code>this.\_\_super()</code> references the parent class' method, by the same name, and yes you can pass arguments.
+
+
+####Static Properties & Methods
+
+You can implement static methods and properties on Classes, by specifying all static properties and methods inside a <code>\_\_static</code> property, like this:
+
+	minion.define("com.example", {
+
+		Example : minion.extend("minion.Class", {
+
+			__static : {
+				
+				someStaticMethod : function(){
+					
+				},
+
+				someStaticProperty : "I am static";
+
+			},
+
+			init : function(){
+				
+			}
+
+		})
+		
+	});
+	
+You will then be able to access these methods and properties with <code>Example.someStaticMethod()</code> and <code>Example.someStaticProperty</code>
+
+NOTE: Static methods are not extendable. I.e. you can not call <code>this.\_\_super</code> from within a static method.
+
+
+####Static Classes
+
+If you want to create a completely static class, simply extend <code>minion.Static</code> instead of <code>minion.Class</code>
+
+NOTE: Methods on static classes have no concept of <code>this.\_\_super()</code>
+
+
+####Singleton Classes
+
+You can implement Singleton's by extending <code>minion.Singleton</code> instead of <code>minion.Class</code>
+
+Singleton's will not throw an error if you try to instantiate them more than once, they will just return the original instance.
+
+Singleton's also have a static <code>.getInstance()</code> method that you can call at any time, even if the Class has not yet been instantiated anywhere. It will create a new instance and return that, or return an already existing instance.
+
+
 ## Using Your Classes
 
+To start using your classes, you'll need to call two methods, <code>minion.configure()</code> and <code>minion.require()</code>:
+
+
+	minion.configure({
+		classPath : "path/to/your/js"
+	});
+
+	minion.require("com.example.Example", function(Example){
+
+		var instance = new Example();
+
+		instance.doSomething();
+
+	})
+
+
+<code>minion.configure()</code> takes a configuration Object, you can pass a few more things than <code>classPath</code> but we'll talk more about that later.
+
+<code>classPath</code> is relative to where you currently are. I.e. if you're calling it from an HTML page (or a js file that gets loaded in via a HTML page), it is relative to that HTML page. If you're calling it from node, it's relative to where your .js file is running from.
+
+<code>minion.require()</code> takes two arguments. The first is the fully qualified class name(s) of the class(es) you want to use. This can be a string, or an array. The second argument is a callback function. This function gets called once the classes specified in the first argument (and their dependencies) have been loaded and defined.
+
+The callback function takes x number of arguments, where x = the number of classes you pass in the first argument. It provides an easy way to reference your classes. Any callback function argument specified will match up to the index of the array you provide in the first argument.
 
 ## Documentation
 
