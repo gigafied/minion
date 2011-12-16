@@ -37,36 +37,39 @@ Minion is a micro-framework. Which means, Minion does all this, all while sporti
 - Minion does not touch native JavaScript prototypes. I.E. no Object.prototype.someSuperAwesomeMethod___weThink();
 - Damage Control. No global pollution (by default). All classes reside under the minion namespace. This is good, trust us.
 
-## Example
+## Examples
 
 #### Defining a Class:
 
 	minion.define("com.example", {
 	  
-	  Example : minion.extend("minion.Class", {
+	    Example : minion.extend("minion.Class", {
 
-	    exampleVar1: 1,
-	    exampleVar2: 2,
+	        exampleVar1: 1,
+	        exampleVar2: 2,
 
-	    init: function(){
+  	        init: function(){
 	      
-	    },
+	        },
 
-	    doSomething : function(something){
-	      //do something with something
-	    }
-	  })
+	        doSomething : function(something){
+	            //do something with something
+	        }
+	    })
+	    
 	});
 
 #### Using a Class:
 
 	minion.require("com.example.Example3", function(Example3) {
-	  var instance = new Example3();
-	  instance.someMethod();
+	
+	    var instance = new Example3();
+	    instance.someMethod();
+	  
 	})
 
 That's the core of Minion, it's that simple. There's a bit more you can do obviously, but we wanted to give you an idea of 
-what you can do with Minion in under 20 lines of code. Refer to Getting Started to dive in deeper.
+what you can do with Minion in under 20 lines of code. See [Getting Started](https://github.com/gigafied/minion/blob/master/getting_started.md) to dive in deeper.
 
 ## Getting Started
 
@@ -76,9 +79,6 @@ https://github.com/gigafied/minion/blob/master/getting_started.md
 
 JSDocs available at: http://gigafied.github.com/minion/docs/
 
-## Examples
-
-TODO
 
 ## Contributing
 
