@@ -14,7 +14,6 @@
 	D: {
 		"author": "Taka Kojima <taka.kojima@ff0000.com> (taka.kojima@ff0000.com)",
 		"name": "f0xy",
-		"version": "1.4.0",
 		"homepage": "https://github.com/gigafied/f0xy",
 		"repository": "git@github.com:gigafied/f0xy.git",
 		"noGlobal": "true"

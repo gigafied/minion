@@ -1,3 +1,5 @@
+# TODO : Move all this make stuff into make.js
+
 OVERRIDING=default
 
 SRC_DIR = src
@@ -32,7 +34,7 @@ BRANCH=${branch_name:-HEAD}
 m=0
 b=0
 
-all: update_submodules core
+all: core node
 
 core: min docs
 	@@echo "f0xy build complete."
@@ -52,7 +54,6 @@ f0xy:
 		sed 's/@VERSION/'"${VER}"'/' > ${PREFIX}/bin/f0xy.js;
 
 min: f0xy
-
 	@@${COMPILER} ${F0XY} > ${F0XY_MIN}
 
 	@@cat ${HEADER} ${F0XY_MIN} | \
@@ -62,8 +63,7 @@ min: f0xy
 	@@mv bin/tmp ${F0XY_MIN}
 
 docs: f0xy
-
-	node_modules/jsdoc-toolkit/app/run.js -c=${SRC_DIR}/jsdoc.conf
+	node_modules/jsdoc-toolkit/app/run.js -c=${SRC_DIR}/jsdoc-conf.json
 
 size: f0xy min
 	@@gzip -c ${F0XY_MIN} > ${F0XY_MIN}.gz; \
@@ -75,19 +75,5 @@ push_docs: docs
 	git commit -am "updated docs"; \
 	git push origin gh-pages
 
-# change pointers for submodules and update them to what is specified in jQuery
-# --merge  doesn't work when doing an initial clone, thus test if we have non-existing
-#  submodules, then do an real update
-update_submodules:
-	@@if [ -d .git ]; then \
-		if git submodule status | grep -q -E '^-'; then \
-			git submodule update --init --recursive; \
-		else \
-			git submodule update --init --recursive --merge; \
-		fi; \
-	fi;
-
-# update the submodules to the latest at the most logical branch
-pull_submodules:
-	@@git submodule foreach "git pull \$$(git config remote.origin.url)"
-	@@git submodule summary
+node:
+	@@node make.js
