@@ -220,6 +220,112 @@ To start using your classes, you'll need to call two methods, <code>minion.confi
 The callback function takes x number of arguments, where x = the number of classes you pass in the first argument. It provides an easy way to reference your classes. Any callback function argument specified will match up to the index of the array you provide in the first argument.
 
 
+## Publish/Subscribe
+
+MinionJS implements a simple, yet robust pub/sub model.
+
+#### Subscribe
+
+All Classes have a <code>subscribe()</code> method. To subscribe to things, do this:
+
+
+	minion.define("com.example", {
+
+		SubscribeExample : minion.extend("minion.Class", {
+
+			init: function(){
+
+				this.subscribe("something", this._handleSomething);
+
+			},
+
+			_handleSomething : function (n) {
+				console.log(n.data.someProperty);
+			}
+
+		})
+		
+	});
+
+<code>subscribe()</code> takes three arguments. The first two are mandatory, the other is optional. The first, a String, for the notification you want to listen for. The second, a function that handles the notification.
+
+The third argument <code>subscribe</code> accepts is <code>priority</code>. By default <code>subscribe</code> will add an instance to the end of a notification list. However, by passing in a value for <code>priority</code>, we can change this behavior.
+
+For example:
+
+		this.subscribe("something", this._handleSomething, 0);
+		
+This will make it so that <code>this</code> receives the Notification before all other already subscribed instances. 
+
+
+#### Publish
+
+All Classes also have a <code>publish</code> method. To publish things, do this:
+
+	minion.define("com.example", {
+
+		PublishExample : minion.extend("minion.Class", {
+
+			init: function(){
+
+				this.doSomething("something");
+
+			},
+
+			doSomething : function (someValue){
+				this.publish("something", {someProperty : someValue})
+			}
+
+		})
+		
+	});
+
+### Notifications
+
+Notifications are similar to events, except events bubble and usually follow heirarchy. I.e child or sibling objects don't receive events fired by their parents or siblings.
+
+Notifications don't bubble, you can subscribe and publish notifications to and from anywhere. You also don't do <code>this.someChildInstance.subscribe()</code>, it's always <code>this.subscribe()</code>
+
+Notification handler functions receive a <code>Notification</code> Object. <code>Notifications</code> have three properties:
+
+- <code>data</code>. An Object of data that gets passed with the Notification.
+- <code>name</code>. A String representing the name of the notification, in this case it is "something".
+- <code>dispatcher</code>. A reference to the Class instance that dispatched the notification.
+
+Notifications also have these three methods:
+
+- <code>hold</code>. Suspends any subsequent instances from receiving this Notification.
+- <code>release</code>. Releases a Notification. Called some point after <code>hold()</code>.
+- <code>cancel</code>. Cancels a Notification. Like <code>hold()</code>, but once cancelled Notifications can no longer be released.
+
+<code>hold()</code> and <code>release()</code> are very powerful and can be used to accomplish some pretty nifty things.
+
+Simple example of <code>hold()</code> and <code>release()</code>
+
+			_handleSomething : function (n) {			
+				console.log(n.data.something);
+				
+				n.hold();
+
+				setTimeout(function(){
+					n.release();
+				}, 2000)
+
+			}
+
+Any instances other than <code>this</code> will still receive the Notification, however, <code>_handleSomething()</code> holds the Notification, and then releases it 2 seconds later.
+I'll leave the rest up to your own devices.
+
+Similarly, we can use <code>cancel()</code>:
+
+			_handleSomething : function (n) {			
+				console.log(n.data.something);			
+				n.cancel();
+			}
+
+
+This will make it so that any other instances listening for this Notification, won't hear about it.
+
 ## Packaging Your Classes Up
 
 If you are working inside Node.js this is unneccessary, however for browser-based development, you are going to need to combine all your classes into a nice neat little minified js file (or a couple minified js files).
