@@ -17,7 +17,7 @@ Or you can just clone this project via git:
 	git clone git://github.com/gigafied/minion.git
 
 
-If you just want to start playing around without installing anything, grab the source [here](https://github.com/gigafied/minion/blob/master/dist/minion.1.4.1.js) and include it via a <script> tag in a an html page.
+If you just want to start playing around without installing anything, grab the source [here](https://github.com/gigafied/minion/blob/master/dist/minion.1.4.1.js) and include it via a &lt;script&gt; tag in a an html page.
 
 
 ## Further Documentation
