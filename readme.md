@@ -1,6 +1,6 @@
-## MinionJS - Cross-Platform & Cross-Browser JavaScript Inheritance
+## MinionJS - Cross-Platform & Cross-Browser JavaScript Classical Inheritance
 
-The goal of Minion is to provide easy-to-use, easy-to-learn inheritance for JavaScript.
+The goal of Minion is to provide easy-to-use, easy-to-learn classical inheritance for JavaScript.
 
 Minion enables you to easily namespace, create and extend custom classes.
 
@@ -16,9 +16,16 @@ Minion handles all the nitty-gritty, so you can focus on the important stuff, li
 - this.__super() method support 
 - Build tool for easy deployment (for browser-based applications)
 
-Minion does all this, all while sporting a tiny footprint of 3.9k (minified and gzipped).
+Minion is a micro-framework. Which means, Minion does all this, all while sporting a tiny footprint of 3.9k (minified and gzipped).
 
-Minion currently supports Node.js IE7+, Safari 3+, Opera 9.0+ and Chrome (other browsers probably work, but have not been thoroughly tested).
+#### Currently Supported:
+
+- Node.js
+- IE7+
+- Safari 3+
+- Opera 9.0+ 
+- Chrome
+- (Other browsers/platforms probably work, but have not been thoroughly tested).
 
 ####Some other cool little factoids:
 
