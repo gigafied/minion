@@ -1,4 +1,4 @@
-## Minion - Cross-Platform & Cross-Browser JavaScript Inheritance
+## MinionJS - Cross-Platform & Cross-Browser JavaScript Inheritance
 
 The goal of Minion is to provide easy-to-use, easy-to-grasp inheritance support for JavaScript.
 
