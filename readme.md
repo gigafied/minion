@@ -1,9 +1,9 @@
-### minion - Foxy JavaScript Inheritance
+### Minion - Inheritance in JavaScripte
 
 
-The goal of minion is to provide easy-to-use inheritance and class support for JavaScript.
+The goal of Minion is to provide easy-to-use inheritance and class support for JavaScript.
 
-minion enables you to easily create and extend custom classes and namespace your classes.
+Minion enables you to easily create and extend custom classes and namespace your classes.
 
 Other Features:
 
