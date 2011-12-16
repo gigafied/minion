@@ -331,13 +331,13 @@ This will make it so that any other instances listening for this Notification, w
 
 ## Packaging Your Classes Up
 
-If you are working inside Node.js this is unneccessary, however for browser-based development, you are going to need to combine all your classes into a nice neat little minified js file (or a couple minified js files).
+If you are working inside Node.js this is unneccessary, however for browser-based development, you are going to need to combine all your classes into a nice neat little minified js file (or a couple minified js files) for deployment.
 
 This is where the build tool comes in:
 
 	minion build com.example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js -i
 
-It's that easy! What this does is compile all your classes into one neat little minified js file (using UglifyJS for compression).
+It's that easy! What this does is compile a class (and all of it's dependencies) into one neat little minified js file (using UglifyJS for compression).
 
 - <code>-p</code> The path to your class definitions.
 - <code>-o</code> This specifies the file you want MinionJS to write the minified contents to.
