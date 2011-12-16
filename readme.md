@@ -39,7 +39,7 @@ Minion is a micro-framework. Which means, Minion does all this, all while sporti
 
 ## Installation
 
-Grab the latest version of node [here](http://nodejs.org/)
+Grab the latest version of Node.js [here](http://nodejs.org/)
 
 Since Node.js now comes bundled with [npm](http://github.com/isaacs/npm), you no longer have to install it separately.
 

@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Fri Dec 16 12:03:22 2011 -0800
+ * Date: Fri Dec 16 12:23:26 2011 -0800
  */
  /**
 
@@ -464,23 +464,23 @@ var minion = (function (root) {
 	* Configure minion.
 	* 
 	* @public
-	* @param		 {Object}		configObj					Configuration object, possible properties are : rootPath, separator and fileSuffix
+	* @param		 {Object}		configObj			Configuration object, possible properties are : classPath, separator and fileSuffix
 	*/
 
 	_minion.configure = function (configObj) {
 		
 		configObj = configObj || {};
 
-		_class_path = configObj.rootPath || _class_path;
+		_class_path = configObj.classPath || _class_path;
 		_class_path = (_class_path.lastIndexOf("/") === _class_path.length - 1) ? _class_path : _class_path + "/";
 
 		_separator = configObj.separator || _separator;
 		_file_suffix = configObj.fileSuffix || _file_suffix;
 
-		var pollute = true;
+		var pollute = false;
 
-		if(configObj.noPollution){
-			pollute = !configObj.noPollution;
+		if(configObj.pollute === true){
+			pollute = configObj.pollute;
 		}
 
 		if(configObj.rootNS) {
@@ -489,11 +489,9 @@ var minion = (function (root) {
 
 		var i;
 
-		if (_initialized && configObj.noPollution !== true) {
-			if (pollute !== false) {
-				_copyToNS(_ns, _root);
-				_pollute = true;
-			}
+		if (_initialized && pollute === true) {
+			_copyToNS(_ns, _root);
+			_pollute = true;
 		}
 		else{
 			_removeFromNS(_ns, _root);
@@ -687,8 +685,7 @@ var minion = (function (root) {
 	};
 
 	/**
-	* Imports classes from the specified namespace to the specified object/scope.
-	* You are responsible for not polluting the global namespace.
+	* Copies an array of classes (by their fully qualified names) to the specified object/scope.
 	*
 	* By calling minion.use("com.test.Example", obj), you will be able to refer to com.test.Example as just obj.Example.
 	* 
@@ -739,7 +736,8 @@ var minion = (function (root) {
 
 		return scope;
 	};
-
+	
+	/** @private */
 	_minion.getLoadedFiles = function () {
 		return _loadedFiles.concat();
 	};

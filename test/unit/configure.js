@@ -19,8 +19,8 @@
 	// Do the first configure test
 	minion.configure(
 		{
-			rootPath: "unit/classes",
-			noPollution: true
+			classPath: "unit/classes",
+			pollute: false
 		}
 	);
 
@@ -37,8 +37,8 @@
 		invokeTimeout();
 	});
 
-	// Test whether noPollution is working
-	asyncTest('noPollution', function() {
+	// Test whether pollute is working
+	asyncTest('pollute', function() {
 		
 		expect(4);
 
@@ -53,7 +53,7 @@
 			// Do the first configure test
 			minion.configure(
 				{
-					noPollution: false
+					pollute: true
 				}
 			);
 
@@ -63,7 +63,7 @@
 			// Do the first configure test
 			minion.configure(
 				{
-					noPollution: true
+					pollute: false
 				}
 			);
 
