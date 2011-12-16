@@ -1,8 +1,10 @@
 ## MinionJS - Cross-Platform & Cross-Browser JavaScript Inheritance
 
-The goal of Minion is to provide easy-to-use, easy-to-grasp inheritance support for JavaScript.
+The goal of Minion is to provide easy-to-use, easy-to-learn inheritance for JavaScript.
 
 Minion enables you to easily namespace, create and extend custom classes.
+
+Minion handles all the nitty-gritty, so you can focus on the important stuff, like ironing out the final details for your plan of global domination.
 
 ####Features:
 
