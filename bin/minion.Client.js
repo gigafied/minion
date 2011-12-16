@@ -1,6 +1,6 @@
 (function(){
 
-	var minion = require('./minion.js');
+	var minion = require(__dirname + '/minion.js');
 
 	minion.define("minion", {
 		
@@ -22,14 +22,14 @@
 				var c = this._args._[1];
 
 				minion.configure({
-					rootPath : path
+					classPath : path
 				});
 
 				minion.require(c, this.proxy(function(Class){
 
 					var files = minion.getLoadedFiles();
 
-					var output = this._args.i ? this._compress("./minion.js") : "";
+					var output = this._args.i ? this._compress(__dirname + "/minion.js") : "";
 
 					for(var i = 0; i < files.length; i ++){
 						var file = files[i];

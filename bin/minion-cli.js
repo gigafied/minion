@@ -2,7 +2,7 @@
 
 (function(){
 
-	minion = require('./minion.js');
+	minion = require(__dirname + '/minion.js');
 
 	var argv = require('optimist').argv;
 
