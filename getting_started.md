@@ -292,7 +292,7 @@ Notifications don't bubble, you can subscribe and publish notifications to and f
 Notification handler functions receive a <code>Notification</code> Object. <code>Notifications</code> have three properties:
 
 - <code>data</code>. An Object of data that gets passed with the Notification.
-- <code>name</code>. A String representing the name of the notification, in this case it is "something".
+- <code>name</code>. A String representing the name of the notification, in the above examples, this is "something".
 - <code>dispatcher</code>. A reference to the Class instance that dispatched the notification.
 
 Notifications also have these three methods:
