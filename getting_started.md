@@ -230,11 +230,37 @@ This is where the build tool comes in:
 
 It's that easy! What this does is compile all your classes into one neat little minified js file (using UglifyJS for compression).
 
-<code>-p</code> The path to your class definitions.
-<code>-o</code> This specifies the file you want MinionJS to write the minified contents to.
-<code>-i</code> Whether or not to include MinionJS in the minified js file. Don't pass this if you want to include Minion separately
+- <code>-p</code> The path to your class definitions.
+- <code>-o</code> This specifies the file you want MinionJS to write the minified contents to.
+- <code>-i</code> Whether or not to include MinionJS in the minified js file. Don't pass this if you want to include Minion separately
 
 The build tool is a major focus right now, soon we will have an option to run it with a config.json, making it easier on you :)
+
+
+####minion.provides()
+
+<code>minion.provides()</code> provides you with a way to explicitly specify where Classes are defined.
+
+For example:
+
+	minion.provides("path/to/js/classes.min.js", [
+		"com.example.Example",
+		"com.example.Example2",
+		"com.example.Example3"
+	]);
+
+	minion.provides("path/to/js/classes2.min.js", [
+		"com.example.Example4",
+		"com.example.Example5",
+		"com.example.Example6"
+	]);
+
+
+This let's you group classes and dependencies into multiple files, for optimization. For instance, say you only need x, y and z class when the App starts up, but later on you require other Classes.
+
+Rather than throwing all Classes into one minified file, you can separate them out, which means faster initial loading. You can then even preload all other classes, or load them on an as-needed basis, the option is up to you.
+
+Just make sure all <code>minion.provides()</code> calls happen before the first <code>minion.require()</code> call.
 
 ## WOOT!!! 
 
