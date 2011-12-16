@@ -27,7 +27,92 @@ If you just want to start playing around without installing anything grab the so
 (Yep, you only need one lousy .js file!)
 
 
-## Further Documentation
+## Defining a Class
+
+To define a new Class create a new JS file, with the following syntax:
+
+	minion.define("com.example", {
+
+		Example : minion.extend("minion.Class", {
+
+			exampleVar1: 1,
+			exampleVar2: 2,
+
+			init: function(){
+
+			},
+
+			doSomething : function(something){
+				//do something with something
+			}
+		})
+		
+	});
+
+Save this file to: <code>path/to/your/js/com/example/Example.js</code>
+
+What the above code does is declare a new class called <code>Example</code> under the <code>com.example</code> namespace, that extends <code>minion.Class</code> (the Minion base class).
+
+The first argument of <code>minion.define()</code> is a namespace identifier. The second argument is an Object, and while it is an Object, you only define one Class per define call. We use Object syntax, so you can easily declare the name of your Class.
+
+<code>init()</code> is the Constructor for all classes, it acts like a normal function, it can accept any number of arguments.
+
+You can also optionally specify a <code>require</code> array before your Class defintion, like this:
+
+	minion.define("com.example", {
+
+		require : [
+			"com.example.Dependency1",
+			"com.example.Dependency2"
+		],
+
+		Example : minion.extend("minion.Class", {
+
+			exampleVar1: 1,
+			exampleVar2: 2,
+
+			init: function(){
+
+			},
+
+			doSomething : function(something){
+				//do something with something
+			}
+		})
+		
+	});
+	
+By doing this, you tell Minion that <code>com.example.Example</code> has two dependencies and two make sure those dependencies are imported and defined, before <code>com.example.Example</code> is defined.
+
+If you specify dependencies, Minion store's references to those dependencies under <code>this.__imports</code>
+
+This means you can do things like this:
+
+
+	minion.define("com.example", {
+
+		require : [
+			"com.example.Dependency1",
+			"com.example.Dependency2"
+		],
+
+		Example : minion.extend("minion.Class", {
+
+			someInstance: null,
+			someOtherInstance: null,
+
+			init: function(){
+				
+				this.someInstance = new this.__imports.Dependency1();
+				this.someOtherInstance = new this.__imports.Dependency2();
+			}
+
+		})
+		
+	});
+
+
+## Documentation
 
 JSDocs available at: http://gigafied.github.com/minion/docs/
 
