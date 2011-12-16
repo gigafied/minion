@@ -115,18 +115,7 @@ This means you can do things like this:
 	});
 	
 	
-This is a quality of life thing, and ensures that you are remembering to import all your dependencies on a class-by-class basis.
-You can also get Classes, by calling <code>minion.get()</code> like so:
-
-	var Dependency1 = minion.get("com.example.Dependency1");
-	var someInstance = new Dependency1();
-	
-However, <code>minion.get()</code> does not synchronously load in the Class if it has not yet been loaded and defined, nothing in Minion is synchronous, so this will only work if you have already loaded in the Class.
-
-Thus, <code>minion.get()</code> has limited uses, instead you will most likely be using <code>minion.require()</code>
-
-
-## minion.require();
+## Using Your Classes
 
 
 ## Documentation
