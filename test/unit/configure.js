@@ -48,7 +48,7 @@
 			ok(!window.com, "Test Class not reachable under the global namespace.");
 
 			// Class should be gettable with minion.get
-			ok(minion.get("com.minion.test.ConfigureTest"), "Test Class reachable with minion.get('com.minion.test.ConfigureTest') with noPollution = true");
+			ok(minion.get("com.minion.test.ConfigureTest"), "Test Class reachable with minion.get('com.minion.test.ConfigureTest') with pollute = false");
 
 			// Do the first configure test
 			minion.configure(
@@ -58,7 +58,7 @@
 			);
 
 			// Class should now exist globally
-			ok(com.minion.test.ConfigureTest, "Test Class now exists globally, after noPollution = false was set.");
+			ok(com.minion.test.ConfigureTest, "Test Class now exists globally, after pollute = true was set.");
 
 			// Do the first configure test
 			minion.configure(
@@ -68,7 +68,7 @@
 			);
 
 			// Class should not exist globally
-			ok(!window.com, "Test Class no longer reachable globally after subsequent noPollution = true");
+			ok(!window.com, "Test Class no longer reachable globally after subsequent pollute = false");
 
 			start();
 		});
