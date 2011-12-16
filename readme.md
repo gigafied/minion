@@ -15,8 +15,8 @@ Minion handles all the nitty-gritty, so you can focus on the important stuff, li
 - Intuitive publish/subscribe model
 - this.__super() method support 
 - Build tool for easy deployment (for browser-based applications)
+- Minion does all this, all while sporting a tiny footprint of 3.9k (minified and gzipped).
 
-Minion is a micro-framework. Which means, Minion does all this, all while sporting a tiny footprint of 3.9k (minified and gzipped).
 
 #### Currently Supported:
 
@@ -26,6 +26,7 @@ Minion is a micro-framework. Which means, Minion does all this, all while sporti
 - Opera 9.0+ 
 - Chrome
 - (Other browsers/platforms probably work, but have not been thoroughly tested).
+
 
 ####Some other cool little factoids:
 
@@ -37,7 +38,9 @@ Minion is a micro-framework. Which means, Minion does all this, all while sporti
 - Minion does not touch native JavaScript prototypes. I.E. no Object.prototype.someSuperAwesomeMethod___weThink();
 - Damage Control. No global pollution (by default). All classes reside under the minion namespace. This is good, trust us.
 
+
 ## Examples
+
 
 #### Defining a Class:
 
@@ -59,7 +62,9 @@ Minion is a micro-framework. Which means, Minion does all this, all while sporti
 	    
 	});
 
+
 #### Using a Class:
+
 
 	minion.require("com.example.Example3", function(Example3) {
 	
@@ -67,6 +72,7 @@ Minion is a micro-framework. Which means, Minion does all this, all while sporti
 	    instance.doSomething();
 	  
 	})
+
 
 That's the core of Minion, it's that simple. There's a bit more you can do obviously, but we wanted to give you an idea of 
 what you can do with Minion in under 20 lines of code. See [Getting Started](https://github.com/gigafied/minion/blob/master/getting_started.md) to dive in deeper.
