@@ -37,19 +37,36 @@ Minion is a micro-framework. Which means, Minion does all this, all while sporti
 - Minion does not touch native JavaScript prototypes. I.E. no Object.prototype.someSuperAwesomeMethod___weThink();
 - Damage Control. No global pollution (by default). All classes reside under the minion namespace. This is good, trust us.
 
-## Installation
+## Example
 
-Grab the latest version of Node.js [here](http://nodejs.org/)
+#### Defining a Class:
 
-Since Node.js now comes bundled with [npm](http://github.com/isaacs/npm), you no longer have to install it separately.
+	minion.define("com.example", {
+	  
+	  Example : minion.extend("minion.Class", {
 
-Once you have Node.js installed, just do:
+	    exampleVar1: 1,
+	    exampleVar2: 2,
 
-	npm install minion-js
+	    init: function(){
+	      
+	    },
 
-Or you can just clone this project via git:
+	    doSomething : function(something){
+	      //do something with something
+	    }
+	  })
+	});
 
-	git clone git://github.com/gigafied/minion.git
+#### Using a Class:
+
+	minion.require("com.example.Example3", function(Example3) {
+	  var instance = new Example3();
+	  instance.someMethod();
+	})
+
+That's the core of Minion, it's that simple. There's a bit more you can do obviously, but we wanted to give you an idea of 
+what you can do with Minion in under 20 lines of code. Refer to Getting Started to dive in deeper.
 
 ## Getting Started
 

@@ -16,8 +16,17 @@ Or you can just clone this project via git:
 
 	git clone git://github.com/gigafied/minion.git
 
+If you're gonna be developing inside Node.js, all you need is:
 
-If you just want to start playing around without installing anything, grab the source [here](https://github.com/gigafied/minion/blob/master/dist/minion.1.4.1.js) and include it via a &lt;script&gt; tag in a an html page.
+	var minion = require("minion-js");
+
+If you're gonna be developing via the browser, copy the minion.1.4.1.js (or minion.1.4.1.min.js) to a place of your choosing and include it via a  &lt;script&gt; tag.
+
+If you just want to start playing around without installing anything grab the source [here](https://github.com/gigafied/minion/blob/master/dist/minion.1.4.1.js)
+(Yep, you only need one lousy .js file!)
+
+
+## Further Documentation
 
 
 ## Further Documentation
