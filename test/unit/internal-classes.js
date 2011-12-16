@@ -25,11 +25,11 @@
 		}, timeout);
 	}
 
-	function f0xyRequireTest(className){
+	function minionRequireTest(className){
 		return asyncTest(className, function() {
 
-			f0xy.require(className, function(){
-				ok(f0xy.get(className), className + " is defined");
+			minion.require(className, function(){
+				ok(minion.get(className), className + " is defined");
 				start();
 			});
 
@@ -37,13 +37,13 @@
 		})
 	}
 
-	module("f0xy internal classes");
+	module("minion internal classes");
 
-	f0xyRequireTest("f0xy.__BaseClass__");
-	f0xyRequireTest("f0xy.Class");
-	f0xyRequireTest("f0xy.Singleton");
-	f0xyRequireTest("f0xy.Static");
-	f0xyRequireTest("f0xy.NotificationManager");
-	f0xyRequireTest("f0xy.Notification");
+	minionRequireTest("minion.__BaseClass__");
+	minionRequireTest("minion.Class");
+	minionRequireTest("minion.Singleton");
+	minionRequireTest("minion.Static");
+	minionRequireTest("minion.NotificationManager");
+	minionRequireTest("minion.Notification");
 
 })();

@@ -10,20 +10,20 @@ DIST_DIR = ${PREFIX}/dist
 
 COMPILER = uglifyjs -nc --unsafe
 
-HEADER = ${SRC_DIR}/f0xy.header.js
+HEADER = ${SRC_DIR}/minion.header.js
 
 FILES = ${HEADER}\
-	${SRC_DIR}/f0xy.main.js\
-	${SRC_DIR}/f0xy.baseclass.js\
-	${SRC_DIR}/f0xy.class.js\
-	${SRC_DIR}/f0xy.static.js\
-	${SRC_DIR}/f0xy.singleton.js\
-	${SRC_DIR}/f0xy.notifications.js\
+	${SRC_DIR}/minion.main.js\
+	${SRC_DIR}/minion.baseclass.js\
+	${SRC_DIR}/minion.class.js\
+	${SRC_DIR}/minion.static.js\
+	${SRC_DIR}/minion.singleton.js\
+	${SRC_DIR}/minion.notifications.js\
 
 VER = $(shell cat version.txt)
 
-F0XY = ${DIST_DIR}/f0xy.${VER}.js
-F0XY_MIN = ${DIST_DIR}/f0xy.${VER}.min.js
+minion = ${DIST_DIR}/minion.${VER}.js
+minion_MIN = ${DIST_DIR}/minion.${VER}.min.js
 
 DATE=$(shell git log -1 --pretty=format:%ad)
 
@@ -37,38 +37,38 @@ b=0
 all: core node
 
 core: min docs
-	@@echo "f0xy build complete."
+	@@echo "minion build complete."
 
-f0xy: 
-	@@echo "Building" ${F0XY}
+minion: 
+	@@echo "Building" ${minion}
 	@@echo "Version:" ${VER}
 
 	@@mkdir -p ${DIST_DIR}
 
 	@@cat ${FILES} | \
 		sed 's/@DATE/'"${DATE}"'/' | \
-		sed 's/@VERSION/'"${VER}"'/' > ${F0XY};
+		sed 's/@VERSION/'"${VER}"'/' > ${minion};
 
 	@@cat ${FILES} | \
 		sed 's/@DATE/'"${DATE}"'/' | \
-		sed 's/@VERSION/'"${VER}"'/' > ${PREFIX}/bin/f0xy.js;
+		sed 's/@VERSION/'"${VER}"'/' > ${PREFIX}/bin/minion.js;
 
-min: f0xy
-	@@${COMPILER} ${F0XY} > ${F0XY_MIN}
+min: minion
+	@@${COMPILER} ${minion} > ${minion_MIN}
 
-	@@cat ${HEADER} ${F0XY_MIN} | \
+	@@cat ${HEADER} ${minion_MIN} | \
 		sed 's/@DATE/'"${DATE}"'/' | \
 		sed 's/@VERSION/'"${VER}"'/' > bin/tmp
 
-	@@mv bin/tmp ${F0XY_MIN}
+	@@mv bin/tmp ${minion_MIN}
 
-docs: f0xy
+docs: minion
 	node_modules/jsdoc-toolkit/app/run.js -c=${SRC_DIR}/jsdoc-conf.json
 
-size: f0xy min
-	@@gzip -c ${F0XY_MIN} > ${F0XY_MIN}.gz; \
-	wc -c ${F0XY} ${F0XY_MIN} ${F0XY_MIN}.gz;
-	@@rm ${F0XY_MIN}.gz; \
+size: minion min
+	@@gzip -c ${minion_MIN} > ${minion_MIN}.gz; \
+	wc -c ${minion} ${minion_MIN} ${minion_MIN}.gz;
+	@@rm ${minion_MIN}.gz; \
 
 push_docs: docs
 	cd gh-pages; git add .; \

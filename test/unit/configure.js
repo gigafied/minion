@@ -14,10 +14,10 @@
 		}, timeout);
 	}
 
-	module("f0xy.configure()");
+	module("minion.configure()");
 
 	// Do the first configure test
-	f0xy.configure(
+	minion.configure(
 		{
 			rootPath: "unit/classes",
 			noPollution: true
@@ -27,10 +27,10 @@
 	// Test whether rootPath is working
 	asyncTest('rootPath', function() {
 
-		f0xy.require("com.f0xy.test.ConfigureTest", function(){
+		minion.require("com.minion.test.ConfigureTest", function(){
 
 			// Class should be defined
-			ok(f0xy.get("com.f0xy.test.ConfigureTest"), "rootPath is being used.");
+			ok(minion.get("com.minion.test.ConfigureTest"), "rootPath is being used.");
 			start();
 		});
 
@@ -42,26 +42,26 @@
 		
 		expect(4);
 
-		f0xy.require("com.f0xy.test.ConfigureTest", function(){
+		minion.require("com.minion.test.ConfigureTest", function(){
 			
 			// Class should not exist globally
 			ok(!window.com, "Test Class not reachable under the global namespace.");
 
-			// Class should be gettable with f0xy.get
-			ok(f0xy.get("com.f0xy.test.ConfigureTest"), "Test Class reachable with f0xy.get('com.f0xy.test.ConfigureTest') with noPollution = true");
+			// Class should be gettable with minion.get
+			ok(minion.get("com.minion.test.ConfigureTest"), "Test Class reachable with minion.get('com.minion.test.ConfigureTest') with noPollution = true");
 
 			// Do the first configure test
-			f0xy.configure(
+			minion.configure(
 				{
 					noPollution: false
 				}
 			);
 
 			// Class should now exist globally
-			ok(com.f0xy.test.ConfigureTest, "Test Class now exists globally, after noPollution = false was set.");
+			ok(com.minion.test.ConfigureTest, "Test Class now exists globally, after noPollution = false was set.");
 
 			// Do the first configure test
-			f0xy.configure(
+			minion.configure(
 				{
 					noPollution: true
 				}

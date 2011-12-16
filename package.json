@@ -1,8 +1,8 @@
 {
-    "name": "f0xy",
+    "name": "minion",
     "version": "1.4.1",
-    "description": "F0xy Javascript Inheritance.",
-    "main": "./bin/f0xy.js",
+    "description": "minion Javascript Inheritance.",
+    "main": "./bin/minion.js",
     "directories": {
         "lib": "lib",
         "test": "test",
@@ -10,7 +10,7 @@
         "bin": "bin"
     },
     "bin": {
-        "f0xy": "./bin/f0xy-cli.js"
+        "minion": "./bin/minion-cli.js"
     },
     "dependencies": {
         "optimist": ">= 0.3.0 < 1.0.0",
@@ -19,7 +19,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://gigafied@github.com/gigafied/f0xy.git"
+        "url": "https://gigafied@github.com/gigafied/minion.git"
     },
     "keywords": [
         "oop",
@@ -32,7 +32,7 @@
     "author": {
         "name": "Taka Kojimay",
         "email": "taka@gigafied.com",
-        "url": "http://gigafied.github.com/f0xy/"
+        "url": "http://gigafied.github.com/minion/"
     },
     "license": "MIT/X11",
     "engine": {

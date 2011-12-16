@@ -1,7 +1,7 @@
 {
 	// source files to use
 	_: [
-		'bin/f0xy.js'
+		'bin/minion.js'
 	],
 	
 	// document all functions, even uncommented ones
@@ -13,9 +13,9 @@
 	// some extra variables I want to include
 	D: {
 		"author": "Taka Kojima <taka.kojima@ff0000.com> (taka.kojima@ff0000.com)",
-		"name": "f0xy",
-		"homepage": "https://github.com/gigafied/f0xy",
-		"repository": "git@github.com:gigafied/f0xy.git",
+		"name": "minion",
+		"homepage": "https://github.com/gigafied/minion",
+		"repository": "git@github.com:gigafied/minion.git",
 		"noGlobal": "true"
 	},
 	
@@ -23,5 +23,5 @@
 	d: "gh-pages/docs",
 	
 	// use this template
-	t: "src/f0xy-jsdoc-template"
+	t: "src/minion-jsdoc-template"
 }
