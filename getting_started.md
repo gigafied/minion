@@ -279,8 +279,11 @@ All Classes also have a <code>publish</code> method. To publish things, do this:
 		})
 		
 	});
+	
+<code>publish()</code> takes two arguments. The first is a String, representing the name of the Notification you are sending. The second is an Object, representing data you are passing along with the Notification.
 
-### Notifications
+
+#### Notifications
 
 Notifications are similar to events, except events bubble and usually follow heirarchy. I.e child or sibling objects don't receive events fired by their parents or siblings.
 
