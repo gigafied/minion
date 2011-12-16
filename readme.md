@@ -37,6 +37,7 @@ Grab the latest version of node [here](http://nodejs.org/)
 Since Node.js now comes bundled with [npm](http://github.com/isaacs/npm), you no longer have to install it separately.
 
 Once you have Node.js installed, just do:
+
 	npm install minion-js
 
 Or you can just clone this project via git:
