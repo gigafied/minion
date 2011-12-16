@@ -1,43 +1,8 @@
-## MinionJS - Cross-Platform & Cross-Browser JavaScript Classical Inheritance
-
-The goal of Minion is to provide easy-to-use, easy-to-learn classical inheritance for JavaScript.
-
-Minion enables you to easily namespace, create and extend custom classes.
-
-Minion handles all the nitty-gritty, so you can focus on the important stuff, like ironing out the final details of your plan for global domination.
-
-####Features:
-
-- Classical Inheritance in JavaScript
-- Dependency management
-- Singleton classes
-- Static classes, methods and properties
-- Intuitive publish/subscribe model
-- this.__super() method support 
-- Build tool for easy deployment (for browser-based applications)
-
-Minion is a micro-framework. Which means, Minion does all this, all while sporting a tiny footprint of 3.9k (minified and gzipped).
-
-#### Currently Supported:
-
-- Node.js
-- IE7+
-- Safari 3+
-- Opera 9.0+ 
-- Chrome
-- (Other browsers/platforms probably work, but have not been thoroughly tested).
-
-####Some other cool little factoids:
-
-- Fully ECMAScript 5 Strict Mode compliant.
-- Passes JSHint with flying colors (with Assume : Browser, NodeJS).
-- See no evil, do no evil. Zero use of eval, with and Function();
-- Tests, tests, tests. You can be sure it works.
-- Very well documented, lots o' comments.
-- Minion does not touch native JavaScript prototypes. I.E. no Object.prototype.someSuperAwesomeMethod___weThink();
-- Damage Control. No global pollution (by default). All classes reside under the minion namespace. This is good, trust us.
+## MinionJS - Getting Started
 
 ## Installation
+
+While you don't actually need to install MinionJS to use it, it's recommended, especially if you are developing for a browser-based application. MinionJS provides a very nifty build tool, that you will want to take advantage of.
 
 Grab the latest version of Node.js [here](http://nodejs.org/)
 
@@ -51,25 +16,10 @@ Or you can just clone this project via git:
 
 	git clone git://github.com/gigafied/minion.git
 
-## Getting Started
-
-https://github.com/gigafied/minion/blob/master/getting_started.md
-
-## Documentation
+## Further Documentation
 
 JSDocs available at: http://gigafied.github.com/minion/docs/
 
-## Examples
-
-TODO
-
-## Contributing
-
-We want you to contribute. Fork the project, issue a pull request. Ideally, if you are adressing a specific issue, please create an issue in GitHub and reference that issue in your commits.
-Write a Unit Test for your fix, so that we can be sure any future updates don't undo all your hard work :)
-
-We'd love to support more platforms. There is very, very little platform detection in Minion's source code. (This is a good thing, we want to keep it this way).
-Getting it to work on other platforms should be relatively simple, so feel free to lend a hand!
 
 ## License
 
