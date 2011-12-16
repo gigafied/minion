@@ -60,6 +60,8 @@ The first argument of <code>minion.define()</code> is a namespace identifier. Th
 
 ## Class Goodies
 
+#### Dependencies
+
 You can optionally specify a <code>require</code> array before your Class defintion, like this:
 
 	minion.define("com.example", {
