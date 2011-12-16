@@ -4,7 +4,7 @@ The goal of Minion is to provide easy-to-use, easy-to-grasp inheritance support 
 
 Minion enables you to easily namespace, create and extend custom classes.
 
-Features:
+#Features:
 
 - Inheritance in JavaScript!?
 - Dependency management
@@ -12,13 +12,13 @@ Features:
 - Static classes, methods and properties
 - Intuitive pub/sub
 - this.__super() method support 
-- Build tool for easy deployment
+- Build tool for easy deployment (for browser-based applications)
 
 Minion does all this, all while sporting a tiny footprint of 3.9k (minified and gzipped).
 
 Minion currently supports Node.js IE7+, Safari 3+, Opera 9.0+ and Chrome (other browsers probably work, but have not been thoroughly tested).
 
-Some other cool little factoids:
+#Some other cool little factoids:
 
 - Fully ECMAScript 5 Strict Mode compliant.
 - Passes JSHint with flying colors (with Assume : Browser, NodeJS).
