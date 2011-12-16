@@ -1,7 +1,7 @@
 {
-    "name": "minion",
+    "name": "minion-js",
     "version": "1.4.1",
-    "description": "minion Javascript Inheritance.",
+    "description": "Cross-Platform & Cross-Browser JavaScript Inheritance.",
     "main": "./bin/minion.js",
     "directories": {
         "lib": "lib",
@@ -30,12 +30,12 @@
         "extend"
     ],
     "author": {
-        "name": "Taka Kojimay",
+        "name": "Taka Kojima",
         "email": "taka@gigafied.com",
         "url": "http://gigafied.github.com/minion/"
     },
     "license": "MIT/X11",
     "engine": {
-        "node": ">=0.4"
+        "node": "0.4.x"
     }
 }

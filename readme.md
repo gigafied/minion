@@ -30,6 +30,19 @@ Minion currently supports Node.js IE7+, Safari 3+, Opera 9.0+ and Chrome (other 
 - Minion does not touch native JavaScript prototypes. I.E. no Object.prototype.someSuperAwesomeMethod___weThink();
 - Damage Control. No global pollution. All classes reside under the minion namespace. This is good, trust us.
 
+## Installation
+
+Grab the latest version of node [here](http://nodejs.org/)
+
+Since Node.js now comes bundled with [npm](http://github.com/isaacs/npm), you no longer have to install it separately.
+
+Once you have Node.js installed, just do:
+	npm install minion-js
+
+Or you can just clone this project via git:
+
+	git clone git://github.com/gigafied/minion.git
+
 ## Getting Started
 
 http://gigafied.github.com/minion/
@@ -37,6 +50,10 @@ http://gigafied.github.com/minion/
 ## Documentation
 
 JSDocs available at: http://gigafied.github.com/minion/docs/
+
+## Examples
+
+TODO
 
 ## Contributing
 
