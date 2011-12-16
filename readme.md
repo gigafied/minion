@@ -35,7 +35,7 @@ Minion is a micro-framework. Which means, Minion does all this, all while sporti
 - Tests, tests, tests. You can be sure it works.
 - Very well documented, lots o' comments.
 - Minion does not touch native JavaScript prototypes. I.E. no Object.prototype.someSuperAwesomeMethod___weThink();
-- Damage Control. No global pollution. All classes reside under the minion namespace. This is good, trust us.
+- Damage Control. No global pollution (by default). All classes reside under the minion namespace. This is good, trust us.
 
 ## Installation
 
