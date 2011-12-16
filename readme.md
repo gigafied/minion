@@ -1,4 +1,4 @@
-### Minion - Cross-Platform & Cross-Browser JavaScript Inheritance
+## Minion - Cross-Platform & Cross-Browser JavaScript Inheritance
 
 The goal of Minion is to provide easy-to-use, easy-to-grasp inheritance support for JavaScript.
 
@@ -28,15 +28,15 @@ Minion currently supports Node.js IE7+, Safari 3+, Opera 9.0+ and Chrome (other 
 - Minion does not touch native JavaScript prototypes. I.E. no Object.prototype.someSuperAwesomeMethod___weThink();
 - Damage Control. No global pollution. All classes reside under the minion namespace. This is good, trust us.
 
-### Getting Started
+## Getting Started
 
 http://gigafied.github.com/minion/
 
-### Documentation
+## Documentation
 
 JSDocs available at: http://gigafied.github.com/minion/docs/
 
-### Contributing
+## Contributing
 
 We want you to contribute. Fork the project, issue a pull request. Ideally, if you are adressing a specific issue, please create an issue in GitHub and reference that issue in your commits.
 Write a Unit Test for your fix, so that we can be sure any future updates don't undo all your hard work :)
@@ -44,6 +44,6 @@ Write a Unit Test for your fix, so that we can be sure any future updates don't 
 We'd love to support more platforms. There is very, very little platform detection in minion's source code. (This is a good thing, we want to keep it this way).
 Getting it to work on other platforms should be relatively simple, so feel free to lend a hand!
 
-### License
+## License
 
 See src/minion.js
