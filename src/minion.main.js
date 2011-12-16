@@ -2,7 +2,7 @@
 
 @fileOverview
 
-<h4>minion - AMD inspired Classy JavaScript</h4>
+<h4>MinionJS - Cross-Platform & Cross-Browser JavaScript Inheritance</h4>
 
 <p>Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
