@@ -22,7 +22,7 @@ Or you can just clone this project via git:
 	make
 	sudo npm link
 
-If you're gonna be developing inside Node.js, put this at the top of all your .js files:
+If you're gonna be developing inside Node.js, put this at the top of all your .js files that will be using minion:
 
 	var minion = require("minion-js");
 
