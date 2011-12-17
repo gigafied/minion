@@ -1,0 +1,649 @@
+info it worked if it ends with ok
+verbose cli [ 'node', '/usr/local/bin/npm', 'publish' ]
+info using npm@1.0.106
+info using node@v0.6.5
+verbose config file /Users/taka.kojima/.npmrc
+verbose config file /usr/local/etc/npmrc
+verbose config file /usr/local/lib/node_modules/npm/npmrc
+verbose publish [ '.' ]
+silly testEngine { name: 'minion-js',
+silly testEngine   version: '1.4.1',
+silly testEngine   description: 'Cross-Platform & Cross-Browser JavaScript Inheritance.',
+silly testEngine   main: './bin/minion.js',
+silly testEngine   directories: { lib: 'lib', test: 'test', examples: 'examples', bin: 'bin' },
+silly testEngine   bin: { minion: './bin/minion-cli.js' },
+silly testEngine   dependencies: 
+silly testEngine    { optimist: '>= 0.3.0 < 1.0.0',
+silly testEngine      'uglify-js': '>= 1.2.0 < 2.0.0',
+silly testEngine      'jsdoc-toolkit': '>= 0.0.1 < 0.0.2' },
+silly testEngine   repository: { type: 'git', url: 'git://github.com/gigafied/minion.git' },
+silly testEngine   keywords: [ 'oop', 'inheritance', 'classes', 'class', 'dependency', 'extend' ],
+silly testEngine   author: 
+silly testEngine    { name: 'Taka Kojima',
+silly testEngine      email: 'taka@gigafied.com',
+silly testEngine      url: 'http://gigafied.github.com/minion/' },
+silly testEngine   license: 'MIT/X11',
+silly testEngine   engine: { node: '0.4.x' },
+silly testEngine   _npmUser: { name: 'gigafied', email: 'taka@gigafied.com' },
+silly testEngine   _id: 'minion-js@1.4.1',
+silly testEngine   devDependencies: {},
+silly testEngine   engines: { node: '*' },
+silly testEngine   _engineSupported: true,
+silly testEngine   _npmVersion: '1.0.106',
+silly testEngine   _nodeVersion: 'v0.6.5',
+silly testEngine   _defaultsLoaded: true,
+silly testEngine   scripts: {} }
+verbose caching /Users/taka.kojima/Projects/minion/package.json
+verbose loadDefaults minion-js@1.4.1
+info prepublish minion-js@1.4.1
+verbose cache add [ '.', null ]
+silly cache add: name, spec, args [ undefined, '.', [ '.', null ] ]
+verbose parsed url { pathname: '.', path: '.', href: '.' }
+silly testEngine { name: 'minion-js',
+silly testEngine   version: '1.4.1',
+silly testEngine   description: 'Cross-Platform & Cross-Browser JavaScript Inheritance.',
+silly testEngine   main: './bin/minion.js',
+silly testEngine   directories: { lib: 'lib', test: 'test', examples: 'examples', bin: 'bin' },
+silly testEngine   bin: { minion: './bin/minion-cli.js' },
+silly testEngine   dependencies: 
+silly testEngine    { optimist: '>= 0.3.0 < 1.0.0',
+silly testEngine      'uglify-js': '>= 1.2.0 < 2.0.0',
+silly testEngine      'jsdoc-toolkit': '>= 0.0.1 < 0.0.2' },
+silly testEngine   repository: { type: 'git', url: 'git://github.com/gigafied/minion.git' },
+silly testEngine   keywords: [ 'oop', 'inheritance', 'classes', 'class', 'dependency', 'extend' ],
+silly testEngine   author: 
+silly testEngine    { name: 'Taka Kojima',
+silly testEngine      email: 'taka@gigafied.com',
+silly testEngine      url: 'http://gigafied.github.com/minion/' },
+silly testEngine   license: 'MIT/X11',
+silly testEngine   engine: { node: '0.4.x' },
+silly testEngine   _npmUser: { name: 'gigafied', email: 'taka@gigafied.com' },
+silly testEngine   _id: 'minion-js@1.4.1',
+silly testEngine   devDependencies: {},
+silly testEngine   engines: { node: '*' },
+silly testEngine   _engineSupported: true,
+silly testEngine   _npmVersion: '1.0.106',
+silly testEngine   _nodeVersion: 'v0.6.5',
+silly testEngine   _defaultsLoaded: true,
+silly testEngine   path: '/Users/taka.kojima/Projects/minion',
+silly testEngine   bundleDependencies: [] }
+verbose caching package.json
+verbose loadDefaults minion-js@1.4.1
+verbose pack /Users/taka.kojima/Projects/minion /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/tmp.tgz
+silly makeList /Users/taka.kojima/Projects/minion
+verbose mkdir (expected) error ENOENT, no such file or directory '/var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016'
+verbose mkdir (expected) error ENOENT, no such file or directory '/var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913'
+verbose mkdir done: /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913 755
+verbose mkdir'ed /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913
+verbose tar about to write tar and gzip it.
+silly tar args [ '-czvf', '-', '-T', '-' ]
+silly spawning [ 'tar',
+silly spawning   [ '-czvf', '-', '-T', '-' ],
+silly spawning   '/Users/taka.kojima/Projects' ]
+verbose mkdir (expected) error ENOENT, no such file or directory '/var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents'
+verbose mkdir (expected) error ENOENT, no such file or directory '/var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm'
+verbose mkdir done: /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm 755
+verbose unpack_ uid, gid [ undefined, undefined ]
+verbose unpackTarget /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/package
+silly gunzTarPerm modes [ '755', '644' ]
+silly spawning [ 'tar',
+silly spawning   [ '-zmvxpf',
+silly spawning     '/var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/tmp.tgz' ],
+silly spawning   '/var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm' ]
+silly tar err x minion/.gitignore
+silly tar err x minion/.gitmodules
+silly tar err x minion/getting_started.md
+silly tar err x minion/make.js
+silly tar err x minion/Makefile
+silly tar err x minion/package.json
+silly tar err x minion/readme.md
+silly tar err x minion/version.txt
+silly tar err x minion/dist/minion.1.4.0.js
+silly tar err x minion/dist/minion.1.4.0.min.js
+silly tar err x minion/dist/minion.1.4.1.js
+silly tar err x minion/dist/minion.1.4.1.min.js
+silly tar err x minion/src/jsdoc-conf.json
+silly tar err x minion/src/minion.baseclass.js
+silly tar err x minion/src/minion.class.js
+silly tar err x minion/src/minion.header.js
+silly tar err x minion/src/minion.main.js
+silly tar err x minion/src/minion.notifications.js
+silly tar err x minion/src/minion.singleton.js
+silly tar err x minion/src/minion.static.js
+silly tar err x minion/src/minion-jsdoc-template/allclasses.tmpl
+silly tar err x minion/src/minion-jsdoc-template/allfiles.tmpl
+silly tar err x minion/src/minion-jsdoc-template/class.tmpl
+silly tar err x minion/src/minion-jsdoc-template/class.tmpl_old
+silly tar err x minion/src/minion-jsdoc-template/docsindex.tmpl
+silly tar err x minion/src/minion-jsdoc-template/header.html
+silly tar err x minion/src/minion-jsdoc-template/index.tmpl
+silly tar err x minion/src/minion-jsdoc-template/publish.js
+silly tar err x minion/src/minion-jsdoc-template/README.md
+silly tar err x minion/src/minion-jsdoc-template/symbol.tmpl
+silly tar err x minion/src/minion-jsdoc-template/symbolindex.tmpl
+silly tar err x minion/src/minion-jsdoc-template/userdoc.tmpl
+silly tar err x minion/src/minion-jsdoc-template/js/htmlparser.js
+silly tar err x minion/src/minion-jsdoc-template/js/jsdom.js
+silly tar err x minion/src/minion-jsdoc-template/js/mootools-1.2.4-core-server.js
+silly tar err x minion/src/minion-jsdoc-template/js/showdown.js
+silly tar err x minion/src/minion-jsdoc-template/js/showdown_license.txt
+silly tar err x minion/src/minion-jsdoc-template/static/blue.css
+silly tar err x minion/src/minion-jsdoc-template/static/default.css
+silly tar err x minion/gh-pages/docs/files.html
+silly tar err x minion/gh-pages/docs/index.html
+silly tar err x minion/gh-pages/docs/symbolindex.html
+silly tar err x minion/gh-pages/docs/static/default.css
+silly tar err x minion/gh-pages/docs/symbols/_global_.html
+silly tar err x minion/gh-pages/docs/symbols/minion.Class.html
+silly tar err x minion/gh-pages/docs/symbols/minion.html
+silly tar err x minion/gh-pages/docs/symbols/src/bin_minion.js.html
+silly tar err x minion/bin/minion-cli.js
+silly tar err x minion/bin/minion.Client.js
+silly tar err x minion/bin/minion.js
+silly tar err x minion/bin/classes/com/minion/test/ConfigureTest.js
+silly tar err x minion/bin/classes/com/minion/test/SingletonTest.js
+silly tar err x minion/bin/classes/com/minion/test/StaticTest.js
+silly tar err x minion/bin/classes/com/minion/test/Test1.js
+silly tar err x minion/bin/classes/com/minion/test/Test2.js
+silly tar err x minion/test/index.html
+silly tar err x minion/test/unit/classes.js
+silly tar err x minion/test/unit/configure.js
+silly tar err x minion/test/unit/internal-classes.js
+silly tar err x minion/test/unit/classes/com/minion/test/ConfigureTest.js
+silly tar err x minion/test/unit/classes/com/minion/test/SingletonTest.js
+silly tar err x minion/test/unit/classes/com/minion/test/StaticTest.js
+silly tar err x minion/test/unit/classes/com/minion/test/Test2.js
+silly tar err x minion/test/unit/classes/com/minion/test/Test1.js
+silly tar exit 0
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/.gitignore
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/.gitmodules
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/getting_started.md
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/make.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/Makefile
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/package.json
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/readme.md
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/version.txt
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/dist
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/dist/minion.1.4.0.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/dist/minion.1.4.0.min.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/dist/minion.1.4.1.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/dist/minion.1.4.1.min.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/jsdoc-conf.json
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion.baseclass.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion.class.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion.header.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion.main.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion.notifications.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion.singleton.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion.static.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/allclasses.tmpl
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/allfiles.tmpl
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/class.tmpl
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/class.tmpl_old
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/docsindex.tmpl
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/header.html
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/index.tmpl
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/publish.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/README.md
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/symbol.tmpl
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/symbolindex.tmpl
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/userdoc.tmpl
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/js/htmlparser.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/js/jsdom.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/js/mootools-1.2.4-core-server.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/js/showdown.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/js/showdown_license.txt
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/static
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/static/blue.css
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/src/minion-jsdoc-template/static/default.css
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/gh-pages
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/gh-pages/docs
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/gh-pages/docs/files.html
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/gh-pages/docs/index.html
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/gh-pages/docs/symbolindex.html
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/gh-pages/docs/static
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/gh-pages/docs/static/default.css
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/gh-pages/docs/symbols
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/gh-pages/docs/symbols/_global_.html
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/gh-pages/docs/symbols/minion.Class.html
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/gh-pages/docs/symbols/minion.html
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/gh-pages/docs/symbols/src
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/gh-pages/docs/symbols/src/bin_minion.js.html
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/bin
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/bin/minion-cli.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/bin/minion.Client.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/bin/minion.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/bin/classes
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/bin/classes/com
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/bin/classes/com/minion
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/bin/classes/com/minion/test
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/bin/classes/com/minion/test/ConfigureTest.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/bin/classes/com/minion/test/SingletonTest.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/bin/classes/com/minion/test/StaticTest.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/bin/classes/com/minion/test/Test1.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/bin/classes/com/minion/test/Test2.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/index.html
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/unit
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/unit/classes.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/unit/configure.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/unit/internal-classes.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/unit/classes
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/unit/classes/com
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/unit/classes/com/minion
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/unit/classes/com/minion/test
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/unit/classes/com/minion/test/ConfigureTest.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/unit/classes/com/minion/test/SingletonTest.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/unit/classes/com/minion/test/StaticTest.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/unit/classes/com/minion/test/Test1.js
+silly asyncMap in gTP /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion/test/unit/classes/com/minion/test/Test2.js
+silly chmod minion 755
+silly chmod .gitmodules 644
+silly chmod .gitignore 644
+silly chmod getting_started.md 644
+silly chmod make.js 644
+silly chmod Makefile 644
+silly chmod package.json 644
+silly chmod readme.md 755
+silly chmod version.txt 644
+silly chmod dist 755
+silly chmod minion.1.4.0.js 644
+silly chmod minion.1.4.0.min.js 644
+silly chmod minion.1.4.1.js 644
+silly chmod minion.1.4.1.min.js 644
+silly chmod src 755
+silly chmod jsdoc-conf.json 644
+silly chmod minion.baseclass.js 644
+silly chmod minion.class.js 644
+silly chmod minion.main.js 755
+silly chmod minion.header.js 644
+silly chmod minion.notifications.js 644
+silly chmod minion.singleton.js 644
+silly chmod minion.static.js 644
+silly chmod allclasses.tmpl 755
+silly chmod minion-jsdoc-template 755
+silly chmod allfiles.tmpl 755
+silly chmod class.tmpl 755
+silly chmod class.tmpl_old 755
+silly chmod docsindex.tmpl 755
+silly chmod header.html 755
+silly chmod index.tmpl 755
+silly chmod publish.js 755
+silly chmod README.md 755
+silly chmod symbol.tmpl 755
+silly chmod symbolindex.tmpl 755
+silly chmod userdoc.tmpl 755
+silly chmod js 755
+silly chmod htmlparser.js 755
+silly chmod jsdom.js 755
+silly chmod showdown.js 755
+silly chmod mootools-1.2.4-core-server.js 755
+silly chmod showdown_license.txt 755
+silly chmod static 755
+silly chmod blue.css 755
+silly chmod default.css 755
+silly chmod gh-pages 755
+silly chmod docs 755
+silly chmod files.html 644
+silly chmod index.html 644
+silly chmod symbolindex.html 644
+silly chmod static 755
+silly chmod default.css 644
+silly chmod symbols 755
+silly chmod _global_.html 644
+silly chmod minion.Class.html 644
+silly chmod minion.html 644
+silly chmod src 755
+silly chmod bin_minion.js.html 644
+silly chmod bin 755
+silly chmod minion.Client.js 644
+silly chmod minion.js 644
+silly chmod classes 755
+silly chmod com 755
+silly chmod minion 755
+silly chmod test 755
+silly chmod ConfigureTest.js 644
+silly chmod SingletonTest.js 644
+silly chmod StaticTest.js 644
+silly chmod Test1.js 644
+silly chmod Test2.js 644
+silly chmod test 755
+silly chmod index.html 644
+silly chmod unit 755
+silly chmod classes.js 644
+silly chmod configure.js 644
+silly chmod internal-classes.js 644
+silly chmod classes 755
+silly chmod com 755
+silly chmod minion 755
+silly chmod test 755
+silly chmod ConfigureTest.js 644
+silly chmod SingletonTest.js 644
+silly chmod StaticTest.js 644
+silly chmod Test1.js 644
+silly chmod Test2.js 644
+verbose gunzed /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion
+verbose rm'ed /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/package
+verbose renamed [ '/var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/___package.npm/minion',
+verbose renamed   '/var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/package' ]
+silly testEngine { name: 'minion-js',
+silly testEngine   version: '1.4.1',
+silly testEngine   description: 'Cross-Platform & Cross-Browser JavaScript Inheritance.',
+silly testEngine   main: './bin/minion.js',
+silly testEngine   directories: { lib: 'lib', test: 'test', examples: 'examples', bin: 'bin' },
+silly testEngine   bin: { minion: './bin/minion-cli.js' },
+silly testEngine   dependencies: 
+silly testEngine    { optimist: '>= 0.3.0 < 1.0.0',
+silly testEngine      'uglify-js': '>= 1.2.0 < 2.0.0',
+silly testEngine      'jsdoc-toolkit': '>= 0.0.1 < 0.0.2' },
+silly testEngine   repository: { type: 'git', url: 'git://github.com/gigafied/minion.git' },
+silly testEngine   keywords: [ 'oop', 'inheritance', 'classes', 'class', 'dependency', 'extend' ],
+silly testEngine   author: 
+silly testEngine    { name: 'Taka Kojima',
+silly testEngine      email: 'taka@gigafied.com',
+silly testEngine      url: 'http://gigafied.github.com/minion/' },
+silly testEngine   license: 'MIT/X11',
+silly testEngine   engine: { node: '0.4.x' },
+silly testEngine   _npmUser: { name: 'gigafied', email: 'taka@gigafied.com' },
+silly testEngine   _id: 'minion-js@1.4.1',
+silly testEngine   devDependencies: {},
+silly testEngine   engines: { node: '*' },
+silly testEngine   _engineSupported: true,
+silly testEngine   _npmVersion: '1.0.106',
+silly testEngine   _nodeVersion: 'v0.6.5',
+silly testEngine   _defaultsLoaded: true,
+silly testEngine   path: '/var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/package' }
+verbose caching /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/package/package.json
+verbose loadDefaults minion-js@1.4.1
+verbose tarball contents [ 'package' ]
+verbose from cache /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/package/package.json
+verbose pack /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/package /Users/taka.kojima/.npm/minion-js/1.4.1/package.tgz
+silly makeList /var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents/package
+verbose mkdir'ed /Users/taka.kojima/.npm/minion-js/1.4.1
+verbose tar about to write tar and gzip it.
+silly tar args [ '-czvf', '-', '-T', '-' ]
+silly spawning [ 'tar',
+silly spawning   [ '-czvf', '-', '-T', '-' ],
+silly spawning   '/var/folders/l3/fv9wbv1d3gdg81q3172c76_400012b/T/npm-1324080930016/1324080930016-0.016955495113506913/contents' ]
+verbose mkdir (expected) error ENOENT, no such file or directory '/Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm'
+verbose mkdir done: /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm 755
+verbose unpack_ uid, gid [ undefined, undefined ]
+verbose unpackTarget /Users/taka.kojima/.npm/minion-js/1.4.1/package
+silly gunzTarPerm modes [ '755', '644' ]
+silly spawning [ 'tar',
+silly spawning   [ '-zmvxpf',
+silly spawning     '/Users/taka.kojima/.npm/minion-js/1.4.1/package.tgz' ],
+silly spawning   '/Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm' ]
+silly tar err x package/.gitignore
+silly tar err x package/.gitmodules
+silly tar err x package/getting_started.md
+silly tar err x package/make.js
+silly tar err x package/Makefile
+silly tar err x package/package.json
+silly tar err x package/readme.md
+silly tar err x package/version.txt
+silly tar err x package/dist/minion.1.4.0.js
+silly tar err x package/dist/minion.1.4.0.min.js
+silly tar err x package/dist/minion.1.4.1.js
+silly tar err x package/dist/minion.1.4.1.min.js
+silly tar err x package/src/jsdoc-conf.json
+silly tar err x package/src/minion.baseclass.js
+silly tar err x package/src/minion.class.js
+silly tar err x package/src/minion.header.js
+silly tar err x package/src/minion.main.js
+silly tar err x package/src/minion.notifications.js
+silly tar err x package/src/minion.singleton.js
+silly tar err x package/src/minion.static.js
+silly tar err x package/src/minion-jsdoc-template/allclasses.tmpl
+silly tar err x package/src/minion-jsdoc-template/allfiles.tmpl
+silly tar err x package/src/minion-jsdoc-template/class.tmpl
+silly tar err x package/src/minion-jsdoc-template/class.tmpl_old
+silly tar err x package/src/minion-jsdoc-template/docsindex.tmpl
+silly tar err x package/src/minion-jsdoc-template/header.html
+silly tar err x package/src/minion-jsdoc-template/index.tmpl
+silly tar err x package/src/minion-jsdoc-template/publish.js
+silly tar err x package/src/minion-jsdoc-template/README.md
+silly tar err x package/src/minion-jsdoc-template/symbol.tmpl
+silly tar err x package/src/minion-jsdoc-template/symbolindex.tmpl
+silly tar err x package/src/minion-jsdoc-template/userdoc.tmpl
+silly tar err x package/src/minion-jsdoc-template/js/htmlparser.js
+silly tar err x package/src/minion-jsdoc-template/js/jsdom.js
+silly tar err x package/src/minion-jsdoc-template/js/mootools-1.2.4-core-server.js
+silly tar err x package/src/minion-jsdoc-template/js/showdown.js
+silly tar err x package/src/minion-jsdoc-template/js/showdown_license.txt
+silly tar err x package/src/minion-jsdoc-template/static/blue.css
+silly tar err x package/src/minion-jsdoc-template/static/default.css
+silly tar err x package/gh-pages/docs/files.html
+silly tar err x package/gh-pages/docs/index.html
+silly tar err x package/gh-pages/docs/symbolindex.html
+silly tar err x package/gh-pages/docs/static/default.css
+silly tar err x package/gh-pages/docs/symbols/_global_.html
+silly tar err x package/gh-pages/docs/symbols/minion.Class.html
+silly tar err x package/gh-pages/docs/symbols/minion.html
+silly tar err x package/gh-pages/docs/symbols/src/bin_minion.js.html
+silly tar err x package/bin/minion-cli.js
+silly tar err x package/bin/minion.Client.js
+silly tar err x package/bin/minion.js
+silly tar err x package/bin/classes/com/minion/test/ConfigureTest.js
+silly tar err x package/bin/classes/com/minion/test/StaticTest.js
+silly tar err x package/bin/classes/com/minion/test/SingletonTest.js
+silly tar err x package/bin/classes/com/minion/test/Test1.js
+silly tar err x package/bin/classes/com/minion/test/Test2.js
+silly tar err x package/test/index.html
+silly tar err x package/test/unit/classes.js
+silly tar err x package/test/unit/configure.js
+silly tar err x package/test/unit/internal-classes.js
+silly tar err x package/test/unit/classes/com/minion/test/ConfigureTest.js
+silly tar err x package/test/unit/classes/com/minion/test/SingletonTest.js
+silly tar err x package/test/unit/classes/com/minion/test/StaticTest.js
+silly tar err x package/test/unit/classes/com/minion/test/Test1.js
+silly tar err x package/test/unit/classes/com/minion/test/Test2.js
+silly tar exit 0
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/.gitignore
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/.gitmodules
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/getting_started.md
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/make.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/Makefile
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/package.json
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/readme.md
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/version.txt
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/dist
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/dist/minion.1.4.0.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/dist/minion.1.4.0.min.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/dist/minion.1.4.1.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/dist/minion.1.4.1.min.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/jsdoc-conf.json
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion.baseclass.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion.class.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion.header.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion.main.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion.notifications.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion.singleton.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion.static.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/allclasses.tmpl
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/allfiles.tmpl
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/class.tmpl
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/class.tmpl_old
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/docsindex.tmpl
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/header.html
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/index.tmpl
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/publish.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/README.md
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/symbol.tmpl
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/symbolindex.tmpl
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/userdoc.tmpl
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/js/htmlparser.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/js/jsdom.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/js/mootools-1.2.4-core-server.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/js/showdown.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/js/showdown_license.txt
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/static
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/static/blue.css
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/src/minion-jsdoc-template/static/default.css
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/gh-pages
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/gh-pages/docs
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/gh-pages/docs/files.html
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/gh-pages/docs/index.html
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/gh-pages/docs/symbolindex.html
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/gh-pages/docs/static
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/gh-pages/docs/static/default.css
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/gh-pages/docs/symbols
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/gh-pages/docs/symbols/_global_.html
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/gh-pages/docs/symbols/minion.Class.html
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/gh-pages/docs/symbols/minion.html
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/gh-pages/docs/symbols/src
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/gh-pages/docs/symbols/src/bin_minion.js.html
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/bin
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/bin/minion-cli.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/bin/minion.Client.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/bin/minion.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/bin/classes
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/bin/classes/com
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/bin/classes/com/minion
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/bin/classes/com/minion/test
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/bin/classes/com/minion/test/ConfigureTest.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/bin/classes/com/minion/test/SingletonTest.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/bin/classes/com/minion/test/StaticTest.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/bin/classes/com/minion/test/Test1.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/bin/classes/com/minion/test/Test2.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/index.html
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/unit
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/unit/classes.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/unit/configure.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/unit/internal-classes.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/unit/classes
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/unit/classes/com
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/unit/classes/com/minion
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/unit/classes/com/minion/test
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/unit/classes/com/minion/test/ConfigureTest.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/unit/classes/com/minion/test/SingletonTest.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/unit/classes/com/minion/test/StaticTest.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/unit/classes/com/minion/test/Test1.js
+silly asyncMap in gTP /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package/test/unit/classes/com/minion/test/Test2.js
+silly chmod package 755
+silly chmod dist 755
+silly chmod src 755
+silly chmod minion-jsdoc-template 755
+silly chmod js 755
+silly chmod static 755
+silly chmod gh-pages 755
+silly chmod docs 755
+silly chmod static 755
+silly chmod symbols 755
+silly chmod src 755
+silly chmod bin 755
+silly chmod classes 755
+silly chmod com 755
+silly chmod minion 755
+silly chmod test 755
+silly chmod test 755
+silly chmod unit 755
+silly chmod classes 755
+silly chmod com 755
+silly chmod minion 755
+silly chmod test 755
+verbose gunzed /Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package
+verbose rm'ed /Users/taka.kojima/.npm/minion-js/1.4.1/package
+verbose renamed [ '/Users/taka.kojima/.npm/minion-js/1.4.1/___package.npm/package',
+verbose renamed   '/Users/taka.kojima/.npm/minion-js/1.4.1/package' ]
+silly testEngine { name: 'minion-js',
+silly testEngine   version: '1.4.1',
+silly testEngine   description: 'Cross-Platform & Cross-Browser JavaScript Inheritance.',
+silly testEngine   main: './bin/minion.js',
+silly testEngine   directories: { lib: 'lib', test: 'test', examples: 'examples', bin: 'bin' },
+silly testEngine   bin: { minion: './bin/minion-cli.js' },
+silly testEngine   dependencies: 
+silly testEngine    { optimist: '>= 0.3.0 < 1.0.0',
+silly testEngine      'uglify-js': '>= 1.2.0 < 2.0.0',
+silly testEngine      'jsdoc-toolkit': '>= 0.0.1 < 0.0.2' },
+silly testEngine   repository: { type: 'git', url: 'git://github.com/gigafied/minion.git' },
+silly testEngine   keywords: [ 'oop', 'inheritance', 'classes', 'class', 'dependency', 'extend' ],
+silly testEngine   author: 
+silly testEngine    { name: 'Taka Kojima',
+silly testEngine      email: 'taka@gigafied.com',
+silly testEngine      url: 'http://gigafied.github.com/minion/' },
+silly testEngine   license: 'MIT/X11',
+silly testEngine   engine: { node: '0.4.x' },
+silly testEngine   _npmUser: { name: 'gigafied', email: 'taka@gigafied.com' },
+silly testEngine   _id: 'minion-js@1.4.1',
+silly testEngine   devDependencies: {},
+silly testEngine   engines: { node: '*' },
+silly testEngine   _engineSupported: true,
+silly testEngine   _npmVersion: '1.0.106',
+silly testEngine   _nodeVersion: 'v0.6.5',
+silly testEngine   _defaultsLoaded: true,
+silly testEngine   dist: 
+silly testEngine    { shasum: '12586447477285b0f316e3b1c5dc69177110b17a',
+silly testEngine      tarball: 'http://registry.npmjs.org/minion-js/-/minion-js-1.4.1.tgz' } }
+verbose caching /Users/taka.kojima/.npm/minion-js/1.4.1/package/package.json
+verbose loadDefaults minion-js@1.4.1
+silly updated sha bytes 40960
+silly updated sha bytes 40960
+silly updated sha bytes 30720
+info shasum 12586447477285b0f316e3b1c5dc69177110b17a
+info shasum /Users/taka.kojima/.npm/minion-js/1.4.1/package.tgz
+verbose from cache /Users/taka.kojima/.npm/minion-js/1.4.1/package/package.json
+verbose chmod /Users/taka.kojima/.npm/minion-js/1.4.1/package.tgz 644
+verbose chown [ '/Users/taka.kojima/.npm/minion-js/1.4.1/package.tgz',
+verbose chown   1099,
+verbose chown   20 ]
+silly publish { name: 'minion-js',
+silly publish   version: '1.4.1',
+silly publish   description: 'Cross-Platform & Cross-Browser JavaScript Inheritance.',
+silly publish   main: './bin/minion.js',
+silly publish   directories: { lib: 'lib', test: 'test', examples: 'examples', bin: 'bin' },
+silly publish   bin: { minion: './bin/minion-cli.js' },
+silly publish   dependencies: 
+silly publish    { optimist: '>= 0.3.0 < 1.0.0',
+silly publish      'uglify-js': '>= 1.2.0 < 2.0.0',
+silly publish      'jsdoc-toolkit': '>= 0.0.1 < 0.0.2' },
+silly publish   repository: { type: 'git', url: 'git://github.com/gigafied/minion.git' },
+silly publish   keywords: [ 'oop', 'inheritance', 'classes', 'class', 'dependency', 'extend' ],
+silly publish   author: 
+silly publish    { name: 'Taka Kojima',
+silly publish      email: 'taka@gigafied.com',
+silly publish      url: 'http://gigafied.github.com/minion/' },
+silly publish   license: 'MIT/X11',
+silly publish   engine: { node: '0.4.x' },
+silly publish   _npmUser: { name: 'gigafied', email: 'taka@gigafied.com' },
+silly publish   _id: 'minion-js@1.4.1',
+silly publish   devDependencies: {},
+silly publish   engines: { node: '*' },
+silly publish   _engineSupported: true,
+silly publish   _npmVersion: '1.0.106',
+silly publish   _nodeVersion: 'v0.6.5',
+silly publish   _defaultsLoaded: true,
+silly publish   dist: 
+silly publish    { shasum: '12586447477285b0f316e3b1c5dc69177110b17a',
+silly publish      tarball: 'http://registry.npmjs.org/minion-js/-/minion-js-1.4.1.tgz' } }
+verbose PUT minion-js
+verbose raw, before any munging minion-js
+verbose url resolving [ 'https://registry.npmjs.org/', './minion-js' ]
+verbose url resolved https://registry.npmjs.org/minion-js
+verbose GET minion-js
+verbose raw, before any munging minion-js
+verbose url resolving [ 'https://registry.npmjs.org/', './minion-js' ]
+verbose url resolved https://registry.npmjs.org/minion-js
+info Already published minion-js@1.4.1
+verbose uploading bin dists []
+ERR! publish fail Cannot publish over existing version.
+ERR! publish fail Bump the 'version' field, set the --force flag, or
+ERR! publish fail     npm unpublish 'minion-js@1.4.1'
+ERR! publish fail and try again
+ERR! 
+ERR! System Darwin 11.2.0
+ERR! command "node" "/usr/local/bin/npm" "publish"
+ERR! cwd /Users/taka.kojima/Projects/minion
+ERR! node -v v0.6.5
+ERR! npm -v 1.0.106
+ERR! code EPUBLISHCONFLICT
+verbose exit [ 1, true ]
