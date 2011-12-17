@@ -10,7 +10,7 @@ Since Node.js now comes bundled with [npm](http://github.com/isaacs/npm), you no
 
 Once you have Node.js installed, just do:
 
-	npm install minion-js -g
+	sudo npm install minion-js -g
 
 Yes, this installs MinionJS globally, this gives you the minion bash command used for building. If you don't want to install it globally omit the <code>-g</code> and refer to the absolute path of the build script (<code>minion/bin/minion-cli.js</code>) instead.
 
