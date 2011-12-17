@@ -61,7 +61,8 @@
 
 				return bind.call(func, this);
 			},
-
+			
+			/** @ignore */
 			addInterest : function(name, handler, priority){
 				if(!this._interestHandlers){
 					this._interestHandlers = [];
@@ -72,6 +73,7 @@
 				}
 			},
 
+			/** @ignore */
 			removeInterest : function(name){
 				if(this._interestHandlers && this._interestHandlers[name]){
 					this._interestHandlers[name] = null;
@@ -80,11 +82,13 @@
 				minion.removeInterest(this, name);
 			},
 
+			/** @ignore */
 			removeAllInterests : function(){
 				minion.removeAllInterests(this);
 				this._interestHandlers = [];
 			},
 
+			/** @ignore */
 			notify : function(name, data){
 				var notification = new minion.Notification(name, data);
 				notification.dispatch(this);
@@ -98,18 +102,40 @@
 				}
 			},
 
+			/** 
+			* Publishes a notification with the specified data.
+			*
+			* @param		{String}				name			The name of the Notification you are publishing.
+			* @param		{Object}				data			An object of data you want to send with the Notification.
+			*/
 			publish : function(name, data){
 				this.notify(name, data);
 			},
 
+			/** 
+			* Subscribes to a notification.
+			*
+			* @public
+			* @param		{String}				name			The name of the Notification you are subscribing to.
+			* @param		{Function}			handler		A function to be called upon receiving the given Notification.
+			*/
 			subscribe : function(name, handler, priority){
 				this.addInterest(name, handler, priority);
 			},
 
+			/** 
+			* Unsubscribes from a notification.
+			*
+			* @public
+			* @param		{String}				name			The name of the Notification you are unsubscribing from.
+			*/
 			unsubscribe : function(name){
 				this.removeInterest(name);
 			},
 
+			/**
+			* Unsubscribes from all notifications registered via this.subscribe();
+			*/
 			unsubscribeAll : function(){
 				this.removeAllInterests();
 			}

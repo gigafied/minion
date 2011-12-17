@@ -4,6 +4,11 @@
 
 	minion.define("minion", {
 
+		/*
+			This Class handles all the nitty gritty Notification stuff.
+			TODO: Be nice and add some comments for other people :)
+		*/
+
 		NotificationManager : minion.extend("minion.Class", {
 
 			_pendingNotifications: [],
@@ -154,6 +159,8 @@
 
 	minion.define("minion", {
 
+		/** @lends minion.Notification# */ 
+
 		Notification : minion.extend("minion.Class", {
 
 			data: {},
@@ -162,22 +169,59 @@
 			status: "",
 			pointer: 0,
 
+			/**
+			*
+			* Notifications are the backbone of Minion's pub/sub model.
+			* You should not have to construct Notification's directly, as the publish() method does this for you.
+			*
+			* @constructs
+			* @param		{String}				name			The name of the Notification.
+			* @param		{Object}				data			An object of data associated with the Notification.		
+			*/
 			init : function(name, data){
 				this.name = name;
 				this.data = data;
 			},
 
+			/**
+			*
+			* Holds a notification. Useful if you want to do other things before other instances receive this Notification,
+			*
+			* @public
+			*/
 			hold : function(){
 				minion.holdNotification(this.name);
 			},
+
+			/**
+			*
+			* Releases a Notification, call this at some point after hold();
+			*
+			* @public
+			*/
 
 			release : function(){
 				minion.releaseNotification(this.name);
 			},
 
+			/**
+			*
+			* Cancels a Notification, any instances interested in this Notification higher up the chain will not receive it.
+			*
+			* @public
+			*/
+
 			cancel : function(){
 				minion.cancelNotification(this.name);
 			},
+
+			/**
+			*
+			* Dispatches a Notification. You will rarely ever construct or call dispatch() on Notifications directly, as the publish() method handles all of this.
+			*
+			* @param		{Object}		An Object referencing what is dispatching this Notification.
+			* @public
+			*/
 
 			dispatch: function(obj){
 				this.dispatcher = obj;

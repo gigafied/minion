@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Fri Dec 16 15:56:54 2011 -0800
+ * Date: Fri Dec 16 16:22:42 2011 -0800
  */
  /**
 
@@ -34,7 +34,7 @@ THE SOFTWARE.</p>
 
 
 /**
-*	Global minion Class with static methods.
+*	Global MinionJS Object with Static methods.
 *
 *	@namespace
 */
@@ -153,6 +153,7 @@ var minion = (function (root) {
 		return b;
 	};
 
+	/** @private */
 	var _copyToNS = function(o1,o2){
 		for (var i in o1) {
 			if(o1.hasOwnProperty(i)){
@@ -161,6 +162,7 @@ var minion = (function (root) {
 		}
 	};
 
+	/** @private */
 	var _removeFromNS = function(o1,o2){
 		for (var i in o1) {
 			if(o1.hasOwnProperty(i)){
@@ -274,7 +276,14 @@ var minion = (function (root) {
 		}
 	};
 
-	/** @ignore */
+	/**
+	* Injects a Script tag into the DOM
+	*
+	* @param		f		The path of the file to inject.
+	* @param		c		The class which maps to the file we are injecting.
+	* @private 
+	*/
+
 	var _inject = function(f, c) {
 
 		var doc = document;
@@ -330,7 +339,6 @@ var minion = (function (root) {
 	* Does all the loading of JS files
 	*
 	* @param		q		The queue to be loaded
-	* @ignore
 	* @private 
 	*/
 
@@ -464,7 +472,7 @@ var minion = (function (root) {
 	* Configure minion.
 	* 
 	* @public
-	* @param		 {Object}		configObj			Configuration object, possible properties are : classPath, separator and fileSuffix
+	* @param		 {Object}		configObj			Configuration object, possible properties are : classPath, pollute, separator and fileSuffix
 	*/
 
 	_minion.configure = function (configObj) {
@@ -504,8 +512,8 @@ var minion = (function (root) {
 	* Gets the object by it's fully qualified identifier.
 	*
 	* @public
-	* @param			{String}			id						The identifier to get
-	* @returns		{Object|Boolean}						The object that represents the identifier or False if it has not yet been defined.
+	* @param			{String}				id						The identifier to get
+	* @returns		{Object|Boolean}							The object that represents the identifier or false if it has not yet been defined.
 	*/
 
 	_minion.get = function (id) {
@@ -531,7 +539,7 @@ var minion = (function (root) {
 	*
 	* @public
 	* @param			{String}			id						The namespace to define the Classes under.
-	* @param			{Object}			[definitions]			An object of class definitions which will be added to the namespace
+	* @param			{Object}			[definitions]		An object of class definitions which will be added to the namespace
 	* @returns		{Object}									The object that represents the namespace passed in as the first argument.
 	*/
 	_minion.define = function (id, definitions) {
@@ -550,12 +558,12 @@ var minion = (function (root) {
 
 	_minion.getURL = function (id) {
 
-		if(_defaultClassFile){
-			return _defaultClassFile;
-		}
-	
 		if (_classMappings[id]) {
 			return _classMappings[id];
+		}
+
+		else if(_defaultClassFile){
+			return _defaultClassFile;
 		}
 		
 		var url = _class_path + id.replace(new RegExp('\\' + _separator, 'g'), '/') + '.js' + ((_file_suffix) ? "?" + _file_suffix : "");
@@ -605,17 +613,12 @@ var minion = (function (root) {
 	* Tells minion that filePath provides the class definitions for these classes.
 	* Useful in cases where you group specific things into minfiied js files.
 	*
-	* minion.provides can load the file right away, by passing doLoad as true, and a callback function.
-	* Otherwise, it just maps the classes to the specified filePath for any subsequent calls to minion.require()
-	*
 	* @public
 	* @param		{String}				file					The path of a JS file.
 	* @param		{String|Array}		definitions			Fully qualfiied name(s) of class(es)
-	* @param		{Boolean}			[doLoad=false]		Whether or not to subsequently call minion.require()
-	* @param		{Function}			[callback=null]	If doLoad=true, the callback function to call once the file has been loaded.
 	*/
 
-	_minion.provides = function (file, definitions, doLoad, callback) {
+	_minion.provides = function (file, definitions) {
 
 		if(definitions === "*"){
 			_defaultClassFile = file;
@@ -631,10 +634,6 @@ var minion = (function (root) {
 		for (var i = 0; i < definitions.length; i += 1) {
 			_classMappings[definitions[i]] = file;
 		}
-
-		if (doLoad) {
-			_minion.require(definitions, callback);
-		}
 	};
 
 	/**
@@ -642,7 +641,7 @@ var minion = (function (root) {
 	* If the classes have already been loaded, or are already defined, the callback function is invoked immediately.
 	*
 	* @public
-	* @param	 {String|Array}	ids				The fully qualified names of the class(es) to load.
+	* @param	 {String|Array}	ids				The fully qualified name(s) of the class(es) to load.
 	* @param	 {Function}			callback			The function to call once all classes (and their dependencies) have been loaded.
 	*/
 
@@ -695,6 +694,7 @@ var minion = (function (root) {
 	* @public
 	* @param		{String|Array}		ids		The fully qualfiied name(s) to import into the global namespace.
 	* @param		{Object=[root]}				The scope to use.
+	* @returns	{Object}							Returns the object passed in as the second argument, with the classes passed in as the first argument as properties.
 	*/
 
 	_minion.use = function (ids, scope) {
@@ -737,7 +737,12 @@ var minion = (function (root) {
 		return scope;
 	};
 	
-	/** @private */
+	/**
+	* Get a list of all files loaded in through Minion, up to this point. 
+	* If a file has been requested, but not yet finished loading, it will still show up in this list.
+	*
+	* @returns	{Array}					An array of the files that have been loaded in via Minion.
+	*/
 	_minion.getLoadedFiles = function () {
 		return _loadedFiles.concat();
 	};
@@ -814,7 +819,10 @@ var minion = (function (root) {
 		}
 	};
 
-	_minion.publish = _minion.notify = function (name, data) {
+	/**
+	* Publishes a Notification. This is useful if you want to publish a notification anywhere other than inside a class method.
+	*/
+	_minion.publish = function (name, data) {
 		if (_notificationManager) {
 			var notification = new minion.Notification(name, data);
 			notification.dispatch(_minion);
@@ -1098,7 +1106,8 @@ var minion = (function (root) {
 
 				return bind.call(func, this);
 			},
-
+			
+			/** @ignore */
 			addInterest : function(name, handler, priority){
 				if(!this._interestHandlers){
 					this._interestHandlers = [];
@@ -1109,6 +1118,7 @@ var minion = (function (root) {
 				}
 			},
 
+			/** @ignore */
 			removeInterest : function(name){
 				if(this._interestHandlers && this._interestHandlers[name]){
 					this._interestHandlers[name] = null;
@@ -1117,11 +1127,13 @@ var minion = (function (root) {
 				minion.removeInterest(this, name);
 			},
 
+			/** @ignore */
 			removeAllInterests : function(){
 				minion.removeAllInterests(this);
 				this._interestHandlers = [];
 			},
 
+			/** @ignore */
 			notify : function(name, data){
 				var notification = new minion.Notification(name, data);
 				notification.dispatch(this);
@@ -1135,18 +1147,40 @@ var minion = (function (root) {
 				}
 			},
 
+			/** 
+			* Publishes a notification with the specified data.
+			*
+			* @param		{String}				name			The name of the Notification you are publishing.
+			* @param		{Object}				data			An object of data you want to send with the Notification.
+			*/
 			publish : function(name, data){
 				this.notify(name, data);
 			},
 
+			/** 
+			* Subscribes to a notification.
+			*
+			* @public
+			* @param		{String}				name			The name of the Notification you are subscribing to.
+			* @param		{Function}			handler		A function to be called upon receiving the given Notification.
+			*/
 			subscribe : function(name, handler, priority){
 				this.addInterest(name, handler, priority);
 			},
 
+			/** 
+			* Unsubscribes from a notification.
+			*
+			* @public
+			* @param		{String}				name			The name of the Notification you are unsubscribing from.
+			*/
 			unsubscribe : function(name){
 				this.removeInterest(name);
 			},
 
+			/**
+			* Unsubscribes from all notifications registered via this.subscribe();
+			*/
 			unsubscribeAll : function(){
 				this.removeAllInterests();
 			}
@@ -1162,12 +1196,6 @@ var minion = (function (root) {
 		require: [
 			"minion.Class"
 		],
-
-		/**
-		*
-		* Yep pretty much exactly what it seems like it does
-		* 
-		*/
 
 		Static : (function() {
 
@@ -1218,29 +1246,22 @@ var minion = (function (root) {
 
 	minion.define("minion", {
 
-		/**
-		*
-		* Yep pretty much exactly what it seems like it does
-		* 
-		*/
+		/** @lends minion.Singleton# */ 
 
 		Singleton : minion.extend("minion.Class", {
 
-			// You can add static methods and properties to a non static class through __static...
-			__static : {
+			/**
+			*
+			* A way to easily implement Singletons.
+			*
+			* @constructs
+			* @extends minion.Class
+			*/
+			init : function(){
 
-				__isSingleton: true,
-				
-				getInstance : function(){
-					if(!this.__instance){
-						var This = this;
-						this.__instance =  new This();
-						return this.__instance;
-					}
-					return this.__instance;
-				}
 			},
-
+			
+			/** @ignore */
 			__preInit : function(){
 				if(this.constructor.__instance){
 					return this.constructor.__instance;
@@ -1252,8 +1273,27 @@ var minion = (function (root) {
 				return this.constructor.__instance;
 			},
 
-			init : function(){
+			/** @ignore */
+			__static : {
 
+				/** @lends minion.Singleton# */ 
+				__isSingleton: true,
+
+				/**
+				*
+				* Returns the instance of this Singleton. If this Class has not yet been instantiated, creates a new instance and returns that.
+				* Otherwise, it returns the already existing reference.
+				*
+				* @memberOf minion.Singleton#
+				*/
+				getInstance : function(){
+					if(!this.__instance){
+						var This = this;
+						this.__instance =  new This();
+						return this.__instance;
+					}
+					return this.__instance;
+				}
 			}
 
 		})
@@ -1264,6 +1304,11 @@ var minion = (function (root) {
 	"use strict";
 
 	minion.define("minion", {
+
+		/*
+			This Class handles all the nitty gritty Notification stuff.
+			TODO: Be nice and add some comments for other people :)
+		*/
 
 		NotificationManager : minion.extend("minion.Class", {
 
@@ -1415,6 +1460,8 @@ var minion = (function (root) {
 
 	minion.define("minion", {
 
+		/** @lends minion.Notification# */ 
+
 		Notification : minion.extend("minion.Class", {
 
 			data: {},
@@ -1423,22 +1470,59 @@ var minion = (function (root) {
 			status: "",
 			pointer: 0,
 
+			/**
+			*
+			* Notifications are the backbone of Minion's pub/sub model.
+			* You should not have to construct Notification's directly, as the publish() method does this for you.
+			*
+			* @constructs
+			* @param		{String}				name			The name of the Notification.
+			* @param		{Object}				data			An object of data associated with the Notification.		
+			*/
 			init : function(name, data){
 				this.name = name;
 				this.data = data;
 			},
 
+			/**
+			*
+			* Holds a notification. Useful if you want to do other things before other instances receive this Notification,
+			*
+			* @public
+			*/
 			hold : function(){
 				minion.holdNotification(this.name);
 			},
+
+			/**
+			*
+			* Releases a Notification, call this at some point after hold();
+			*
+			* @public
+			*/
 
 			release : function(){
 				minion.releaseNotification(this.name);
 			},
 
+			/**
+			*
+			* Cancels a Notification, any instances interested in this Notification higher up the chain will not receive it.
+			*
+			* @public
+			*/
+
 			cancel : function(){
 				minion.cancelNotification(this.name);
 			},
+
+			/**
+			*
+			* Dispatches a Notification. You will rarely ever construct or call dispatch() on Notifications directly, as the publish() method handles all of this.
+			*
+			* @param		{Object}		An Object referencing what is dispatching this Notification.
+			* @public
+			*/
 
 			dispatch: function(obj){
 				this.dispatcher = obj;

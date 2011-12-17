@@ -8,12 +8,6 @@
 			"minion.Class"
 		],
 
-		/**
-		*
-		* Yep pretty much exactly what it seems like it does
-		* 
-		*/
-
 		Static : (function() {
 
 			var _staticClass = function() {

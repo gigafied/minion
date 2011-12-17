@@ -25,7 +25,7 @@ THE SOFTWARE.</p>
 
 
 /**
-*	Global minion Class with static methods.
+*	Global MinionJS Object with Static methods.
 *
 *	@namespace
 */
@@ -144,6 +144,7 @@ var minion = (function (root) {
 		return b;
 	};
 
+	/** @private */
 	var _copyToNS = function(o1,o2){
 		for (var i in o1) {
 			if(o1.hasOwnProperty(i)){
@@ -152,6 +153,7 @@ var minion = (function (root) {
 		}
 	};
 
+	/** @private */
 	var _removeFromNS = function(o1,o2){
 		for (var i in o1) {
 			if(o1.hasOwnProperty(i)){
@@ -265,7 +267,14 @@ var minion = (function (root) {
 		}
 	};
 
-	/** @ignore */
+	/**
+	* Injects a Script tag into the DOM
+	*
+	* @param		f		The path of the file to inject.
+	* @param		c		The class which maps to the file we are injecting.
+	* @private 
+	*/
+
 	var _inject = function(f, c) {
 
 		var doc = document;
@@ -321,7 +330,6 @@ var minion = (function (root) {
 	* Does all the loading of JS files
 	*
 	* @param		q		The queue to be loaded
-	* @ignore
 	* @private 
 	*/
 
@@ -455,7 +463,7 @@ var minion = (function (root) {
 	* Configure minion.
 	* 
 	* @public
-	* @param		 {Object}		configObj			Configuration object, possible properties are : classPath, separator and fileSuffix
+	* @param		 {Object}		configObj			Configuration object, possible properties are : classPath, pollute, separator and fileSuffix
 	*/
 
 	_minion.configure = function (configObj) {
@@ -495,8 +503,8 @@ var minion = (function (root) {
 	* Gets the object by it's fully qualified identifier.
 	*
 	* @public
-	* @param			{String}			id						The identifier to get
-	* @returns		{Object|Boolean}						The object that represents the identifier or False if it has not yet been defined.
+	* @param			{String}				id						The identifier to get
+	* @returns		{Object|Boolean}							The object that represents the identifier or false if it has not yet been defined.
 	*/
 
 	_minion.get = function (id) {
@@ -522,7 +530,7 @@ var minion = (function (root) {
 	*
 	* @public
 	* @param			{String}			id						The namespace to define the Classes under.
-	* @param			{Object}			[definitions]			An object of class definitions which will be added to the namespace
+	* @param			{Object}			[definitions]		An object of class definitions which will be added to the namespace
 	* @returns		{Object}									The object that represents the namespace passed in as the first argument.
 	*/
 	_minion.define = function (id, definitions) {
@@ -541,12 +549,12 @@ var minion = (function (root) {
 
 	_minion.getURL = function (id) {
 
-		if(_defaultClassFile){
-			return _defaultClassFile;
-		}
-	
 		if (_classMappings[id]) {
 			return _classMappings[id];
+		}
+
+		else if(_defaultClassFile){
+			return _defaultClassFile;
 		}
 		
 		var url = _class_path + id.replace(new RegExp('\\' + _separator, 'g'), '/') + '.js' + ((_file_suffix) ? "?" + _file_suffix : "");
@@ -596,17 +604,12 @@ var minion = (function (root) {
 	* Tells minion that filePath provides the class definitions for these classes.
 	* Useful in cases where you group specific things into minfiied js files.
 	*
-	* minion.provides can load the file right away, by passing doLoad as true, and a callback function.
-	* Otherwise, it just maps the classes to the specified filePath for any subsequent calls to minion.require()
-	*
 	* @public
 	* @param		{String}				file					The path of a JS file.
 	* @param		{String|Array}		definitions			Fully qualfiied name(s) of class(es)
-	* @param		{Boolean}			[doLoad=false]		Whether or not to subsequently call minion.require()
-	* @param		{Function}			[callback=null]	If doLoad=true, the callback function to call once the file has been loaded.
 	*/
 
-	_minion.provides = function (file, definitions, doLoad, callback) {
+	_minion.provides = function (file, definitions) {
 
 		if(definitions === "*"){
 			_defaultClassFile = file;
@@ -622,10 +625,6 @@ var minion = (function (root) {
 		for (var i = 0; i < definitions.length; i += 1) {
 			_classMappings[definitions[i]] = file;
 		}
-
-		if (doLoad) {
-			_minion.require(definitions, callback);
-		}
 	};
 
 	/**
@@ -633,7 +632,7 @@ var minion = (function (root) {
 	* If the classes have already been loaded, or are already defined, the callback function is invoked immediately.
 	*
 	* @public
-	* @param	 {String|Array}	ids				The fully qualified names of the class(es) to load.
+	* @param	 {String|Array}	ids				The fully qualified name(s) of the class(es) to load.
 	* @param	 {Function}			callback			The function to call once all classes (and their dependencies) have been loaded.
 	*/
 
@@ -686,6 +685,7 @@ var minion = (function (root) {
 	* @public
 	* @param		{String|Array}		ids		The fully qualfiied name(s) to import into the global namespace.
 	* @param		{Object=[root]}				The scope to use.
+	* @returns	{Object}							Returns the object passed in as the second argument, with the classes passed in as the first argument as properties.
 	*/
 
 	_minion.use = function (ids, scope) {
@@ -728,7 +728,12 @@ var minion = (function (root) {
 		return scope;
 	};
 	
-	/** @private */
+	/**
+	* Get a list of all files loaded in through Minion, up to this point. 
+	* If a file has been requested, but not yet finished loading, it will still show up in this list.
+	*
+	* @returns	{Array}					An array of the files that have been loaded in via Minion.
+	*/
 	_minion.getLoadedFiles = function () {
 		return _loadedFiles.concat();
 	};
@@ -805,7 +810,10 @@ var minion = (function (root) {
 		}
 	};
 
-	_minion.publish = _minion.notify = function (name, data) {
+	/**
+	* Publishes a Notification. This is useful if you want to publish a notification anywhere other than inside a class method.
+	*/
+	_minion.publish = function (name, data) {
 		if (_notificationManager) {
 			var notification = new minion.Notification(name, data);
 			notification.dispatch(_minion);

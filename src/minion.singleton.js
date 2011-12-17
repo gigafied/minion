@@ -4,29 +4,22 @@
 
 	minion.define("minion", {
 
-		/**
-		*
-		* Yep pretty much exactly what it seems like it does
-		* 
-		*/
+		/** @lends minion.Singleton# */ 
 
 		Singleton : minion.extend("minion.Class", {
 
-			// You can add static methods and properties to a non static class through __static...
-			__static : {
+			/**
+			*
+			* A way to easily implement Singletons.
+			*
+			* @constructs
+			* @extends minion.Class
+			*/
+			init : function(){
 
-				__isSingleton: true,
-				
-				getInstance : function(){
-					if(!this.__instance){
-						var This = this;
-						this.__instance =  new This();
-						return this.__instance;
-					}
-					return this.__instance;
-				}
 			},
-
+			
+			/** @ignore */
 			__preInit : function(){
 				if(this.constructor.__instance){
 					return this.constructor.__instance;
@@ -38,8 +31,27 @@
 				return this.constructor.__instance;
 			},
 
-			init : function(){
+			/** @ignore */
+			__static : {
 
+				/** @lends minion.Singleton# */ 
+				__isSingleton: true,
+
+				/**
+				*
+				* Returns the instance of this Singleton. If this Class has not yet been instantiated, creates a new instance and returns that.
+				* Otherwise, it returns the already existing reference.
+				*
+				* @memberOf minion.Singleton#
+				*/
+				getInstance : function(){
+					if(!this.__instance){
+						var This = this;
+						this.__instance =  new This();
+						return this.__instance;
+					}
+					return this.__instance;
+				}
 			}
 
 		})
