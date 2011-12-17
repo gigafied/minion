@@ -8,11 +8,11 @@ Grab the latest version of Node.js [here](http://nodejs.org/)
 
 Since Node.js now comes bundled with [npm](http://github.com/isaacs/npm), you no longer have to install it separately.
 
-Once you have Node.js installed, just do:
+Once you have Node.js installed, <code>cd</code> into the directory where you want to install MinionJS and do:
 
-	sudo npm install minion-js -g
-
-Yes, this installs MinionJS globally, this gives you the minion bash command used for building. If you don't want to install it globally omit the <code>-g</code> and refer to the absolute path of the build script (<code>/path/to/minion/bin/minion-cli.js</code>) when using the build tool.
+	npm install minion-js
+	
+This will install minion locally at <code>node_modules/minion-js</code>.
 
 You can also just clone this project via git:
 
@@ -344,9 +344,21 @@ This will make it so that any other instances listening for this Notification, w
 
 If you are working inside Node.js this is unneccessary, however for browser-based development, you are going to need to combine all your classes into a nice neat little minified js file (or a couple minified js files) for deployment.
 
-This is where the build tool comes in:
+To install the build tool, cd into <code>node_modules/minion-js</code and run:
+
+	sudo npm link
+	
+What this does is create a symbolic link in your <code>/usr/local/bin</code> dir. Mapping <code>minion</code> to <code>node_modules/minion-js/bin/minion-cli.js</code>
+
+This step is only necessary if you want a way to easily reference the build script.
+
+Now, you can use the build script:
 
 	minion build com.example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js -i
+
+If you opted out of the <code>sudo npm link</code> step, you can just do this instead:
+
+	node_modules/minion-js/bin/minion-cli.js build com.example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js -i
 
 It's that easy! What this does is compile a class (and all of it's dependencies) into one neat little minified js file (using UglifyJS for compression).
 
