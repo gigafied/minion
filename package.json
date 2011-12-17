@@ -1,5 +1,5 @@
 {
-    "name": "minion-js",
+    "name": "minion",
     "version": "1.4.1",
     "description": "Cross-Platform & Cross-Browser JavaScript Inheritance.",
     "main": "./bin/minion.js",
