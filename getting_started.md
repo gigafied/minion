@@ -54,7 +54,7 @@ To define a new Class create a new JS file, with the following syntax:
 
 Save this file to: <code>path/to/your/js/com/example/Example.js</code>
 
-What the above code does is declare a new class called <code>Example</code> under the <code>com.example</code> namespace, that extends <code>minion.Class</code> (the Minion base class).
+What the above code does is declare a new class called <code>Example</code> under the <code>com.example</code> namespace, that extends <code>minion.Class</code> (the MinionJS base class).
 
 The first argument of <code>minion.define()</code> is a namespace identifier. The second argument is an Object, and while it is an Object, you only define one Class per define call. We use Object syntax, so you can easily declare the name of your Class.
 
@@ -90,9 +90,9 @@ You can optionally specify a <code>require</code> array before your Class defint
 		
 	});
 	
-By doing this, you tell Minion that <code>com.example.Example</code> has two dependencies and to make sure those dependencies are loaded and defined before <code>com.example.Example</code> is defined.
+By doing this, you tell MinionJS that <code>com.example.Example</code> has two dependencies and to make sure those dependencies are loaded and defined before <code>com.example.Example</code> is defined.
 
-If you specify dependencies, Minion store's references to those dependencies under <code>this.__imports</code>
+If you specify dependencies, MinionJS store's references to those dependencies under <code>this.__imports</code>
 
 This means you can do things like this:
 
@@ -350,7 +350,7 @@ It's that easy! What this does is compile a class (and all of it's dependencies)
 
 - <code>-p</code> The path to your class definitions.
 - <code>-o</code> This specifies the file you want MinionJS to write the minified contents to.
-- <code>-i</code> Whether or not to include MinionJS in the minified js file. Don't pass this if you want to include Minion separately
+- <code>-i</code> Whether or not to include MinionJS in the minified js file. Don't pass this if you want to include MinionJS separately
 
 The build tool is a major focus right now, soon we will have an option to run it with a config.json, making it easier on you :)
 

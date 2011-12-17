@@ -1,10 +1,10 @@
 ## MinionJS - Cross-Platform & Cross-Browser JavaScript Classical Inheritance
 
-The goal of Minion is to provide easy-to-use, easy-to-learn classical inheritance for JavaScript.
+The goal of MinionJS is to provide easy-to-use, easy-to-learn classical inheritance for JavaScript.
 
-Minion enables you to easily namespace, create and extend custom classes.
+MinionJS enables you to easily namespace, create and extend custom classes.
 
-Minion handles all the nitty-gritty, so you can focus on the important stuff, like ironing out the final details of your plan for global domination.
+MinionJS handles all the nitty-gritty, so you can focus on the important stuff, like ironing out the final details of your plan for global domination.
 
 ####Features:
 
@@ -15,7 +15,7 @@ Minion handles all the nitty-gritty, so you can focus on the important stuff, li
 - Intuitive publish/subscribe model
 - this.__super() method support 
 - Build tool for easy deployment (for browser-based applications)
-- Minion does all this, all while sporting a tiny footprint of 3.9k (minified and gzipped).
+- MinionJS does all this, all while sporting a tiny footprint of 3.9k (minified and gzipped).
 
 
 #### Currently Supported:
@@ -35,7 +35,7 @@ Minion handles all the nitty-gritty, so you can focus on the important stuff, li
 - See no evil, do no evil. Zero use of eval, with and Function();
 - Tests, tests, tests. You can be sure it works.
 - Very well documented, lots o' comments.
-- Minion does not touch native JavaScript prototypes. I.E. no Object.prototype.someSuperAwesomeMethod___weThink();
+- MinionJS does not touch native JavaScript prototypes. I.E. no Object.prototype.someSuperAwesomeMethod___weThink();
 - Damage Control. No global pollution (by default). All classes reside under the minion namespace. This is good, trust us.
 
 
@@ -75,7 +75,7 @@ Minion handles all the nitty-gritty, so you can focus on the important stuff, li
 
 
 That's the core of Minion, it's that simple. There's a bit more you can do obviously, but we wanted to give you an idea of 
-what you can do with Minion in under 20 lines of code. See [Getting Started](https://github.com/gigafied/minion/blob/master/getting_started.md) to dive in deeper.
+what you can do with MinionJS in under 20 lines of code. See [Getting Started](https://github.com/gigafied/minion/blob/master/getting_started.md) to dive in deeper.
 
 ## Getting Started
 
