@@ -268,6 +268,8 @@ For example:
 		
 This will make it so that <code>this</code> receives the Notification before all other already subscribed instances. 
 
+Classes also have two related methods <code>unsubscribe()</code> and <code>unsubscribeAll()</code>. <code>unsubscribe()</code> takes one argument, the name of the notification you are unsubscribing. <code>unsubscribeAll()</code> takes no arguments, it removes all subscriptions.
+
 
 #### Publish
 
