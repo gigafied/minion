@@ -12,9 +12,9 @@ Once you have Node.js installed, just do:
 
 	sudo npm install minion-js -g
 
-Yes, this installs MinionJS globally, this gives you the minion bash command used for building. If you don't want to install it globally omit the <code>-g</code> and refer to the absolute path of the build script (<code>minion/bin/minion-cli.js</code>) instead.
+Yes, this installs MinionJS globally, this gives you the minion bash command used for building. If you don't want to install it globally omit the <code>-g</code> and refer to the absolute path of the build script (<code>/path/to/minion/bin/minion-cli.js</code>) when using the build tool.
 
-Or you can just clone this project via git:
+You can also just clone this project via git:
 
 	git clone git://github.com/gigafied/minion.git
 	git submodule init
@@ -22,7 +22,7 @@ Or you can just clone this project via git:
 	make
 	sudo npm link
 
-If you're gonna be developing inside Node.js, put this at the top of all your .js files that will be using minion:
+If you're gonna be developing inside Node.js, put this at the top of all your .js files that will be using MinionJS:
 
 	var minion = require("minion-js");
 
