@@ -346,7 +346,7 @@ This will make it so that any other instances listening for this Notification, w
 
 If you are working inside Node.js this is unneccessary, however for browser-based development, you are going to need to combine all your classes into a nice neat little minified js file (or a couple minified js files) for deployment.
 
-To install the build tool, cd into <code>node_modules/minion-js</code and run:
+To install the build tool, cd into <code>node_modules/minion-js</code> and run:
 
 	sudo npm link
 	
@@ -390,9 +390,9 @@ For example:
 	]);
 
 
-This let's you group classes and dependencies into multiple files, for optimization. For instance, say you only need x, y and z class when the App starts up, but later on you require other Classes.
+This let's you group classes and dependencies into a single or multiple files for optimization. For instance, say you only need x, y and z class when the App starts up, but later on you require other Classes.
 
-Rather than throwing all Classes into one minified file, you can separate them out, which means faster initial loading. You can then even preload all other classes, or load them on an as-needed basis, the option is up to you.
+Rather than throwing all Classes into one minified file, you can separate them out, which means faster initial loading. You can then preload all other classes, or load them on an as-needed basis, the option is up to you.
 
 Just make sure all <code>minion.provides()</code> calls happen before the first <code>minion.require()</code> call.
 
