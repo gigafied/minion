@@ -31,7 +31,7 @@ Minion handles all the nitty-gritty, so you can focus on the important stuff, li
 ####Some other cool little factoids:
 
 - Fully ECMAScript 5 Strict Mode compliant.
-- Passes JSHint with flying colors (with Assume : Browser, NodeJS).
+- Passes [JSHint](http://www.jshint.com) with flying colors (with Assume : Browser, NodeJS).
 - See no evil, do no evil. Zero use of eval, with and Function();
 - Tests, tests, tests. You can be sure it works.
 - Very well documented, lots o' comments.

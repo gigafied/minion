@@ -15,6 +15,9 @@ Once you have Node.js installed, just do:
 Or you can just clone this project via git:
 
 	git clone git://github.com/gigafied/minion.git
+	git submodule init
+	git submodule update
+	make
 	sudo npm link
 
 If you're gonna be developing inside Node.js, put this at the top of all your .js files:
@@ -192,6 +195,12 @@ Singleton's will not throw an error if you try to instantiate them more than onc
 
 Singleton's also have a static <code>.getInstance()</code> method that you can call at any time, even if the Class has not yet been instantiated anywhere. It will create a new instance and return that, or return an already existing instance.
 
+
+####Other Goodies
+
+- <code>this.proxy(fn)</code>. Binds the <code>fn</code> function to the scope of <code>this</code>.
+- <code>this.setTimeout(fn, delay)</code>. Automatically calls <code>this.proxy(fn)</code> for you on the <code>fn</code> argument.
+- <code>this.setInterval(fn, delay)</code>. Automatically calls <code>this.proxy(fn)</code> for you on the <code>fn</code> argument.
 
 ## Using Your Classes
 
