@@ -13,9 +13,9 @@
         "minion": "./bin/minion-cli.js"
     },
     "dependencies": {
-        "optimist": ">= 0.3.0 < 1.0.0",
-        "uglify-js": ">= 1.2.0 < 2.0.0",
-        "jsdoc-toolkit": ">= 0.0.1 < 0.0.2"
+        "optimist": "0.3.x",
+        "uglify-js": "1.2.x",
+        "jsdoc-toolkit": "0.0.x"
     },
     "repository": {
         "type": "git",
@@ -36,6 +36,6 @@
     },
     "license": "MIT/X11",
     "engine": {
-        "node": "0.4.x"
+        "node": ">=0.4.x"
     }
 }
