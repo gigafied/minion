@@ -15,6 +15,9 @@ Once you have Node.js installed, just do:
 Or you can just clone this project via git:
 
 	git clone git://github.com/gigafied/minion.git
+	git submodule init
+	git submodule update
+	make
 	sudo npm link
 
 If you're gonna be developing inside Node.js, put this at the top of all your .js files:
