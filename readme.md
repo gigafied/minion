@@ -21,10 +21,12 @@ MinionJS handles all the nitty-gritty, so you can focus on the important stuff, 
 #### Currently Supported:
 
 - Node.js
-- IE7+
+- IE 7+
 - Safari 3+
-- Opera 9.0+ 
-- Chrome
+- Opera 9+ 
+- Chrome 9+
+- iOS
+- Android
 - (Other browsers/platforms probably work, but have not been thoroughly tested).
 
 
