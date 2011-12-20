@@ -8,7 +8,7 @@ TEST_DIR = test
 PREFIX = .
 DIST_DIR = ${PREFIX}/dist
 
-COMPILER = uglifyjs -nc --unsafe
+COMPILER = ./node_modules/uglify-js/bin/uglifyjs -nc --unsafe
 
 HEADER = ${SRC_DIR}/minion.header.js
 
