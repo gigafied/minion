@@ -1,27 +1,31 @@
-{
-    "vars" : {
-        "relative_path" : "unit/classes",
-        "class_path" : "../test/{{relative_path}}"
-    },
-
-    "class_path" : "{{class_path}}",
-    "relative_class_path" : "{{relative_path}}",
-    "include_duplicates" : false,
-    "jshint" : true,
-
-    "build_groups" : [
-        {
-            "output" : "{{class_path}}/classes1.min.js",
-            "classes" : [
-                "com.minion.test.Test2"
-            ],
-            "include_duplicates" : true
+    {
+        "vars" : {
+            "output_path" : "unit/classes",
+            "class_path" : "../test/unit/classes"
         },
-        {
-            "output" : "{{class_path}}/classes2.min.js",
-            "classes" : [
-                "com.*"
-            ]
-        }
-    ]
-}
+
+        "class_path" : "{{class_path}}",
+        "output_path" : "{{output_path}}",
+        "include_duplicates" : false,
+        "jshint" : true,
+
+        "jshint_options" : {
+            "node" : true,
+            "browser" : true
+        },
+
+        "build_groups" : [
+            {
+                "output" : "{{class_path}}/classes1.min.js",
+                "classes" : [
+                    "com.minion.test.Test2"
+                ]
+            },
+            {
+                "output" : "{{class_path}}/classes2.min.js",
+                "classes" : [
+                    "com.*"
+                ]
+            }
+        ]
+    }

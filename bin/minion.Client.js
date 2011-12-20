@@ -54,7 +54,7 @@
 
 					includeMinion = this._args.i || false;
 					path = this._parsePath(this._args.p, process.cwd());
-					outputPath = this._parsePath(this._args.o, null);
+					output = this._parsePath(this._args.o, null);
 
 					this._basePath = path;
 
@@ -62,7 +62,7 @@
 
 					var buildGroup = {
 		            "class_path" : path,
-		            "output" : outputPath,
+		            "output" : output,
 		            "classes" : [c],
 		            "prepend_files" : [],
 		            "append_files" : [],
@@ -72,6 +72,8 @@
 		        };
 
 		        configObj = {build_groups: [buildGroup]};
+
+		        configObj.output_path = this._args.p;
 				}
 
 				if(this._args.w){
@@ -97,7 +99,7 @@
 
 				var _classes = [];
 				var path = group.class_path || this._configObj.class_path;
-				var relative_path = group.relative_class_path || this._configObj.relative_class_path || path;
+				var output_path = group.output_path || this._configObj.output_path || path;
 
 				minion.configure({
 					classPath : this._parsePath(path)
@@ -134,13 +136,14 @@
 						}
 
 						var jshint_check = group.jshint || this._configObj.jshint || false;
+						var jshint_opts = group.jshint_options || this.__configObj.jshint_options || {};
 
 						for(var i = 0; i < loadedClasses.length; i ++){
 							var file = minion.getURL(loadedClasses[i]);
 
 							if(jshint_check){
 
-								if(!jshint(this._getFileContents(file))){
+								if(!jshint(this._getFileContents(file), jshint_opts)){
 									this._logError("JSHINT failed on file... " + file);
 									this._log("", "red+bold");
 									this._log("------------------------------------------------------------------------------", "red+bold");
@@ -169,7 +172,7 @@
 							}
 
 							this._compressedFiles.push({
-								file : this._relativePath(group.output, path, relative_path),
+								file : this._outputPath(group.output, path, output_path),
 								classes: loadedClasses
 							})						
 
@@ -298,14 +301,14 @@
 				this._log("Error : " + err, "red+bold");
 			},
 
-			_relativePath : function(path, rootPath, relativePath) {
+			_outputPath : function(path, rootPath, outputPath) {
 				path = path.replace(this._parsePath(rootPath), "");
 				path = path.replace(rootPath, "");
-				relativePath = relativePath[relativePath.length-1] === "/" ? relativePath : relativePath + "/";
+				outputPath = outputPath[outputPath.length-1] === "/" ? outputPath : outputPath + "/";
  				if(path[0] === "/"){
 					path = path.substr(1);
 				}
-				return relativePath + path;
+				return outputPath + path;
 			},
 
 			// Recursively checks Class __dependencies and adds them all to an array
@@ -366,7 +369,7 @@
 			_watchFiles : function (){
 				for(var i = 0; i < this._filesToWatch.length; i ++) {
 					var file = this._filesToWatch[i];
-					fs.watchFile(file, {persistent: true, interval: 10}, this.proxy(function (curr, prev){
+					fs.watchFile(file, {persistent: true, interval: 50}, this.proxy(function (curr, prev){
 						if (+curr.mtime > +prev.mtime) {
 							this._unwatchFiles();
 							this.build();
