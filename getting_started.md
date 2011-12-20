@@ -372,6 +372,10 @@ It's that easy! What this does is compile a class (and all of it's dependencies)
 
 #### Using a Config File
 
+There is a sample config file included in the repo under <code>bin/sample.conf.json</code>. It builds the Classes in the <code>test</code> dir.
+
+It looks like this:
+
     {
         "vars" : {
             "output_path" : "unit/classes",
@@ -383,13 +387,17 @@ It's that easy! What this does is compile a class (and all of it's dependencies)
         "include_duplicates" : false,
         "jshint" : true,
 
+        "jshint_options" : {
+            "node" : true,
+            "browser" : true
+        },
+
         "build_groups" : [
             {
                 "output" : "{{class_path}}/classes1.min.js",
                 "classes" : [
                     "com.minion.test.Test2"
-                ],
-                "include_duplicates" : true
+                ]
             },
             {
                 "output" : "{{class_path}}/classes2.min.js",
@@ -399,7 +407,57 @@ It's that easy! What this does is compile a class (and all of it's dependencies)
             }
         ]
     }
+    
+The <code>vars</code> property let's you specify variables that you can use throughout your config file. <code>vars</code> can use other <code>vars</code> in their value, as long as the <code>vars</code> they are using appear before them:
 
+        "vars" : {
+            "output_path" : "unit/classes",
+            "class_path" : "../test/{{output_path}}"
+        },
+
+You use <code>vars</code> with the mustache syntax <code>{{var}}</code>.
+
+<code>class_path</code> is the the path to your classes (relative to where the config file is).
+
+<code>output_path</code> is what you want to prefix the <code>minion.configure({paths:...})</code> definitions with.
+
+<code>include_duplicates</code> usually you want to leave this set to false, set this to true if you want to compile the same classes into multiple files.
+
+<code>jshint</code> Whether or not to JSHINT your Classes before compiling.
+
+<code>jshint_options</code> An object of the options you want to use for JSHINT checking.
+
+<code>build_groups</code> Using a config file, you can specify multiple groupings of classes to build, all to separate minified files.
+
+A build group has two mandatory properties:
+
+- <code>output</code> The path where you want to write the minified file to (relative to the config file).
+- <code>classes</code> An array of fully qualified names, representing the classes you want to include.
+
+You don't have to explicitly list all Classes you want compiled in a build group. This is the beauty of MinionJS. MinionJS will also automatically include dependencies in the build group.
+
+So, if <code>com.minion.test.Test2</code> extends <code>com.minion.test.Test1</code> and lists <code>com.minion.test.SomeDependency</code> as a dependency, then we only have to specify <code>com.minion.test.Test2</code> and MinionJS will automatically include <code>com.minion.test.Test1</code> and <code>com.minion.test.SomeDependency</code> in the build group for you.
+
+You can also specify full namespaces under <code>classes</code>. In the example above, you'll see this:
+
+               "classes" : [
+                    "com.*"
+                ]
+
+This includes any and all classes under the <code>com</code> namespace. This will include any classes directy in the <code>com</code> namespace and children namespaces, like <code>com.example</code>
+
+However, in this example, we are already including <code>com.minion.test.Test2</code> in the prior build group, so it will be ommitted in this build group (along with all of it's dependencies) as it's already compiled elsewhere.
+
+Build groups can also have the following optional properties:
+
+- <code>class_path</code>
+- <code>output_path</code>
+- <code>include_duplicates</code>
+- <code>jshint</code>
+- <code>jshint_options</code>
+
+
+By specifying any one of these properties, it will use that property over the corresponding parent property. They are completely optional, so you only have to specify them if you want specific behavior/options for a given build group.
 
 ####minion.provides()
 
@@ -426,6 +484,29 @@ Rather than throwing all Classes into one minified file, you can separate them o
 
 Just make sure all <code>minion.provides()</code> calls happen before the first <code>minion.require()</code> call.
 
+You can also pass paths to <code>minion.configure()</code> with the <code>paths</code> property, so intead of the above, you could do:
+
+	minion.configure({paths: [
+	    {
+	        "file": "path/to/js/classes1.min.js",
+	        "classes": [
+					"com.example.Example",
+					"com.example.Example2",
+					"com.example.Example3"
+	        ]
+	    },
+	    {
+	        "file": "path/to/js/classes2.min.js",
+	        "classes": [
+					"com.example.Example4",
+					"com.example.Example5",
+					"com.example.Example6"
+	        ]
+	    }
+	]});
+	
+This is the syntax the build script will output for you, that you can just copy and paste into your application.
+
 ## WOOT!!! 
 
 If you've made it here, you should now have a pretty solid understanding of MinionJS and how to use it. We also threw some [JSDocs](http://gigafied.github.com/minion/docs/) together, if you want to dive in even deeper.
@@ -433,42 +514,3 @@ If you've made it here, you should now have a pretty solid understanding of Mini
 ## Documentation
 
 JSDocs available at: http://gigafied.github.com/minion/docs/
-
-## License
-
-	(c) 2011 Taka Kojima (the "Author").
-	All Rights Reserved.
-
-	Permission is hereby granted, free of charge, to any person
-	obtaining a copy of this software and associated documentation
-	files (the "Software"), to deal in the Software without
-	restriction, including without limitation the rights to use,
-	copy, modify, merge, publish, distribute, sublicense, and/or sell
-	copies of the Software, and to permit persons to whom the
-	Software is furnished to do so, subject to the following
-	conditions:
-
-	The above copyright notice and this permission notice shall be
-	included in all copies or substantial portions of the Software.
-
-	Distributions of all or part of the Software intended to be used
-	by the recipients as they would use the unmodified Software,
-	containing modifications that substantially alter, remove, or
-	disable functionality of the Software, outside of the documented
-	configuration mechanisms provided by the Software, shall be
-	modified such that the Author's bug reporting email addresses and
-	urls are either replaced with the contact information of the
-	parties responsible for the changes, or removed entirely.
-
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-	EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-	OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-	NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-	HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-	WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-	FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-	OTHER DEALINGS IN THE SOFTWARE.
-
-	Except where noted, this license applies to any and all software
-	programs and associated documentation files created by the
-	Author, when distributed with the Software.
