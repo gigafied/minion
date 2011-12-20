@@ -5,12 +5,33 @@
 		<title>MinionJS - Unit Tests</title>
 		<link rel="Stylesheet" media="screen" href="qunit/qunit/qunit.css" />
 
-		<script src="../src/minion.main.js"></script>
+		<script src="../src/minion.main.js?t=1"></script>
 		<script src="../src/minion.baseclass.js"></script>
 		<script src="../src/minion.class.js"></script>
 		<script src="../src/minion.static.js"></script>
 		<script src="../src/minion.singleton.js"></script>
 		<script src="../src/minion.notifications.js"></script>
+
+
+		<script>
+			minion.configure({paths: [
+			    {
+			        "file": "unit/classes/classes1.min.js",
+			        "classes": [
+			            "com.minion.test.Test2",
+			            "com.minion.test.Test1"
+			        ]
+			    },
+			    {
+			        "file": "unit/classes/classes2.min.js",
+			        "classes": [
+			            "com.minion.test.ConfigureTest",
+			            "com.minion.test.SingletonTest",
+			            "com.minion.test.StaticTest"
+			        ]
+			    }
+			]});
+		</script>
 
 		<script src="qunit/qunit/qunit.js"></script>
 		

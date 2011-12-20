@@ -10,6 +10,5 @@ minion.define("com.minion.test", {
 		someTestMethod : function(){
 			return true;
 		}
-
 	})
 });

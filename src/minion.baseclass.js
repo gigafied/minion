@@ -157,7 +157,7 @@
 
 				_class.__ns = obj.__ns || "";
 				_class.__nsID = obj.__nsID || "";
-				_class._class = obj._class || "";
+				_class.__class = obj.__class || "";
 				_class.__dependencies = obj.__dependencies || [];
 
 				/*

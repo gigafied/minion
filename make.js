@@ -1,7 +1,8 @@
 (function(){
 
 	var fs = require('fs');
-
+	var jshint = require("jshint").JSHINT;
+	
 	var version = fs.readFileSync('./version.txt', 'utf-8');
 
 	function getJSONFile (file) {
@@ -20,5 +21,22 @@
 		packageObj.version = version;
 
 		writeJSONFile(packageFile, packageObj);
-		
+
+	var jshint_passed = jshint(fs.readFileSync('./dist/minion.' + version + ".js", "utf-8"), {node : true, browser: true});
+
+	console.log("");
+	console.log("");
+
+	if(!jshint_passed){
+		console.log("JSHINT FAILED : ");
+		console.log("");
+		console.log("");
+		console.log(jshint.errors);
+	}
+	else{
+		console.log("JSHINT PASSED");
+	}
+	console.log("");
+	console.log("");
+
 })();

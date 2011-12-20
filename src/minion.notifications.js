@@ -219,7 +219,7 @@
 			*
 			* Dispatches a Notification. You will rarely ever construct or call dispatch() on Notifications directly, as the publish() method handles all of this.
 			*
-			* @param		{Object}		An Object referencing what is dispatching this Notification.
+			* @param		{Object}		obj		An Object referencing what is dispatching this Notification.
 			* @public
 			*/
 

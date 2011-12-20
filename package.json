@@ -1,6 +1,6 @@
 {
     "name": "minion",
-    "version": "1.4.1",
+    "version": "1.4.2",
     "description": "Cross-Platform & Cross-Browser JavaScript Inheritance.",
     "main": "./bin/minion.js",
     "directories": {
@@ -16,7 +16,8 @@
         "optimist": "0.3.x",
         "uglify-js": "1.2.x",
         "jsdoc-toolkit": "0.0.x",
-        "ansi-color": "0.2.x"
+        "ansi-color": "0.2.x",
+        "jshint": "0.5.x"
     },
     "repository": {
         "type": "git",

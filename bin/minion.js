@@ -1,11 +1,11 @@
 /*
- * minion.JS v1.4.1
+ * minion.JS v1.4.2
  * http://minion.org
  *
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Mon Dec 19 11:57:45 2011 -0800
+ * Date: Mon Dec 19 19:10:31 2011 -0800
  */
  /**
 
@@ -84,7 +84,7 @@ var minion = (function (root) {
 
 	var _waitID;
 	var _waitingForLoad = [];
-	var _loadedClasses = [];
+	var _loadedFiles = [];
 	var _notificationManager;
 	var _waitInterval = 500;
 
@@ -166,6 +166,7 @@ var minion = (function (root) {
 			}
 		}
 	};
+
 
 	// Recursively checks dependencies
 	/** @private */
@@ -463,7 +464,7 @@ var minion = (function (root) {
 	* Configure minion.
 	* 
 	* @public
-	* @param		 {Object}		configObj			Configuration object, possible properties are : classPath, pollute, separator and fileSuffix
+	* @param			{Object}		configObj			Configuration object, possible properties are : classPath, pollute, separator and fileSuffix
 	*/
 
 	_minion.configure = function (configObj) {
@@ -476,6 +477,13 @@ var minion = (function (root) {
 		_separator = configObj.separator || _separator;
 		_file_suffix = configObj.fileSuffix || _file_suffix;
 
+		if(configObj.paths){
+			for(var i = 0; i < configObj.paths.length; i ++){
+				var m = configObj.paths[i];
+				_minion.provides(m.file, m.classes);
+			}
+		}
+
 		var pollute = false;
 
 		if(configObj.pollute === true){
@@ -485,8 +493,6 @@ var minion = (function (root) {
 		if(configObj.rootNS) {
 			_root = configObj.rootNS;
 		}
-
-		var i;
 
 		if (_initialized && pollute === true) {
 			_copyToNS(_ns, _root);
@@ -613,7 +619,7 @@ var minion = (function (root) {
 		definitions = _strToArray(definitions);
 
 		// If the file is not absolute, prepend the _class_path
-		file = (!new RegExp("(http://|/)[^ :]+").test(file)) ? _class_path + file : file;
+		//file = (!new RegExp("(http://|/)[^ :]+").test(file)) ? _class_path + file : file;
 
 		for (var i = 0; i < definitions.length; i += 1) {
 			_classMappings[definitions[i]] = file;
@@ -625,8 +631,8 @@ var minion = (function (root) {
 	* If the classes have already been loaded, or are already defined, the callback function is invoked immediately.
 	*
 	* @public
-	* @param	 {String|Array}	ids				The fully qualified name(s) of the class(es) to load.
-	* @param	 {Function}			callback			The function to call once all classes (and their dependencies) have been loaded.
+	* @param		{String|Array}		ids				The fully qualified name(s) of the class(es) to load.
+	* @param		{Function}			callback			The function to call once all classes (and their dependencies) have been loaded.
 	*/
 
 	_minion.require = function (ids, callback) {
@@ -639,20 +645,16 @@ var minion = (function (root) {
 		var fileList = [];
 		var classList = [];
 
-		for (var i = 0; i < ids.length; i += 1) {
+		for (var i = 0; i < ids.length; i ++) {
 
 			var id = ids[i];
 			var file = _minion.getURL(id);
+			var get = _minion.get(id);
 
-			if ((_loadedClasses.indexOf(id) < 0)) {
-				if(!_minion.get(id)){
-					fileList.push(file);
-					classList.push(id);
-				}
-				// Don't add any minion.* Classes to the _loadedClasses array.
-				if(id.indexOf("minion.") !== 0){
-					_loadedClasses.push(id);
-				}
+			if ((_loadedFiles.indexOf(file) < 0) && !_minion.get(id)) {
+				fileList.push(file);
+				classList.push(id);
+				_loadedFiles.push(file);
 			}
 		}
 
@@ -669,7 +671,7 @@ var minion = (function (root) {
 		}
 
 		else if (callback) {
-			callback();
+			callback.apply(_root, _minion.get(ids));
 		}
 	};
 
@@ -724,29 +726,9 @@ var minion = (function (root) {
 			}
 		}
 
-		return scope;
+		return scope;		
 	};
 	
-	/**
-	* Get a list of all Classes loaded in through Minion, up to this point. 
-	* If a Class has been requested, but not yet finished loading, it will still show up in this list.
-	*
-	* @returns	{Array}					An array of the Classes that have been loaded in via Minion.
-	*/
-	_minion.getLoadedClasses = function () {
-		return _loadedClasses.concat();
-	};
-
-	/**
-	* Clears all of the loaded Classses from the _loadedClasses array. This is mainly used by the build tool, but can be used
-	* for other edge case situations as well.
-	*
-	*/
-
-	_minion.clearLoadedClasses = function() {
-		_loadedClasses = [];
-	};
-		
 	/** @private */
 	_minion.enableNotifications = function () {
 		if (_minion.isDefined("minion.NotificationManager")) {
@@ -1004,7 +986,7 @@ var minion = (function (root) {
 
 				_class.__ns = obj.__ns || "";
 				_class.__nsID = obj.__nsID || "";
-				_class._class = obj._class || "";
+				_class.__class = obj.__class || "";
 				_class.__dependencies = obj.__dependencies || [];
 
 				/*
@@ -1073,7 +1055,7 @@ var minion = (function (root) {
 			/** 
 			* Local version of window.setTimeout that keeps scope of <i>this</i>.<br>
 			* 
-			* @returns {Number}		 A timeout ID
+			* @returns	{Number}		A timeout ID
 			*/
 			setTimeout : function(func, delay){
 				return setTimeout(this.proxy(func), delay);
@@ -1082,7 +1064,7 @@ var minion = (function (root) {
 			/** 
 			* Local version of window.setInterval that keeps scope of <i>this</i>.<br>
 			*
-			* @returns {Number}		 An interval ID
+			* @returns	{Number}		An interval ID
 			*/
 			setInterval : function(func, delay){
 				return setInterval(this.proxy(func), delay);
@@ -1092,10 +1074,9 @@ var minion = (function (root) {
 			* Shorthand for <i>func.bind(this)</i><br>
 			* or rather, <i>$.proxy(func, this)</i> in jQuery terms
 			*
-			* @returns {Function}		 The proxied function
+			* @returns	{Function}	The proxied function
 			*/
 			proxy: function(func){
-
 				var bind = function (context) {
 					if (!context) {return this;}
 					var this_ = this;
@@ -1520,7 +1501,7 @@ var minion = (function (root) {
 			*
 			* Dispatches a Notification. You will rarely ever construct or call dispatch() on Notifications directly, as the publish() method handles all of this.
 			*
-			* @param		{Object}		An Object referencing what is dispatching this Notification.
+			* @param		{Object}		obj		An Object referencing what is dispatching this Notification.
 			* @public
 			*/
 

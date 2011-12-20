@@ -3,16 +3,20 @@
 	var minion = require(__dirname + '/minion.js');
 	var fs = require("fs");
 	var color = require("ansi-color").set;
+	var jshint = require("jshint").JSHINT;
 
 	minion.define("minion", {
 		
 		Client : minion.extend("minion.Singleton", {
 
 			_args : {},
+			_configObj : {},
 			_currentBuildIndex : 0,
-			_buildGroups : [],
 			_compiledClasses: [],
 			_compressedFiles : [],
+			_errored : false,
+			_filesToWatch : [],
+			_basePath : "",
 
 			setArgs : function (args){
 				this._args = args;
@@ -20,14 +24,31 @@
 			
 			build : function () {
 
+				this._configObj = {};
+				this._currentBuildIndex = 0;
+				this._compiledClasses = [];
+				this._compressedFiles = [];
+				this._errored = false;
+				this._filesToWatch = [];
+				this._basePath = process.cwd();
+
 				var path, outputPath, configFile, configObj, includeMinion;
 
 				configFile = this._parsePath(this._args.c, null);
 
 				// Load Config File
 				if(configFile){
+					this._filesToWatch.push(configFile);
 					configObj = this._getJSONFile(configFile);
+					
+					if(configFile.indexOf("/") > -1){
+						if(this._isAbsolutePath(configFile)){
+							this._basePath = "";
+						}
+						this._basePath += configFile.substr(0, configFile.lastIndexOf("/"));
+					}
 				}
+
 				// Otherwise, build the config obj ourselves
 				else{
 
@@ -35,30 +56,37 @@
 					path = this._parsePath(this._args.p, process.cwd());
 					outputPath = this._parsePath(this._args.o, null);
 
+					this._basePath = path;
+
 					var c = this._args._[1];
 
 					var buildGroup = {
-		            "path" : path,
+		            "class_path" : path,
 		            "output" : outputPath,
 		            "classes" : [c],
 		            "prepend_files" : [],
 		            "append_files" : [],
 		            "include_minion" : includeMinion,
 		            "embed_provides" : false,
-		            "jshint" : false
+		            "jshint" : this._args.jshint
 		        };
 
 		        configObj = {build_groups: [buildGroup]};
+				}
+
+				if(this._args.w){
+					configObj.watch = true;
 				}
 
 				if(configObj.vars){
 					configObj = this._parseJSONTemplate(configObj.vars, configObj);
 				}
 
+				this._configObj = configObj;
+
 				if(configObj.build_groups.length >= 1){
-					this._buildGroups = configObj.build_groups;
 					this._currentBuildIndex = 0;
-					this._doBuild(this._buildGroups[0]);
+					this._doBuild(this._configObj.build_groups[0]);
 				}
 				else{
 					this._logError("No build group found!!!")
@@ -68,9 +96,11 @@
 			_doBuild : function (group) {
 
 				var _classes = [];
+				var path = group.class_path || this._configObj.class_path;
+				var relative_path = group.relative_class_path || this._configObj.relative_class_path || path;
 
 				minion.configure({
-					classPath : this._parsePath(group.path)
+					classPath : this._parsePath(path)
 				});
 
 				for(var j = 0; j < group.classes.length; j ++){
@@ -85,18 +115,17 @@
 
 				try{
 
-					minion.clearLoadedClasses();
-
 					minion.require(_classes, this.proxy(function(){
 
-						var loadedClasses = minion.getLoadedClasses();
+						var loadedClasses = this._getAllDependencies(_classes);
+
 						var output = group.include_minion ? this._compress(__dirname + "/minion.js") : "";
 
 						for(var i = loadedClasses.length-1; i >= 0; i --) {
 							if(this._compiledClasses.indexOf(loadedClasses[i]) > -1){
 								// If this file has already been compiled, and include_duplicates != true, exclude it from the list.
 								if(!group.include_duplicates){
-									loadedClasses.splice(i, 1);									
+									loadedClasses.splice(i, 1);	
 								}
 							}
 							else{
@@ -104,49 +133,87 @@
 							}
 						}
 
+						var jshint_check = group.jshint || this._configObj.jshint || false;
+
 						for(var i = 0; i < loadedClasses.length; i ++){
 							var file = minion.getURL(loadedClasses[i]);
-							output += this._compress(file);
+
+							if(jshint_check){
+
+								if(!jshint(this._getFileContents(file))){
+									this._logError("JSHINT failed on file... " + file);
+									this._log("", "red+bold");
+									this._log("------------------------------------------------------------------------------", "red+bold");
+									this._log("", "red+bold");
+									
+									for (var j = 0; j < jshint.errors.length; j ++) {
+										var error = jshint.errors[j];
+										this._logError(("Line : " + error.line + ", Character : " + error.character + ", Reason : " + error.reason + "\n        " + this._trim(error.evidence)) + "\n");
+									}
+
+									//return;
+								}
+							}
+							if(!this._errored){
+								output += this._compress(file) + ";";
+							}
+							this._filesToWatch.push(file);
 						}
 
-						if(group.output){
-							fs.writeFile(group.output, output);	
+						if(!this._errored){
+							if(group.output){
+								fs.writeFile(group.output, output);	
+							}
+							else{
+								this._logError("Please specify an output path for this build group...", _classes);
+							}
+
+							this._compressedFiles.push({
+								file : this._relativePath(group.output, path, relative_path),
+								classes: loadedClasses
+							})						
+
+							// If there is another build group, let's build that one...
+							if(this._configObj.build_groups[this._currentBuildIndex+1]){
+								this._currentBuildIndex += 1;
+								this._doBuild(this._configObj.build_groups[this._currentBuildIndex]);
+								return;
+							}
+
+							// Otherwise, we can now output all the minion.configure code...
+							this._log("");
+							this._log("");
+							this._log("*********************************** BUILD SUCCESSFUL ************************************");
+							this._log("");
+							this._log("");
+							this._log("----------------------------------------------------------------------------------------");
+							this._log("Copy and paste the following into your code, before the first minion.require() call:");
+							this._log("----------------------------------------------------------------------------------------");
+							this._log("");
+							this._log("minion.configure({paths: " + JSON.stringify(this._compressedFiles, null, 4) + "});");
+							this._log("");
+							this._log("----------------------------------------------------------------------------------------");
+							this._log("");
 						}
-						else{
-							this._logError("Please specify an output path for this build group...", _classes);
+
+						// If the watch flag was passed, set up watchers on all the loaded files, rebuilding whenever a file changes
+						if(this._configObj.watch){
+							this._log("");
+							this._log("****************************** WATCHING FOR CHANGES *********************************");							
+							this._watchFiles();
 						}
 
-						this._compressedFiles.push({
-							file : this._relativePath(group.output, group.path),
-							classes: loadedClasses
-						})						
+						return;
 
-						// If there is another build group, let's build that one...
-						if(this._buildGroups[this._currentBuildIndex+1]){
-							this._currentBuildIndex += 1;
-							this._doBuild(this._buildGroups[this._currentBuildIndex]);
-							return;
-						}
-
-						// Otherwise, we can now output all the minion.provides code...
-						console.log(color("----------------------------------------------------------------------------------------", "cyan"));
-						console.log(color("Copy and paste the following into your code, before the first minion.require() call:", "cyan"));
-						console.log(color("----------------------------------------------------------------------------------------", "cyan"));
-						console.log("");
-
-						for (var i = 0; i < this._compressedFiles.length; i ++) {
-							var obj = this._compressedFiles[i];
-							console.log(color('minion.provides("' + obj.file + '", ' + JSON.stringify(obj.classes) + ');', "cyan"));
-						}
-
-						console.log("");
-						console.log(color("----------------------------------------------------------------------------------------", "cyan"));
-						console.log("");
 					}));
 				}
 				catch(e){
 					this._logError("An unexpected error occured when trying to compile the following classes...", _classes);
 				}
+			},
+
+			_getFileContents : function(file){
+				return fs.readFileSync(file, 'utf-8');	
 			},
 
 			_compress : function (file) {
@@ -155,7 +222,7 @@
 				var uglify = require('uglify-js').uglify;
 				var parser = require('uglify-js').parser;
 
-				var code = fs.readFileSync(file, 'utf-8');
+				var code = this._getFileContents(file);
 
 				code = parser.parse(code);
 				code = uglify.ast_mangle(code);
@@ -166,17 +233,17 @@
 			},
 
 			_isAbsolutePath : function(path) {
-				return (new RegExp("(http://|/)[^ :]+").test(path));
+				return path[0] === "/";
 			},
 
 			_parsePath : function (path, fallbackValue) {
 				if(!path){return fallbackValue};
-				return path[0] === "/" ? path : process.cwd() + "/" + path;
+				return path[0] === "/" ? path : this._basePath + "/" + path;
 			},
 
 			_getJSONFile : function (file) {
 				var str = fs.readFileSync(file, 'utf-8');
-				return JSON.parse(str);	
+				return JSON.parse(str);
 			},
 
 			_writeJSONFile : function (file, obj) {
@@ -209,17 +276,57 @@
 
 			},
 
-			_logError : function(err) {
-				console.log(color("Error : " + err, "red+bold"));
+			_trim : function(s) {
+				return s.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 			},
 
-			_relativePath : function(path, rootPath) {
+			_log : function (msg, clr){
+				clr = clr || "cyan";
+				console.log(color(msg, clr));
+			},
+
+			_logError : function(err) {
+				if(!this._errored){
+					this._log("");
+					this._log("");				
+					this._log("*********************************** BUILD FAILURE ************************************", "red+bold");
+					this._log("");
+					this._log("");
+					this._errored = true;
+				}
+
+				this._log("Error : " + err, "red+bold");
+			},
+
+			_relativePath : function(path, rootPath, relativePath) {
 				path = path.replace(this._parsePath(rootPath), "");
 				path = path.replace(rootPath, "");
-				if(path[0] === "/"){
+				relativePath = relativePath[relativePath.length-1] === "/" ? relativePath : relativePath + "/";
+ 				if(path[0] === "/"){
 					path = path.substr(1);
 				}
-				return path;
+				return relativePath + path;
+			},
+
+			// Recursively checks Class __dependencies and adds them all to an array
+			_getAllDependencies : function (classes) {
+				
+				var dependencies = [];
+
+				for(var i = 0; i < classes.length; i ++) {
+					var c = minion.get(classes[i]);
+
+					// Don't add the base minion classes to the dependency list as they are already compiled.
+					if (c.__nsID !== "minion") {
+						dependencies.push(classes[i]);
+
+						if(c.__dependencies && c.__dependencies.length > 0){
+							dependencies = dependencies.concat(this._getAllDependencies(c.__dependencies));
+						}
+					}
+				}
+				
+				return dependencies;				
 			},
 
 			// Recursively checks directories under the given namespace and returns a list of all Files/Classes in said namespace/directory.
@@ -253,6 +360,26 @@
 				}
 				
 				return _classes;
+			},
+
+			// Watches all files in this._filesToWatch and calls this._build() if any changes are made.
+			_watchFiles : function (){
+				for(var i = 0; i < this._filesToWatch.length; i ++) {
+					var file = this._filesToWatch[i];
+					fs.watchFile(file, {persistent: true, interval: 10}, this.proxy(function (curr, prev){
+						if (+curr.mtime > +prev.mtime) {
+							this._unwatchFiles();
+							this.build();
+						}
+					}));
+				}	
+			},
+			// Cleans up any watchers on this._filesToWatch files.
+			_unwatchFiles : function(){
+				for(var i = 0; i < this._filesToWatch.length; i ++) {
+					var file = this._filesToWatch[i];
+					fs.unwatchFile(file);
+				}	
 			}
 
 		})

@@ -28,7 +28,7 @@
 			/** 
 			* Local version of window.setTimeout that keeps scope of <i>this</i>.<br>
 			* 
-			* @returns {Number}		 A timeout ID
+			* @returns	{Number}		A timeout ID
 			*/
 			setTimeout : function(func, delay){
 				return setTimeout(this.proxy(func), delay);
@@ -37,7 +37,7 @@
 			/** 
 			* Local version of window.setInterval that keeps scope of <i>this</i>.<br>
 			*
-			* @returns {Number}		 An interval ID
+			* @returns	{Number}		An interval ID
 			*/
 			setInterval : function(func, delay){
 				return setInterval(this.proxy(func), delay);
@@ -47,10 +47,9 @@
 			* Shorthand for <i>func.bind(this)</i><br>
 			* or rather, <i>$.proxy(func, this)</i> in jQuery terms
 			*
-			* @returns {Function}		 The proxied function
+			* @returns	{Function}	The proxied function
 			*/
 			proxy: function(func){
-
 				var bind = function (context) {
 					if (!context) {return this;}
 					var this_ = this;
