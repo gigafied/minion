@@ -356,21 +356,49 @@ This step is only necessary if you want a way to easily reference the build scri
 
 Now, you can use the build script:
 
-	minion build com.example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js -i
+	minion build com.example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js
 
 If you opted out of the <code>sudo npm link</code> step, you can just do this instead:
 
-	node_modules/minion/bin/minion-cli.js build com.example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js -i
+	node_modules/minion/bin/minion-cli.js build com.example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js
 
 It's that easy! What this does is compile a class (and all of it's dependencies) into one neat little minified js file (using UglifyJS for compression).
 
 - <code>-p</code> The path to your class definitions.
 - <code>-o</code> This specifies the file you want MinionJS to write the minified contents to.
-- <code>-w</code> Whether or not to watch for changes. Passing this will keep the process running and everytime any file in the build tree, changes, minion will reminify the file contents for you.
+- <code>-w</code> Run in watch mode, will rebuild everytime a file in the build tree is modified.
 - <code>-i</code> Whether or not to include MinionJS in the minified js file.
+- <code>-c</code> Configuration File. You can use a Config File to specify options for your build, this is the preferred method.
 
+#### Using a Config File
 
-The build tool is a major focus right now, soon we will have an option to run it with a config.json, making it easier on you :)
+    {
+        "vars" : {
+            "output_path" : "unit/classes",
+            "class_path" : "../test/unit/classes"
+        },
+
+        "class_path" : "{{class_path}}",
+        "output_path" : "{{output_path}}",
+        "include_duplicates" : false,
+        "jshint" : true,
+
+        "build_groups" : [
+            {
+                "output" : "{{class_path}}/classes1.min.js",
+                "classes" : [
+                    "com.minion.test.Test2"
+                ],
+                "include_duplicates" : true
+            },
+            {
+                "output" : "{{class_path}}/classes2.min.js",
+                "classes" : [
+                    "com.*"
+                ]
+            }
+        ]
+    }
 
 
 ####minion.provides()
