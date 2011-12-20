@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Sat Dec 17 12:37:43 2011 -0800
+ * Date: Mon Dec 19 11:57:45 2011 -0800
  */
  /**
 
@@ -79,16 +79,14 @@ var minion = (function (root) {
 
 	var _initialized;
 
-	var _loadedFiles = [];
 	var _loadQueue = [];
 	var _extendQueue = [];
 
 	var _waitID;
 	var _waitingForLoad = [];
-	var _requestedFiles = [];
+	var _loadedClasses = [];
 	var _notificationManager;
 	var _waitInterval = 500;
-	var _defaultClassFile = null;
 
 	var _isNode = (typeof window === "undefined");
 
@@ -104,9 +102,6 @@ var minion = (function (root) {
 	var _minion = {};	
 
 	/*================= HELPER FUNCTIONS =================*/
-
-	/** @private */
-	var _sTimeout = setTimeout;
 
 	/** @private */
 	var _isArray = Array._isArray || function (a) {
@@ -240,7 +235,7 @@ var minion = (function (root) {
 					ns[id] = _minion.extend(ns[id].__extendedFrom, ns[id]);
 
 					eq.splice(i, 1);
-					_sTimeout(_checkExtendQueue, 0);
+					setTimeout(_checkExtendQueue, 0);
 					return;
 				}
 			}
@@ -272,7 +267,7 @@ var minion = (function (root) {
 		}
 
 		if (w.length > 0) {
-			_waitID = _sTimeout(_checkWaitQueue, _waitInterval);
+			_waitID = setTimeout(_checkWaitQueue, _waitInterval);
 		}
 	};
 
@@ -291,48 +286,44 @@ var minion = (function (root) {
 
 		var injectObj, script;
 
-		if (_requestedFiles.indexOf(f) < 0) {
+		if (!doc[body]) {
+			return setTimeout(function(){
+				_inject(f,c);
+			}, 0);
+		}
 
-			if (!doc[body]) {
-				return _sTimeout(function(){
-					_inject(f,c);
-				}, 0);
-			}
+		script = doc.createElement("script");
+		script.async = true;
+	
+		injectObj = {
+			f : f,		// File
+			c : c,		// Class
+			e : 0,		// Elapsed Time
+			s : script	// Script
+		};
 
-			script = doc.createElement("script");
-			script.async = true;
-		
-			injectObj = {
-				f : f,		// File
-				c : c,		// Class
-				e : 0,		// Elapsed Time
-				s : script	// Script
-			};
+		_waitingForLoad.push(injectObj);
 
-			_requestedFiles.push(f);	
-			_waitingForLoad.push(injectObj);
-
-			/** @ignore */
-			script.onreadystatechange = /** @ignore */ script.onload = function (e) {
-				if (_minion.isDefined(c)) {
-					injectObj.s.onload = injectObj.s.onreadystatechange = null;
-					injectObj.s.onerror = null;
-					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-				}
-			};
-
-			/** @ignore */
-			script.onerror = function (e) {
+		/** @ignore */
+		script.onreadystatechange = /** @ignore */ script.onload = function (e) {
+			if (_minion.isDefined(c)) {
+				injectObj.s.onload = injectObj.s.onreadystatechange = null;
 				injectObj.s.onerror = null;
 				_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-				throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
-			};
+			}
+		};
 
-			script.src = f;
-			
-			// Append the script to the document body
-			doc[body].appendChild(script);
-		}
+		/** @ignore */
+		script.onerror = function (e) {
+			injectObj.s.onerror = null;
+			_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
+			throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
+		};
+
+		script.src = f;
+		
+		// Append the script to the document body
+		doc[body].appendChild(script);
 	};
 
 	/**
@@ -347,20 +338,20 @@ var minion = (function (root) {
 		_loadQueue.push(q);
 
 		for (var i = 0; i < q.f.length; i += 1) {
+
 			if(_isNode){
-				var c = require(q.f[i]);
+				require(q.f[i]);
 			}
 			else{
 				_inject(q.f[i], q.c[i]);
 			}
-			_loadedFiles.push(q.f[i]);
 		}
 
 		/*
 			If the load times out, fire onerror after the time defined by _errorTimeout (default is 10 seconds)
 			(can be changed through minion.config({minion.errorTimeout : ms});
 		*/
-		_waitID = _sTimeout(_checkWaitQueue, _waitInterval);
+		_waitID = setTimeout(_checkWaitQueue, _waitInterval);
 	};
 
 	/**
@@ -562,11 +553,9 @@ var minion = (function (root) {
 			return _classMappings[id];
 		}
 
-		else if(_defaultClassFile){
-			return _defaultClassFile;
-		}
-		
-		var url = _class_path + id.replace(new RegExp('\\' + _separator, 'g'), '/') + '.js' + ((_file_suffix) ? "?" + _file_suffix : "");
+		var isDir = id.indexOf("*") > -1;
+		id = isDir ? id.replace(".*", "") : id;
+		var url = _class_path + id.replace(new RegExp('\\' + _separator, 'g'), '/') + (isDir ? "" : '.js') + ((_file_suffix) ? "?" + _file_suffix : "");
 
 		return url;
 	};
@@ -620,11 +609,6 @@ var minion = (function (root) {
 
 	_minion.provides = function (file, definitions) {
 
-		if(definitions === "*"){
-			_defaultClassFile = file;
-			return;
-		}
-
 		// If classes is a String, create an array
 		definitions = _strToArray(definitions);
 
@@ -660,9 +644,15 @@ var minion = (function (root) {
 			var id = ids[i];
 			var file = _minion.getURL(id);
 
-			if ((_requestedFiles.indexOf(file) < 0) && !_minion.get(id)) {
-				fileList.push(file);
-				classList.push(id);
+			if ((_loadedClasses.indexOf(id) < 0)) {
+				if(!_minion.get(id)){
+					fileList.push(file);
+					classList.push(id);
+				}
+				// Don't add any minion.* Classes to the _loadedClasses array.
+				if(id.indexOf("minion.") !== 0){
+					_loadedClasses.push(id);
+				}
 			}
 		}
 
@@ -675,7 +665,7 @@ var minion = (function (root) {
 			};
 									
 			//_load(q);
-			_sTimeout(function(){_load(q);}, 0);
+			setTimeout(function(){_load(q);}, 0);
 		}
 
 		else if (callback) {
@@ -738,13 +728,23 @@ var minion = (function (root) {
 	};
 	
 	/**
-	* Get a list of all files loaded in through Minion, up to this point. 
-	* If a file has been requested, but not yet finished loading, it will still show up in this list.
+	* Get a list of all Classes loaded in through Minion, up to this point. 
+	* If a Class has been requested, but not yet finished loading, it will still show up in this list.
 	*
-	* @returns	{Array}					An array of the files that have been loaded in via Minion.
+	* @returns	{Array}					An array of the Classes that have been loaded in via Minion.
 	*/
-	_minion.getLoadedFiles = function () {
-		return _loadedFiles.concat();
+	_minion.getLoadedClasses = function () {
+		return _loadedClasses.concat();
+	};
+
+	/**
+	* Clears all of the loaded Classses from the _loadedClasses array. This is mainly used by the build tool, but can be used
+	* for other edge case situations as well.
+	*
+	*/
+
+	_minion.clearLoadedClasses = function() {
+		_loadedClasses = [];
 	};
 		
 	/** @private */

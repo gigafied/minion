@@ -1,0 +1,38 @@
+{
+    "vars" : {
+        "root_path" : "test/unit/classes"
+    },
+
+    "embed_provides" : false,
+    "compile_minion" : false,
+
+    "build_groups" : [
+        {
+            "path" : "{{root_path}}",
+            "output" : "{{root_path}}/classes1.min.js",
+            "classes" : [
+                "com.minion.test.Test2"
+            ],
+            "prepend_files" : [],
+            "append_files" : [],
+            "include_minion" : false,
+            "embed_provides" : true,
+            "jshint" : true
+        },
+
+        {
+            "path" : "{{root_path}}",
+            "output" : "{{root_path}}/classes2.min.js",
+            "classes" : [
+                "com.*"
+            ],
+            "exclude_classes" : [],
+            "prepend_files" : [],
+            "append_files" : [],
+            "include_duplicates" : false,
+            "include_minion" : false,
+            "embed_provides" : false,
+            "jshint" : true
+        }
+    ]
+}

@@ -16,7 +16,7 @@
         "optimist": "0.3.x",
         "uglify-js": "1.2.x",
         "jsdoc-toolkit": "0.0.x",
-        "dox": "0.1.x"
+        "ansi-color": "0.2.x"
     },
     "repository": {
         "type": "git",
