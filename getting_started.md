@@ -366,7 +366,9 @@ It's that easy! What this does is compile a class (and all of it's dependencies)
 
 - <code>-p</code> The path to your class definitions.
 - <code>-o</code> This specifies the file you want MinionJS to write the minified contents to.
-- <code>-i</code> Whether or not to include MinionJS in the minified js file. Don't pass this if you want to include MinionJS separately
+- <code>-w</code> Whether or not to watch for changes. Passing this will keep the process running and everytime any file in the build tree, changes, minion will reminify the file contents for you.
+- <code>-i</code> Whether or not to include MinionJS in the minified js file.
+
 
 The build tool is a major focus right now, soon we will have an option to run it with a config.json, making it easier on you :)
 
