@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Tue Dec 20 15:55:01 2011 -0800
+ * Date: Tue Dec 20 23:03:14 2011 -0800
  */
  /**
 
@@ -735,11 +735,35 @@ var minion = (function (root) {
 			if (!_notificationManager) {
 				_notificationManager = new (minion.get("minion.NotificationManager"))();
 
-				for(var prop in _notificationManager) {
-					if (_isFunction(_notificationManager[prop])) {
-						_minion[prop] = _notificationManager[prop];
-					}
-				}
+				/** @private */
+				_minion.subscribe = function () {
+					_notificationManager.subscribe.apply(_notificationManager, arguments);
+				};
+
+				/** @private */
+				_minion.unsubscribe = function () {
+					_notificationManager.unsubscribe.apply(_notificationManager, arguments);
+				};
+
+				/** @private */
+				_minion.publish = function () {
+					_notificationManager.publish.apply(_notificationManager, arguments);
+				};
+
+				/** @private */
+				_minion.holdNotification = function () {
+					_notificationManager.holdNotification.apply(_notificationManager, arguments);
+				};
+
+				/** @private */
+				_minion.releaseNotification = function () {
+					_notificationManager.releaseNotification.apply(_notificationManager, arguments);
+				};
+
+				/** @private */
+				_minion.cancelNotification = function () {
+					_notificationManager.cancelNotification.apply(_notificationManager, arguments);
+				};
 			}
 		}
 	};
@@ -1009,7 +1033,7 @@ var minion = (function (root) {
 			*
 			* @returns	{Function}	The proxied function
 			*/
-			proxy: function(func){
+			proxy : function(func){
 				var bind = function (context) {
 					if (!context) {return this;}
 					var this_ = this;
@@ -1034,7 +1058,7 @@ var minion = (function (root) {
 					this._interestHandlers = [];
 				}
 				if(handler && !this._interestHandlers[name]){
-					minion.addInterest(this, name, priority);
+					minion.subscribe(this, name, priority);
 					this._interestHandlers[name] = handler;
 				}
 			},
@@ -1051,7 +1075,7 @@ var minion = (function (root) {
 					this._interestHandlers[name] = null;
 					delete this._interestHandlers[name];
 				}
-				minion.removeInterest(this, name);
+				minion.unsubscribe(this, name);
 			},
 
 			/**
@@ -1388,7 +1412,9 @@ var minion = (function (root) {
 						
 			releaseNotification : function(notification){
 				notification.status = 1;
-				this._notifyObjects(notification);
+				if(this._pendingNotifications.indexOf(notification) > -1){
+					this._notifyObjects(notification);
+				}
 			},
 			
 			cancelNotification : function(notification){

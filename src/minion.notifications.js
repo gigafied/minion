@@ -185,7 +185,9 @@
 						
 			releaseNotification : function(notification){
 				notification.status = 1;
-				this._notifyObjects(notification);
+				if(this._pendingNotifications.indexOf(notification) > -1){
+					this._notifyObjects(notification);
+				}
 			},
 			
 			cancelNotification : function(notification){

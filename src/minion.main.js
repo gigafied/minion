@@ -726,11 +726,35 @@ var minion = (function (root) {
 			if (!_notificationManager) {
 				_notificationManager = new (minion.get("minion.NotificationManager"))();
 
-				for(var prop in _notificationManager) {
-					if (_isFunction(_notificationManager[prop])) {
-						_minion[prop] = _notificationManager[prop];
-					}
-				}
+				/** @private */
+				_minion.subscribe = function () {
+					_notificationManager.subscribe.apply(_notificationManager, arguments);
+				};
+
+				/** @private */
+				_minion.unsubscribe = function () {
+					_notificationManager.unsubscribe.apply(_notificationManager, arguments);
+				};
+
+				/** @private */
+				_minion.publish = function () {
+					_notificationManager.publish.apply(_notificationManager, arguments);
+				};
+
+				/** @private */
+				_minion.holdNotification = function () {
+					_notificationManager.holdNotification.apply(_notificationManager, arguments);
+				};
+
+				/** @private */
+				_minion.releaseNotification = function () {
+					_notificationManager.releaseNotification.apply(_notificationManager, arguments);
+				};
+
+				/** @private */
+				_minion.cancelNotification = function () {
+					_notificationManager.cancelNotification.apply(_notificationManager, arguments);
+				};
 			}
 		}
 	};

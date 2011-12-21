@@ -49,7 +49,7 @@
 			*
 			* @returns	{Function}	The proxied function
 			*/
-			proxy: function(func){
+			proxy : function(func){
 				var bind = function (context) {
 					if (!context) {return this;}
 					var this_ = this;
@@ -74,7 +74,7 @@
 					this._interestHandlers = [];
 				}
 				if(handler && !this._interestHandlers[name]){
-					minion.addInterest(this, name, priority);
+					minion.subscribe(this, name, priority);
 					this._interestHandlers[name] = handler;
 				}
 			},
@@ -91,7 +91,7 @@
 					this._interestHandlers[name] = null;
 					delete this._interestHandlers[name];
 				}
-				minion.removeInterest(this, name);
+				minion.unsubscribe(this, name);
 			},
 
 			/**
