@@ -4,170 +4,15 @@
 
 	minion.define("minion", {
 
-		/*
-			This Class handles all the nitty gritty Notification stuff.
-			TODO: Be nice and add some comments for other people :)
-		*/
-
-		NotificationManager : minion.extend("minion.Class", {
-
-			_pendingNotifications: [],
-			_interests: {},
-			_removeQueue: [],
-			
-			init : function(){
-				
-			},
-			
-			addInterest : function(obj, name, priority){
-				priority = (priority || priority === 0) ? priority : -1;
-				if(typeof this._interests[name] === "undefined"){
-					this._interests[name] = [];
-				}
-				if(priority <= -1 || priority >= this._interests[name].length){
-					this._interests[name].push(obj);
-				}
-				else{
-					this._interests[name].splice(priority, 0, obj);
-				}
-			},
-			
-			addInterests : function(obj, names){
-				for(var i = 0; i < names.length; i++){
-					if(typeof names[i] === "string"){
-						this.addInterest(obj, names[i]);
-					}
-					else if(typeof names[i] === "object" || typeof names[i] === "array"){
-						var priority = (names[i].priority !== null && names[i].priority !== undefined) ? names[i].priority : -1;
-						this.addInterest(obj, names[i].name, priority);
-					}
-				}
-			},
-			
-			removeInterest : function(obj, name){
-				var objIndex = this._interests[name].indexOf(obj);
-				if(obj && objIndex > -1){
-					var pendingNotification = this.getNotification(name);
-					if(pendingNotification){
-						var rq = this._removeQueue[name] = this._removeQueue[name] || [];
-						rq.push(obj);
-					}
-					else{
-						this._interests[name].splice(objIndex, 1);
-					}
-				}
-			},
-			
-			removeInterests : function(obj, names){
-				for(var i = 0; i < names.length; i++){
-					this.removeInterest(obj, names[i]);
-				}		
-			},
-			
-			removeAllInterests : function(obj, name){
-				if(obj !== null){
-					for(var i in this._interests){
-						if(this._interests.hasOwnProperty[i]) {
-							this.removeInterest(obj, i);
-						}
-					}
-				}
-				else if(name !== null){
-					this._interests[name] = null;
-				}		
-			},
-			
-			notify : function(notification){
-				notification.status = "pending";
-				notification.pointer = 0;
-
-				if(this._interests[notification.name] !== null){
-					this._pendingNotifications.push(notification);
-					this._notifyObjects(notification);
-				}
-			},
-			
-			_notifyObjects : function(notification){
-
-				var name = notification.name;
-
-				while(notification.pointer < this._interests[name].length){
-					if(notification.status === "pending"){
-						if(this._interests[name][notification.pointer].handleNotification !== null){
-							this._interests[name][notification.pointer].handleNotification(notification);
-						}
-						notification.pointer ++;
-					}
-					else{
-						return;
-					}
-				}
-
-				if(notification.status === "pending"){
-					this.cancelNotification(notification.name);
-				}
-			},
-
-			getNotification : function(name, data){
-				for(var i = 0; i < this._pendingNotifications.length; i ++){
-					if(this._pendingNotifications[i].name === name){
-						return this._pendingNotifications[i];
-					}
-				}
-				if(data){
-					return new minion.Notification(name, data);
-				}
-				return false;
-			},
-			
-			holdNotification : function(name){
-				var notification = this.getNotification(name);
-				if(notification){
-					notification.status = "hold";
-				}
-			},
-			
-			releaseNotification : function(name){
-				var notification = this.getNotification(name);
-
-				if(notification && notification.status === "hold"){
-					notification.status = "pending";
-					this._notifyObjects(notification);
-				}
-			},
-			
-			cancelNotification : function(name){
-				var notification = this.getNotification(name);
-				if(notification){
-					this._pendingNotifications.splice(this._pendingNotifications.indexOf(notification), 1);
-
-					notification.status = "";
-
-					if(this._removeQueue[name]){
-						for(var i = 0; i < this._removeQueue.length; i ++){
-							this.removeInterest(this._removeQueue[name][i], name);
-						}
-						this._removeQueue[name] = null;
-						delete this._removeQueue[name];
-					}
-				}
-			}
-
-		})
-
-	});
-
-	minion.define("minion", {
-
 		/** @lends minion.Notification# */ 
 
 		Notification : minion.extend("minion.Class", {
 
-			data: {},
-			name: "",
-			dispatcher: null,
-			status: "",
-			pointer: 0,
+			data : {},
+			name : "",
+			dispatcher : null,
+			status : 0, // 0 : Closed; 1 : Pending; 2 : Hold
+			pointer : 0,
 
 			/**
 			*
@@ -178,7 +23,7 @@
 			* @param		{String}				name			The name of the Notification.
 			* @param		{Object}				data			An object of data associated with the Notification.		
 			*/
-			init : function(name, data){
+			init : function(name, data) {
 				this.name = name;
 				this.data = data;
 			},
@@ -189,8 +34,8 @@
 			*
 			* @public
 			*/
-			hold : function(){
-				minion.holdNotification(this.name);
+			hold : function() {
+				this.status = 2;
 			},
 
 			/**
@@ -200,8 +45,9 @@
 			* @public
 			*/
 
-			release : function(){
-				minion.releaseNotification(this.name);
+			release : function() {
+				this.status = 1;
+				minion.releaseNotification(this);
 			},
 
 			/**
@@ -211,8 +57,14 @@
 			* @public
 			*/
 
-			cancel : function(){
-				minion.cancelNotification(this.name);
+			cancel : function() {
+				minion.cancelNotification(this);
+
+				this.data = {};
+				this.name = "";
+				this.status = 0;
+				this.pointer = 0;
+				this.dispatcher = null;
 			},
 
 			/**
@@ -223,11 +75,142 @@
 			* @public
 			*/
 
-			dispatch: function(obj){
+			dispatch : function(obj) {
+				this.status = 1;
+				this.pointer = 0;
 				this.dispatcher = obj;
-				minion.notify(this);
+
+				minion.publish(this);
 			}
 		})
+	});
+
+
+	minion.define("minion", {
+
+		/*
+			This Class handles all the nitty gritty Notification stuff.
+			TODO: Be nice and add some comments for other people :)
+		*/
+
+		require : [
+			"minion.Notification"
+		],
+
+		NotificationManager : minion.extend("minion.Singleton", {
+
+			_pendingNotifications: [],
+			_pendingNotificationNames : [],
+			_interests: {},
+			_removeQueue: [],
+			
+			subscribe : function(obj, name, priority) {
+				
+				priority = isNaN(priority) ? -1 : priority;
+				this._interests[name] = this._interests[name] || [];
+
+				if(priority <= -1 || priority >= this._interests[name].length){
+					this._interests[name].push(obj);
+				}
+				else{
+					this._interests[name].splice(priority, 0, obj);
+				}
+			},
+
+			unsubscribe : function(obj, name){
+				if(name instanceof Array){
+					for(var i = 0; i < name.length; i ++){
+						this.unsubscribe(obj, name[i]);
+					}
+					return;
+				}
+				var objIndex = this._interests[name].indexOf(obj);
+				if(obj && objIndex > -1){
+
+					if(this._pendingNotificationNames.indexOf(name) > -1) {
+						var rq = this._removeQueue[name] = this._removeQueue[name] || [];
+						rq.push(obj);
+					}
+					else{
+						this._interests[name].splice(objIndex, 1);
+					}
+				}
+			},
+			
+			publish : function(notification, data, obj){
+
+				if(!(notification instanceof this.__imports.Notification)){
+					notification = new this.__imports.Notification(notification, data);
+					notification.dispatch(obj);
+					return;
+				}
+				
+				var name = notification.name;
+
+				if(this._interests[name]){
+					this._pendingNotifications.push(notification);
+					this._pendingNotificationNames.push(name);
+					this._notifyObjects(notification);
+				}
+			},
+			
+			_notifyObjects : function(notification){
+
+				var name = notification.name;
+
+				while(notification.pointer < this._interests[name].length) {
+					if(notification.status === 1){
+						if(this._interests[name][notification.pointer].handleNotification){
+							this._interests[name][notification.pointer].handleNotification(notification);
+						}
+						notification.pointer ++;
+					}
+					else{
+						return;
+					}
+				}
+
+				if(notification.status === 1) {
+					this.cancelNotification(notification);
+				}
+			},
+
+			getNotification : function(name) {
+				for(var i = 0; i < this._pendingNotifications.length; i ++){
+					if(this._pendingNotifications[i].name === name){
+						return this._pendingNotifications[i];
+					}
+				}
+			},
+						
+			releaseNotification : function(notification){
+				notification.status = 1;
+				this._notifyObjects(notification);
+			},
+			
+			cancelNotification : function(notification){
+				if(notification){
+
+					var name = notification.name;
+					
+					this._pendingNotifications.splice(this._pendingNotifications.indexOf(notification), 1);
+
+					notification.status = 0;
+
+					if(this._removeQueue[name]){
+						for(var i = 0; i < this._removeQueue.length; i ++){
+							this.unsubscribe(this._removeQueue[name][i], name);
+						}
+						this._removeQueue[name] = null;
+						delete this._removeQueue[name];
+					}
+
+					notification = null;
+				}
+			}
+
+		})
+
 	});
 
 	minion.enableNotifications();

@@ -724,81 +724,14 @@ var minion = (function (root) {
 	_minion.enableNotifications = function () {
 		if (_minion.isDefined("minion.NotificationManager")) {
 			if (!_notificationManager) {
-				_notificationManager = new minion.NotificationManager();
+				_notificationManager = new (minion.get("minion.NotificationManager"))();
+
+				for(var prop in _notificationManager) {
+					if (_isFunction(_notificationManager[prop])) {
+						_minion[prop] = _notificationManager[prop];
+					}
+				}
 			}
-		}
-	};
-
-	/** @private */
-	_minion.addInterest = function () {
-		if (_notificationManager) {
-			_notificationManager.addInterest.apply(_notificationManager, arguments);
-		}
-	};
-
-	/** @private */
-	_minion.addInterests = function () {
-		if (_notificationManager) {
-			_notificationManager.addInterests.apply(_notificationManager, arguments);
-		}
-	};
-
-	/** @private */
-	_minion.removeInterest = function () {
-		if (_notificationManager) {
-			_notificationManager.removeInterest.apply(_notificationManager, arguments);
-		}
-	};
-	
-	/** @private */
-	_minion.removeInterests = function () {
-		if (_notificationManager) {
-			_notificationManager.removeInterests.apply(_notificationManager, arguments);
-		}
-	};
-
-	/** @private */
-	_minion.removeAllInterests = function () {
-		if (_notificationManager) {
-			_notificationManager.removeAllInterests.apply(_notificationManager, arguments);
-		}
-	};
-
-	/** @private */
-	_minion.notify = function () {
-		if (_notificationManager) {
-			_notificationManager.notify.apply(_notificationManager, arguments);
-		}
-	};
-
-	/** @private */
-	_minion.holdNotification = function () {
-		if (_notificationManager) {
-			_notificationManager.holdNotification.apply(_notificationManager, arguments);
-		}
-	};
-
-	/** @private */
-	_minion.releaseNotification = function () {
-		if (_notificationManager) {
-			_notificationManager.releaseNotification.apply(_notificationManager, arguments);
-		}
-	};
-
-	/** @private */
-	_minion.cancelNotification = function () {
-		if (_notificationManager) {
-			_notificationManager.cancelNotification.apply(_notificationManager, arguments);
-		}
-	};
-
-	/**
-	* Publishes a Notification. This is useful if you want to publish a notification anywhere other than inside a class method.
-	*/
-	_minion.publish = function (name, data) {
-		if (_notificationManager) {
-			var notification = new minion.Notification(name, data);
-			notification.dispatch(_minion);
 		}
 	};
 

@@ -61,8 +61,15 @@
 				return bind.call(func, this);
 			},
 			
-			/** @ignore */
-			addInterest : function(name, handler, priority){
+			/** 
+			* Subscribes to a notification.
+			*
+			* @public
+			* @param		{String}				name			The name of the Notification you are subscribing to.
+			* @param		{Function}			handler		A function to be called upon receiving the given Notification.
+			*/
+
+			subscribe : function(name, handler, priority){
 				if(!this._interestHandlers){
 					this._interestHandlers = [];
 				}
@@ -72,8 +79,14 @@
 				}
 			},
 
-			/** @ignore */
-			removeInterest : function(name){
+			/** 
+			* Unsubscribes from a notification.
+			*
+			* @public
+			* @param		{String}				name			The name of the Notification you are unsubscribing from.
+			*/
+
+			unsubscribe : function(name){
 				if(this._interestHandlers && this._interestHandlers[name]){
 					this._interestHandlers[name] = null;
 					delete this._interestHandlers[name];
@@ -81,24 +94,17 @@
 				minion.removeInterest(this, name);
 			},
 
-			/** @ignore */
-			removeAllInterests : function(){
-				minion.removeAllInterests(this);
-				this._interestHandlers = [];
-			},
+			/**
+			* Unsubscribes from all notifications registered via this.subscribe();
+			*/
 
-			/** @ignore */
-			notify : function(name, data){
-				var notification = new minion.Notification(name, data);
-				notification.dispatch(this);
-			},
-			
-			/** @ignore */
-			handleNotification : function(n){
-				var handler = this._interestHandlers[n.name];
-				if(handler){
-					this.proxy(handler)(n);
+			unsubscribeAll : function(){
+				for(var interest in this._interestHandlers){
+					if(this._interestHandlers.hasOwnProperty(interest)){
+						this.unsubscribe(interest);
+					}
 				}
+				this._interestHandlers = [];
 			},
 
 			/** 
@@ -107,37 +113,19 @@
 			* @param		{String}				name			The name of the Notification you are publishing.
 			* @param		{Object}				data			An object of data you want to send with the Notification.
 			*/
+
 			publish : function(name, data){
-				this.notify(name, data);
+				minion.publish(name, data, this);
 			},
-
-			/** 
-			* Subscribes to a notification.
-			*
-			* @public
-			* @param		{String}				name			The name of the Notification you are subscribing to.
-			* @param		{Function}			handler		A function to be called upon receiving the given Notification.
-			*/
-			subscribe : function(name, handler, priority){
-				this.addInterest(name, handler, priority);
-			},
-
-			/** 
-			* Unsubscribes from a notification.
-			*
-			* @public
-			* @param		{String}				name			The name of the Notification you are unsubscribing from.
-			*/
-			unsubscribe : function(name){
-				this.removeInterest(name);
-			},
-
-			/**
-			* Unsubscribes from all notifications registered via this.subscribe();
-			*/
-			unsubscribeAll : function(){
-				this.removeAllInterests();
+			
+			/** @ignore */
+			handleNotification : function(n){
+				var handler = this._interestHandlers[n.name];
+				if(handler){
+					this.proxy(handler)(n);
+				}
 			}
+
 		})
 	});
 

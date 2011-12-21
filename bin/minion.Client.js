@@ -136,7 +136,7 @@
 						}
 
 						var jshint_check = group.jshint || this._configObj.jshint || false;
-						var jshint_opts = group.jshint_options || this.__configObj.jshint_options || {};
+						var jshint_opts = group.jshint_options || this._configObj.jshint_options || {};
 
 						for(var i = 0; i < loadedClasses.length; i ++){
 							var file = minion.getURL(loadedClasses[i]);
@@ -357,7 +357,7 @@
 						_classes = _classes.concat(this._getAllClassesInNamespace(namespace + "." + file + ".*"));
 					}
 
-					else{
+					else if(file.indexOf(".js") > -1){
 						_classes.push(namespace + "." + file.replace(".js", ""));
 					}
 				}
