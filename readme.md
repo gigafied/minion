@@ -15,7 +15,7 @@ MinionJS handles all the nitty-gritty, so you can focus on the important stuff, 
 - Intuitive publish/subscribe model
 - this.__super() method support 
 - Build tool for easy deployment (for browser-based applications)
-- MinionJS does all this, all while sporting a tiny footprint of 3.9k (minified and gzipped).
+- MinionJS does all this, all while sporting a tiny footprint of 3.8k (minified and gzipped).
 
 
 #### Currently Supported:
