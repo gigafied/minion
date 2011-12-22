@@ -36,7 +36,7 @@ If you just want to start playing around without installing anything grab the so
 
 To define a new Class create a new JS file, with the following syntax:
 
-	minion.define("com.example", {
+	minion.define("example", {
 
 		Example : minion.extend("minion.Class", {
 
@@ -54,9 +54,9 @@ To define a new Class create a new JS file, with the following syntax:
 		
 	});
 
-Save this file to: <code>path/to/your/js/com/example/Example.js</code>
+Save this file to: <code>path/to/your/js/example/Example.js</code>
 
-What the above code does is declare a new class called <code>Example</code> under the <code>com.example</code> namespace, that extends <code>minion.Class</code> (the MinionJS base class).
+What the above code does is declare a new class called <code>Example</code> under the <code>example</code> namespace, that extends <code>minion.Class</code> (the MinionJS base class).
 
 The first argument of <code>minion.define()</code> is a namespace identifier. The second argument is an Object, and while it is an Object, you only define one Class per define call. We use Object syntax, so you can easily declare the name of your Class.
 
@@ -69,11 +69,11 @@ The first argument of <code>minion.define()</code> is a namespace identifier. Th
 
 You can optionally specify a <code>require</code> array before your Class defintion, like this:
 
-	minion.define("com.example", {
+	minion.define("example", {
 
 		require : [
-			"com.example.Dependency1",
-			"com.example.Dependency2"
+			"example.Dependency1",
+			"example.Dependency2"
 		],
 
 		Example : minion.extend("minion.Class", {
@@ -92,18 +92,18 @@ You can optionally specify a <code>require</code> array before your Class defint
 		
 	});
 	
-By doing this, you tell MinionJS that <code>com.example.Example</code> has two dependencies and to make sure those dependencies are loaded and defined before <code>com.example.Example</code> is defined.
+By doing this, you tell MinionJS that <code>example.Example</code> has two dependencies and to make sure those dependencies are loaded and defined before <code>example.Example</code> is defined.
 
 If you specify dependencies, MinionJS store's references to those dependencies under <code>this.__imports</code>
 
 This means you can do things like this:
 
 
-	minion.define("com.example", {
+	minion.define("example", {
 
 		require : [
-			"com.example.Dependency1",
-			"com.example.Dependency2"
+			"example.Dependency1",
+			"example.Dependency2"
 		],
 
 		Example : minion.extend("minion.Class", {
@@ -127,9 +127,9 @@ This means you can do things like this:
 Of course, you can extend your own classes as well, as long as somewhere up the chain, a class extends one of Minion's base Classes (<code>minion.Class</code>, <code>minion.Singleton</code> or <code>minion.Static</code>)
 
 
-	minion.define("com.example", {
+	minion.define("example", {
 
-		Example2 : minion.extend("com.example.Example", {
+		Example2 : minion.extend("example.Example", {
 
 
 			init: function(){
@@ -155,7 +155,7 @@ You'll notice some calls to to <code>this.\_\_super()</code>. <code>this.\_\_sup
 
 You can implement static methods and properties on Classes, by specifying all static properties and methods inside a <code>\_\_static</code> property, like this:
 
-	minion.define("com.example", {
+	minion.define("example", {
 
 		Example : minion.extend("minion.Class", {
 
@@ -213,7 +213,7 @@ To start using your classes, you'll need to call two methods, <code>minion.confi
 		classPath : "path/to/your/js"
 	});
 
-	minion.require("com.example.Example", function(Example){
+	minion.require("example.Example", function(Example){
 
 		var instance = new Example();
 
@@ -240,7 +240,7 @@ MinionJS implements a simple, yet robust pub/sub model.
 All Classes have a <code>subscribe()</code> method. To subscribe to things, do this:
 
 
-	minion.define("com.example", {
+	minion.define("example", {
 
 		SubscribeExample : minion.extend("minion.Class", {
 
@@ -275,7 +275,7 @@ Classes also have two related methods <code>unsubscribe()</code> and <code>unsub
 
 All Classes also have a <code>publish</code> method. To publish things, do this:
 
-	minion.define("com.example", {
+	minion.define("example", {
 
 		PublishExample : minion.extend("minion.Class", {
 
@@ -356,11 +356,11 @@ This step is only necessary if you want a way to easily reference the build scri
 
 Now, you can use the build script:
 
-	minion build com.example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js
+	minion build example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js
 
 If you opted out of the <code>sudo npm link</code> step, you can just do this instead:
 
-	node_modules/minion/bin/minion-cli.js build com.example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js
+	node_modules/minion/bin/minion-cli.js build example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js
 
 It's that easy! What this does is compile a class (and all of it's dependencies) into one neat little minified js file (using UglifyJS for compression).
 
@@ -396,13 +396,13 @@ It looks like this:
             {
                 "output" : "{{class_path}}/classes1.min.js",
                 "classes" : [
-                    "com.minion.test.Test2"
+                    "minion.test.Test2"
                 ]
             },
             {
                 "output" : "{{class_path}}/classes2.min.js",
                 "classes" : [
-                    "com.*"
+                    "*"
                 ]
             }
         ]
@@ -436,17 +436,17 @@ A build group has two mandatory properties:
 
 You don't have to explicitly list all Classes you want compiled in a build group. This is the beauty of MinionJS. MinionJS will also automatically include dependencies in the build group.
 
-So, if <code>com.minion.test.Test2</code> extends <code>com.minion.test.Test1</code> and lists <code>com.minion.test.SomeDependency</code> as a dependency, then we only have to specify <code>com.minion.test.Test2</code> and MinionJS will automatically include <code>com.minion.test.Test1</code> and <code>com.minion.test.SomeDependency</code> in the build group for you.
+So, if <code>minion.test.Test2</code> extends <code>minion.test.Test1</code> and lists <code>minion.test.SomeDependency</code> as a dependency, then we only have to specify <code>minion.test.Test2</code> and MinionJS will automatically include <code>minion.test.Test1</code> and <code>minion.test.SomeDependency</code> in the build group for you.
 
 You can also specify full namespaces under <code>classes</code>. In the example above, you'll see this:
 
                "classes" : [
-                    "com.*"
+                    "minion.*"
                 ]
 
-This includes any and all classes under the <code>com</code> namespace. This will include any classes directy in the <code>com</code> namespace and children namespaces, like <code>com.example</code>
+This includes any and all classes under the <code>minion</code> namespace. This will include any classes directy in the <code>minion</code> namespace and children namespaces, like <code>test</code>
 
-However, in this example, we are already including <code>com.minion.test.Test2</code> in the prior build group, so it will be ommitted in this build group (along with all of it's dependencies) as it's already compiled elsewhere.
+However, in this example, we are already including <code>minion.test.Test2</code> in the prior build group, so it will be ommitted in this build group (along with all of it's dependencies) as it's already compiled elsewhere.
 
 Build groups can also have the following optional properties:
 
@@ -466,15 +466,15 @@ By specifying any one of these properties, it will use that property over the co
 For example:
 
 	minion.provides("path/to/js/classes.min.js", [
-		"com.example.Example",
-		"com.example.Example2",
-		"com.example.Example3"
+		"example.Example",
+		"example.Example2",
+		"example.Example3"
 	]);
 
 	minion.provides("path/to/js/classes2.min.js", [
-		"com.example.Example4",
-		"com.example.Example5",
-		"com.example.Example6"
+		"example.Example4",
+		"example.Example5",
+		"example.Example6"
 	]);
 
 
@@ -490,17 +490,17 @@ You can also pass paths to <code>minion.configure()</code> with the <code>paths<
 	    {
 	        "file": "path/to/js/classes1.min.js",
 	        "classes": [
-					"com.example.Example",
-					"com.example.Example2",
-					"com.example.Example3"
+					"example.Example",
+					"example.Example2",
+					"example.Example3"
 	        ]
 	    },
 	    {
 	        "file": "path/to/js/classes2.min.js",
 	        "classes": [
-					"com.example.Example4",
-					"com.example.Example5",
-					"com.example.Example6"
+					"example.Example4",
+					"example.Example5",
+					"example.Example6"
 	        ]
 	    }
 	]});

@@ -111,7 +111,7 @@
 					if(arguments[0] !== "__no_init__"){
 
 						/*
-							Handy for referencing dependencies. If a Class requires com.example.Test, then you can reference said class
+							Handy for referencing dependencies. If a Class requires example.Test, then you can reference said class
 							in any method by this.__imports.Test;
 
 							This method is preferred over this.use_dependencies(), as you have to explicitly call this.unuse_dependencies()

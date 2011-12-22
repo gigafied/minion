@@ -1,6 +1,6 @@
-minion.define("com.minion.test", {
+minion.define("minion.test", {
 
-	Test2 : minion.extend("com.minion.test.Test1", {
+	Test2 : minion.extend("minion.test.Test1", {
 
 		init : function(){
 

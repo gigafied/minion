@@ -15,20 +15,20 @@
 	}
 
 	module("minion.Class");
-		asyncTest('com.minion.test.Test2', function() {
+		asyncTest('minion.test.Test2', function() {
 
 			expect(5);
 
-			minion.require("com.minion.test.Test2", function(){
+			minion.require("minion.test.Test2", function(){
 
 				// Class should be defined
-				ok(minion.get("com.minion.test.Test2"), "com.minion.test.Test2 is defined.");
+				ok(minion.get("minion.test.Test2"), "minion.test.Test2 is defined.");
 
-				var Test = minion.get("com.minion.test.Test2");
+				var Test = minion.get("minion.test.Test2");
 				var testInstance = new Test();
 				var testInstance2 = new Test();
 
-				ok(testInstance, "com.minion.test.Test2 was instantiated.")
+				ok(testInstance, "minion.test.Test2 was instantiated.")
 
 				ok(testInstance.someTestMethod(), "instance.someTestMethod exists and returns true.");
 
@@ -46,16 +46,16 @@
 		});
 
 	module("minion.Singleton");
-		asyncTest('com.minion.test.SingletonTest', function() {
+		asyncTest('minion.test.SingletonTest', function() {
 
 			expect(5);
 
-			minion.require("com.minion.test.SingletonTest", function(){
+			minion.require("minion.test.SingletonTest", function(){
 
 				// Class should be defined
-				ok(minion.get("com.minion.test.SingletonTest"), "com.minion.test.SingletonTest is defined.");
+				ok(minion.get("minion.test.SingletonTest"), "minion.test.SingletonTest is defined.");
 
-				var Test = minion.get("com.minion.test.SingletonTest");
+				var Test = minion.get("minion.test.SingletonTest");
 				var testInstance = new Test();
 				var testInstance2 = new Test();
 				var testInstance3 = Test.getInstance();
@@ -64,7 +64,7 @@
 				testInstance2.testPropBool = false;
 				testInstance3.testPropObj = {yay: "This should exist on all instances..."};
 
-				ok(testInstance, "com.minion.test.SingletonTest was instantiated.")
+				ok(testInstance, "minion.test.SingletonTest was instantiated.")
 
 				same(testInstance, testInstance2, "instance1 === instance2");
 				same(testInstance, testInstance3, "instance1 === instance3");
@@ -78,16 +78,16 @@
 		});
 
 	module("minion.Static");
-		asyncTest('com.minion.test.StaticTest', function() {
+		asyncTest('minion.test.StaticTest', function() {
 
 			expect(3);
 
-			minion.require("com.minion.test.StaticTest", function(){
+			minion.require("minion.test.StaticTest", function(){
 
 				// Class should be defined
-				ok(minion.get("com.minion.test.StaticTest"), "com.minion.test.StaticTest is defined.");
+				ok(minion.get("minion.test.StaticTest"), "minion.test.StaticTest is defined.");
 
-				var Test = minion.get("com.minion.test.StaticTest");
+				var Test = minion.get("minion.test.StaticTest");
 
 				ok(Test.someTestMethod(), "StaticTest.someTestMethod() exists statically and returns true.");
 				ok(Test.testPropBool, "StaticTest.testPropBool exists statically and === true");

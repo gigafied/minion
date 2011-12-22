@@ -669,9 +669,9 @@ var minion = (function (root) {
 	/**
 	* Copies an array of classes (by their fully qualified names) to the specified object/scope.
 	*
-	* By calling minion.use("com.test.Example", obj), you will be able to refer to com.test.Example as just obj.Example.
+	* By calling minion.use("test.Example", obj), you will be able to refer to test.Example as just obj.Example.
 	* 
-	* Identifiers can contain the* wildcard character as its last segment (eg: com.test.*) 
+	* Identifiers can contain the* wildcard character as its last segment (eg: test.*) 
 	* which will import all Classes under the given namespace.
 	*
 	* @public

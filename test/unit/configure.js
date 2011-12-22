@@ -27,10 +27,10 @@
 	// Test whether rootPath is working
 	asyncTest('rootPath', function() {
 
-		minion.require("com.minion.test.ConfigureTest", function(){
+		minion.require("minion.test.ConfigureTest", function(){
 
 			// Class should be defined
-			ok(minion.get("com.minion.test.ConfigureTest"), "rootPath is being used.");
+			ok(minion.get("minion.test.ConfigureTest"), "rootPath is being used.");
 			start();
 		});
 
@@ -42,13 +42,13 @@
 		
 		expect(4);
 
-		minion.require("com.minion.test.ConfigureTest", function(){
+		minion.require("minion.test.ConfigureTest", function(){
 			
 			// Class should not exist globally
 			ok(!window.com, "Test Class not reachable under the global namespace.");
 
 			// Class should be gettable with minion.get
-			ok(minion.get("com.minion.test.ConfigureTest"), "Test Class reachable with minion.get('com.minion.test.ConfigureTest') with pollute = false");
+			ok(minion.get("minion.test.ConfigureTest"), "Test Class reachable with minion.get('minion.test.ConfigureTest') with pollute = false");
 
 			// Do the first configure test
 			minion.configure(
@@ -58,7 +58,7 @@
 			);
 
 			// Class should now exist globally
-			ok(com.minion.test.ConfigureTest, "Test Class now exists globally, after pollute = true was set.");
+			ok(minion.test.ConfigureTest, "Test Class now exists globally, after pollute = true was set.");
 
 			// Do the first configure test
 			minion.configure(

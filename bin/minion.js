@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Tue Dec 20 23:40:15 2011 -0800
+ * Date: Wed Dec 21 01:27:27 2011 -0800
  */
  /**
 
@@ -678,9 +678,9 @@ var minion = (function (root) {
 	/**
 	* Copies an array of classes (by their fully qualified names) to the specified object/scope.
 	*
-	* By calling minion.use("com.test.Example", obj), you will be able to refer to com.test.Example as just obj.Example.
+	* By calling minion.use("test.Example", obj), you will be able to refer to test.Example as just obj.Example.
 	* 
-	* Identifiers can contain the* wildcard character as its last segment (eg: com.test.*) 
+	* Identifiers can contain the* wildcard character as its last segment (eg: test.*) 
 	* which will import all Classes under the given namespace.
 	*
 	* @public
@@ -897,7 +897,7 @@ var minion = (function (root) {
 					if(arguments[0] !== "__no_init__"){
 
 						/*
-							Handy for referencing dependencies. If a Class requires com.example.Test, then you can reference said class
+							Handy for referencing dependencies. If a Class requires example.Test, then you can reference said class
 							in any method by this.__imports.Test;
 
 							This method is preferred over this.use_dependencies(), as you have to explicitly call this.unuse_dependencies()

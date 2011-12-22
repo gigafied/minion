@@ -1,17 +1,17 @@
-minion.define("com.minion.test", {
+minion.define("minion.test", {
 
-	Test1 : minion.extend("minion.Class", {
+	SingletonTest : minion.extend("minion.Singleton", {
 
 		testPropBool : true,
 		testPropStr : "minion",
 		testPropObj : {prop1 : "yay", prop2 : "awesome"},
-		testPropArr : ["yay", "awesome"],		
+		testPropArr : ["yay", "awesome"],
 
 		init : function(){
 
 		},
 
-		superTestMethod : function(){
+		someTestMethod : function(){
 			return true;
 		}
 

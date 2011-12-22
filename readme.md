@@ -46,7 +46,7 @@ MinionJS handles all the nitty-gritty, so you can focus on the important stuff, 
 
 #### Defining a Class:
 
-	minion.define("com.example", {
+	minion.define("example", {
 	  
 	    Example : minion.extend("minion.Class", {
 
@@ -68,7 +68,7 @@ MinionJS handles all the nitty-gritty, so you can focus on the important stuff, 
 #### Using a Class:
 
 
-	minion.require("com.example.Example3", function(Example3) {
+	minion.require("example.Example3", function(Example3) {
 	
 	    var instance = new Example3();
 	    instance.doSomething();

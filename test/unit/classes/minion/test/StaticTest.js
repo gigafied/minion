@@ -1,4 +1,4 @@
-minion.define("com.minion.test", {
+minion.define("minion.test", {
 
 	StaticTest : minion.extend("minion.Static", {
 

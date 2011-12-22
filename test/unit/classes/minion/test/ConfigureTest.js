@@ -1,4 +1,4 @@
-minion.define("com.minion.test", {
+minion.define("minion.test", {
 
 	ConfigureTest : minion.extend("minion.Class", {
 
