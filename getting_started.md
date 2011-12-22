@@ -402,7 +402,7 @@ It looks like this:
             {
                 "output" : "{{class_path}}/classes2.min.js",
                 "classes" : [
-                    "*"
+                    "minion.*"
                 ]
             }
         ]
