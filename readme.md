@@ -68,9 +68,9 @@ MinionJS handles all the nitty-gritty, so you can focus on the important stuff, 
 #### Using a Class:
 
 
-	minion.require("example.Example3", function(Example3) {
+	minion.require("example.Example", function(Example) {
 	
-	    var instance = new Example3();
+	    var instance = new Example();
 	    instance.doSomething();
 	  
 	})
