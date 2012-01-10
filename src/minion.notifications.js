@@ -141,8 +141,9 @@
 
 				if(!(notification instanceof this.__imports.Notification)){
 					notification = new this.__imports.Notification(notification, data);
-					notification.dispatch(obj);
-					return;
+					notification.status = 1;
+					notification.pointer = 0;
+					notification.dispatcher = obj;
 				}
 				
 				var name = notification.name;
