@@ -1,11 +1,11 @@
 /*
- * minion.JS v1.4.2
+ * minion.JS v1.4.3
  * http://minion.org
  *
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Thu Dec 22 00:26:30 2011 -0800
+ * Date: Tue Jan 10 15:57:34 2012 -0800
  */
  /**
 
@@ -1368,8 +1368,9 @@ var minion = (function (root) {
 
 				if(!(notification instanceof this.__imports.Notification)){
 					notification = new this.__imports.Notification(notification, data);
-					notification.dispatch(obj);
-					return;
+					notification.status = 1;
+					notification.pointer = 0;
+					notification.dispatcher = obj;
 				}
 				
 				var name = notification.name;
