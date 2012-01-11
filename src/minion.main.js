@@ -83,7 +83,6 @@ var minion = (function (root) {
 
 	var _root = root;
 	var _ns = {};
-	var _pollute = false;
 	var _errorTimeout = 1e4;
 
 	/**
@@ -439,10 +438,6 @@ var minion = (function (root) {
 					ns[className] = c;
 				}
 			}
-
-			if(_pollute){
-				_copyToNS(_ns, _root);
-			}
 		}
 
 		return ns;
@@ -455,7 +450,7 @@ var minion = (function (root) {
 	* Configure minion.
 	* 
 	* @public
-	* @param			{Object}		configObj			Configuration object, possible properties are : classPath, pollute, separator and fileSuffix
+	* @param			{Object}		configObj			Configuration object, possible properties are : classPath, separator and fileSuffix
 	*/
 
 	_minion.configure = function (configObj) {
@@ -473,24 +468,6 @@ var minion = (function (root) {
 				var m = configObj.paths[i];
 				_minion.provides(m.file, m.classes);
 			}
-		}
-
-		var pollute = false;
-
-		if(configObj.pollute === true){
-			pollute = configObj.pollute;
-		}
-
-		if(configObj.rootNS) {
-			_root = configObj.rootNS;
-		}
-
-		if (_initialized && pollute === true) {
-			_copyToNS(_ns, _root);
-			_pollute = true;
-		}
-		else{
-			_removeFromNS(_ns, _root);
 		}
 
 		_initialized = true;
