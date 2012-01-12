@@ -13,6 +13,7 @@
 			dispatcher : null,
 			status : 0, // 0 : Closed; 1 : Pending; 2 : Hold
 			pointer : 0,
+			callback : null,
 
 			/**
 			*
@@ -22,10 +23,12 @@
 			* @constructs
 			* @param		{String}				name			The name of the Notification.
 			* @param		{Object}				data			An object of data associated with the Notification.		
+			* @param		{Function}				callback		A callback function. This gets invoked by calling Notification.respond();
 			*/
-			init : function(name, data) {
+			init : function(name, data, callback) {
 				this.name = name;
 				this.data = data;
+				this.callback = callback;
 			},
 
 			/**
@@ -65,6 +68,7 @@
 				this.status = 0;
 				this.pointer = 0;
 				this.dispatcher = null;
+				this.callback = null;
 			},
 
 			/**
@@ -81,6 +85,21 @@
 				this.dispatcher = obj;
 
 				minion.publish(this);
+			},
+
+			/**
+			*
+			* Responds to a Notification. Pretty much just calls the callback function that is passed when constructing a new function.
+			*
+			* @public
+			*/
+
+			respond : function () {
+				if(this.callback) {
+					this.callback.apply(typeof this.dispatcher == "object" ? this.dispatcher : this, arguments);
+					this.callback = null;
+					this.cancel();
+				}
 			}
 		})
 	});
@@ -137,10 +156,10 @@
 				}
 			},
 			
-			publish : function(notification, data, obj){
+			publish : function(notification, data, obj, callback){
 
 				if(!(notification instanceof this.__imports.Notification)){
-					notification = new this.__imports.Notification(notification, data);
+					notification = new this.__imports.Notification(notification, data, callback);
 					notification.status = 1;
 					notification.pointer = 0;
 					notification.dispatcher = obj;
@@ -171,7 +190,7 @@
 					}
 				}
 
-				if(notification.status === 1) {
+				if(notification.status === 1 && !notification.callback) {
 					this.cancelNotification(notification);
 				}
 			},

@@ -112,10 +112,11 @@
 			*
 			* @param		{String}				name			The name of the Notification you are publishing.
 			* @param		{Object}				data			An object of data you want to send with the Notification.
+			* @param		{Function}				callback		A callback function to be invoked if Notification.respond() is called
 			*/
 
-			publish : function(name, data){
-				minion.publish(name, data, this);
+			publish : function(name, data, callback){
+				minion.publish(name, data, this, callback);
 			},
 			
 			/** @ignore */

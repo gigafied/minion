@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Tue Jan 10 16:01:01 2012 -0800
+ * Date: Tue Jan 10 18:22:06 2012 -0800
  */
  /**
 
@@ -1073,10 +1073,11 @@ var minion = (function (root) {
 			*
 			* @param		{String}				name			The name of the Notification you are publishing.
 			* @param		{Object}				data			An object of data you want to send with the Notification.
+			* @param		{Function}				callback		A callback function to be invoked if Notification.respond() is called
 			*/
 
-			publish : function(name, data){
-				minion.publish(name, data, this);
+			publish : function(name, data, callback){
+				minion.publish(name, data, this, callback);
 			},
 			
 			/** @ignore */
@@ -1217,6 +1218,7 @@ var minion = (function (root) {
 			dispatcher : null,
 			status : 0, // 0 : Closed; 1 : Pending; 2 : Hold
 			pointer : 0,
+			callback : null,
 
 			/**
 			*
@@ -1226,10 +1228,12 @@ var minion = (function (root) {
 			* @constructs
 			* @param		{String}				name			The name of the Notification.
 			* @param		{Object}				data			An object of data associated with the Notification.		
+			* @param		{Function}				callback		A callback function. This gets invoked by calling Notification.respond();
 			*/
-			init : function(name, data) {
+			init : function(name, data, callback) {
 				this.name = name;
 				this.data = data;
+				this.callback = callback;
 			},
 
 			/**
@@ -1269,6 +1273,7 @@ var minion = (function (root) {
 				this.status = 0;
 				this.pointer = 0;
 				this.dispatcher = null;
+				this.callback = null;
 			},
 
 			/**
@@ -1285,6 +1290,21 @@ var minion = (function (root) {
 				this.dispatcher = obj;
 
 				minion.publish(this);
+			},
+
+			/**
+			*
+			* Responds to a Notification. Pretty much just calls the callback function that is passed when constructing a new function.
+			*
+			* @public
+			*/
+
+			respond : function () {
+				if(this.callback) {
+					this.callback.apply(typeof this.dispatcher == "object" ? this.dispatcher : this, arguments);
+					this.callback = null;
+					this.cancel();
+				}
 			}
 		})
 	});
@@ -1341,10 +1361,10 @@ var minion = (function (root) {
 				}
 			},
 			
-			publish : function(notification, data, obj){
+			publish : function(notification, data, obj, callback){
 
 				if(!(notification instanceof this.__imports.Notification)){
-					notification = new this.__imports.Notification(notification, data);
+					notification = new this.__imports.Notification(notification, data, callback);
 					notification.status = 1;
 					notification.pointer = 0;
 					notification.dispatcher = obj;
@@ -1375,7 +1395,7 @@ var minion = (function (root) {
 					}
 				}
 
-				if(notification.status === 1) {
+				if(notification.status === 1 && !notification.callback) {
 					this.cancelNotification(notification);
 				}
 			},
