@@ -8,6 +8,9 @@
 
 		Static : minion.extend("minion.Singleton", {
 
+			__isDefined : true,
+			__isStatic : true,
+
 			/**
 			*
 			* A way to easily implement Static Classes.
@@ -18,7 +21,7 @@
 			init : function(){
 
 			},
-			
+
 			/** @ignore */
 			__static : {
 
