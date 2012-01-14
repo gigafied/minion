@@ -42,6 +42,11 @@
 					}
 				}
 
+				_class.__ns = obj.__ns || "";
+				_class.__nsID = obj.__nsID || "";
+				_class.__class = obj.__class || "";
+				_class.__dependencies = obj.__dependencies || [];
+
 				return _class;
 			};
 
