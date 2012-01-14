@@ -16,8 +16,8 @@ FILES = ${HEADER}\
 	${SRC_DIR}/minion.main.js\
 	${SRC_DIR}/minion.baseclass.js\
 	${SRC_DIR}/minion.class.js\
-	${SRC_DIR}/minion.static.js\
 	${SRC_DIR}/minion.singleton.js\
+	${SRC_DIR}/minion.static.js\
 	${SRC_DIR}/minion.notifications.js\
 
 VER = $(shell cat version.txt)

@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Sat Jan 14 00:08:44 2012 -0800
+ * Date: Sat Jan 14 01:19:17 2012 -0800
  */
  /**
 
@@ -1096,37 +1096,6 @@ var minion = (function (root) {
 		})
 	});
 
-})();(function(){
-	
-	"use strict";
-
-	minion.define("minion", {
-
-		/** @lends minion.Static# */ 
-
-		Static : minion.extend("minion.Singleton", {
-
-			/**
-			*
-			* A way to easily implement Static Classes.
-			*
-			* @constructs
-			* @extends minion.Singleton
-			*/
-			init : function(){
-
-			},
-			
-			/** @ignore */
-			__static : {
-
-				/** @lends minion.Static# */ 
-				__isStatic: true
-			}
-
-		})
-	});
-	
 })();	(function(){
 	
 	"use strict";
@@ -1181,6 +1150,37 @@ var minion = (function (root) {
 					}
 					return this.__instance;
 				}
+			}
+
+		})
+	});
+	
+})();(function(){
+	
+	"use strict";
+
+	minion.define("minion", {
+
+		/** @lends minion.Static# */ 
+
+		Static : minion.extend("minion.Singleton", {
+
+			/**
+			*
+			* A way to easily implement Static Classes.
+			*
+			* @constructs
+			* @extends minion.Singleton
+			*/
+			init : function(){
+
+			},
+			
+			/** @ignore */
+			__static : {
+
+				/** @lends minion.Static# */ 
+				__isStatic: true
 			}
 
 		})
