@@ -4,51 +4,29 @@
 
 	minion.define("minion", {
 
-		require: [
-			"minion.Class"
-		],
+		/** @lends minion.Static# */ 
 
-		Static : (function() {
+		Static : minion.extend("minion.Singleton", {
 
-			var _staticClass = function() {
-				throw new Error("This is a Static Class. Don't instantiate this Class.");
-			};
+			/**
+			*
+			* A way to easily implement Static Classes.
+			*
+			* @constructs
+			* @extends minion.Singleton
+			*/
+			init : function(){
 
-			_staticClass.__isDefined = true;
-			_staticClass.__isStatic = true;
+			},
+			
+			/** @ignore */
+			__static : {
 
-			_staticClass.__extend = function(obj){
-				var _class = function() {
-					throw new Error("This is a Static Class. Don't instantiate this Class.");
-				};
-				
-				var prop;
+				/** @lends minion.Static# */ 
+				__isStatic: true
+			}
 
-				for(prop in minion.Class.prototype){
-					if(minion.Class.prototype.hasOwnProperty(prop)){
-						_class[prop] = minion.Class.prototype[prop];
-					}
-				}
-
-				for(prop in this){
-					if(this.hasOwnProperty(prop)){
-						_class[prop] = this[prop];
-					}
-				}
-
-				for(prop in obj){
-					if(obj.hasOwnProperty(prop)){
-						_class[prop] = obj[prop];
-					}
-				}
-
-				return _class;
-			};
-
-			return _staticClass;
-
-		})()
-
+		})
 	});
 	
 })();

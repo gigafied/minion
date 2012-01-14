@@ -188,6 +188,11 @@
 					}
 				}
 
+				if(_class.__isStatic){
+					var StaticClass = _class;
+					return new StaticClass();
+				}
+
 				return _class;
 			};
 			
