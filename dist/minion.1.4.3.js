@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Fri Jan 13 23:46:40 2012 -0800
+ * Date: Fri Jan 13 23:56:47 2012 -0800
  */
  /**
 
@@ -1123,22 +1123,17 @@ var minion = (function (root) {
 					}
 				}
 
-				for(prop in obj){
-					if(obj.hasOwnProperty(prop)){
-						_class[prop] = obj[prop];
-					}
-				}
-
 				for(prop in this){
 					if(this.hasOwnProperty(prop)){
 						_class[prop] = this[prop];
 					}
 				}
 
-				_class.__ns = obj.__ns || "";
-				_class.__nsID = obj.__nsID || "";
-				_class.__class = obj.__class || "";
-				_class.__dependencies = obj.__dependencies || [];
+				for(prop in obj){
+					if(obj.hasOwnProperty(prop)){
+						_class[prop] = obj[prop];
+					}
+				}
 
 				return _class;
 			};

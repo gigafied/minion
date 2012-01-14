@@ -30,22 +30,17 @@
 					}
 				}
 
-				for(prop in obj){
-					if(obj.hasOwnProperty(prop)){
-						_class[prop] = obj[prop];
-					}
-				}
-
 				for(prop in this){
 					if(this.hasOwnProperty(prop)){
 						_class[prop] = this[prop];
 					}
 				}
 
-				_class.__ns = obj.__ns || "";
-				_class.__nsID = obj.__nsID || "";
-				_class.__class = obj.__class || "";
-				_class.__dependencies = obj.__dependencies || [];
+				for(prop in obj){
+					if(obj.hasOwnProperty(prop)){
+						_class[prop] = obj[prop];
+					}
+				}
 
 				return _class;
 			};
