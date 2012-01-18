@@ -19,8 +19,7 @@
 	// Do the first configure test
 	minion.configure(
 		{
-			classPath: "unit/classes",
-			pollute: false
+			classPath: "unit/classes"
 		}
 	);
 

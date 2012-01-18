@@ -63,6 +63,7 @@ var minion = (function (root) {
 	};
 	
 	var _classMappings = [];
+	var _aliases = ["minion"];
 
 	var _separator = ".";
 	var _class_path = "";
@@ -366,7 +367,7 @@ var minion = (function (root) {
 		if (id && !_isObject(id) && !_isFunction(id)) {
 			var parts = id.split(_separator);
 
-			if (parts[0] === "minion") {
+			if (_aliases.indexOf(parts[0]) > -1) {
 				ns = _minion;
 				parts.splice(0,1);
 			}
@@ -471,6 +472,18 @@ var minion = (function (root) {
 		}
 
 		_initialized = true;
+	};
+
+	/**
+	* Alias minion under a different namespace. I.e. var woot = minion.alias("woot");
+	* 
+	* @public
+	* @param			{String}		alias			The name of the namespace to alias minion under.
+	*/
+
+	_minion.alias = function (alias) {
+		_aliases.push(alias);
+		return _minion;
 	};
 
 	/**

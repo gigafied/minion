@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Sat Jan 14 01:19:17 2012 -0800
+ * Date: Sat Jan 14 01:23:34 2012 -0800
  */
  /**
 
@@ -72,6 +72,7 @@ var minion = (function (root) {
 	};
 	
 	var _classMappings = [];
+	var _aliases = ["minion"];
 
 	var _separator = ".";
 	var _class_path = "";
@@ -375,7 +376,7 @@ var minion = (function (root) {
 		if (id && !_isObject(id) && !_isFunction(id)) {
 			var parts = id.split(_separator);
 
-			if (parts[0] === "minion") {
+			if (_aliases.indexOf(parts[0]) > -1) {
 				ns = _minion;
 				parts.splice(0,1);
 			}
@@ -480,6 +481,18 @@ var minion = (function (root) {
 		}
 
 		_initialized = true;
+	};
+
+	/**
+	* Alias minion under a different namespace. I.e. var woot = minion.alias("woot");
+	* 
+	* @public
+	* @param			{String}		alias			The name of the namespace to alias minion under.
+	*/
+
+	_minion.alias = function (alias) {
+		_aliases.push(alias);
+		return _minion;
 	};
 
 	/**
@@ -912,6 +925,12 @@ var minion = (function (root) {
 				//* @ignore */
 				_class.__extend = _baseClass.__extend;
 
+				_class.prototype.__extend = (function(scope, fn){
+					return function(){
+						return fn.apply(scope, arguments);
+					}
+				})(_class, _class.__extend);
+
 				/*
 					Custom minion properties, anything beginning with an __ on a Class or instance, is populated and used by minion.
 					The "__" prefix is used to avoid naming conflictions with developers, and allows
@@ -951,9 +970,18 @@ var minion = (function (root) {
 					}
 				}
 
-				if(_class.__isStatic){
+				if(_class.__static.__isStatic){
+					
 					var StaticClass = _class;
-					return new StaticClass();
+					var s = new StaticClass();
+
+					s.__static = _class.__static;
+
+					for(var prop in _class.__static){
+						s[prop] = _class.__static[prop];
+					};
+
+					return s;
 				}
 
 				return _class;
@@ -1165,6 +1193,12 @@ var minion = (function (root) {
 
 		Static : minion.extend("minion.Singleton", {
 
+			__static : {
+				__isDefined : true,
+				__isStatic : true
+				
+			},
+
 			/**
 			*
 			* A way to easily implement Static Classes.
@@ -1174,13 +1208,6 @@ var minion = (function (root) {
 			*/
 			init : function(){
 
-			},
-			
-			/** @ignore */
-			__static : {
-
-				/** @lends minion.Static# */ 
-				__isStatic: true
 			}
 
 		})

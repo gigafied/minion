@@ -149,6 +149,12 @@
 				//* @ignore */
 				_class.__extend = _baseClass.__extend;
 
+				_class.prototype.__extend = (function(scope, fn){
+					return function(){
+						return fn.apply(scope, arguments);
+					}
+				})(_class, _class.__extend);
+
 				/*
 					Custom minion properties, anything beginning with an __ on a Class or instance, is populated and used by minion.
 					The "__" prefix is used to avoid naming conflictions with developers, and allows
@@ -188,9 +194,18 @@
 					}
 				}
 
-				if(_class.__isStatic){
+				if(_class.__static.__isStatic){
+					
 					var StaticClass = _class;
-					return new StaticClass();
+					var s = new StaticClass();
+
+					s.__static = _class.__static;
+
+					for(var prop in _class.__static){
+						s[prop] = _class.__static[prop];
+					};
+
+					return s;
 				}
 
 				return _class;

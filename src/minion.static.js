@@ -8,8 +8,11 @@
 
 		Static : minion.extend("minion.Singleton", {
 
-			__isDefined : true,
-			__isStatic : true,
+			__static : {
+				__isDefined : true,
+				__isStatic : true
+				
+			},
 
 			/**
 			*
@@ -20,13 +23,6 @@
 			*/
 			init : function(){
 
-			},
-
-			/** @ignore */
-			__static : {
-
-				/** @lends minion.Static# */ 
-				__isStatic: true
 			}
 
 		})
