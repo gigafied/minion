@@ -152,7 +152,7 @@
 				_class.prototype.__extend = (function(scope, fn){
 					return function(){
 						return fn.apply(scope, arguments);
-					}
+					};
 				})(_class, _class.__extend);
 
 				/*
@@ -201,9 +201,9 @@
 
 					s.__static = _class.__static;
 
-					for(var prop in _class.__static){
+					for(prop in _class.__static){
 						s[prop] = _class.__static[prop];
-					};
+					}
 
 					return s;
 				}
