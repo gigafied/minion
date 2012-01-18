@@ -632,9 +632,10 @@ var minion = (function (root) {
 			var file = _minion.getURL(id);
 			var get = _minion.get(id);
 
+			classList.push(id);
+			
 			if ((_loadedFiles.indexOf(file) < 0) && !_minion.get(id)) {
-				fileList.push(file);
-				classList.push(id);
+				fileList.push(file);				
 				_loadedFiles.push(file);
 			}
 		}
