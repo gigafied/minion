@@ -52,9 +52,8 @@ minion:
 		sed 's/@DATE/'"${DATE}"'/' | \
 		sed 's/@VERSION/'"${VER}"'/' > ${minion};
 
-	@@cat ${FILES} | \
-		sed 's/@DATE/'"${DATE}"'/' | \
-		sed 's/@VERSION/'"${VER}"'/' > ${PREFIX}/bin/minion.js;
+	@@cp ${minion} ${minion_LATEST}
+	@@cp ${minion} ${PREFIX}/bin/minion.js;
 
 min: minion
 	@@${COMPILER} ${minion} > ${minion_MIN}
@@ -64,6 +63,7 @@ min: minion
 		sed 's/@VERSION/'"${VER}"'/' > bin/tmp
 
 	@@mv bin/tmp ${minion_MIN}
+	@@cp ${minion_MIN} ${minion_LATEST_MIN}
 
 docs: minion
 	node_modules/jsdoc-toolkit/app/run.js -c=${SRC_DIR}/jsdoc-conf.json
