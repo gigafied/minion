@@ -22,7 +22,7 @@
 
 		writeJSONFile(packageFile, packageObj);
 
-	var jshint_passed = jshint(fs.readFileSync('./dist/minion.' + version + ".js", "utf-8"), {node : true, browser: true});
+	var jshint_passed = jshint(fs.readFileSync('./dist/minion-' + version + ".js", "utf-8"), {node : true, browser: true});
 
 	console.log("");
 	console.log("");

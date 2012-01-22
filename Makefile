@@ -22,8 +22,11 @@ FILES = ${HEADER}\
 
 VER = $(shell cat version.txt)
 
-minion = ${DIST_DIR}/minion.${VER}.js
-minion_MIN = ${DIST_DIR}/minion.${VER}.min.js
+minion = ${DIST_DIR}/minion-${VER}.js
+minion_MIN = ${DIST_DIR}/minion-${VER}.min.js
+minion_LATEST = ${DIST_DIR}/minion-latest.js
+minion_LATEST_MIN = ${DIST_DIR}/minion-latest.min.js
+
 
 DATE=$(shell git log -1 --pretty=format:%ad)
 
