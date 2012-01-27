@@ -6,6 +6,45 @@ MinionJS enables you to easily namespace, create and extend custom classes.
 
 MinionJS handles all the nitty-gritty, so you can focus on the important stuff, like ironing out the final details of your plan for global domination.
 
+## Examples
+
+
+#### Defining a Class:
+
+	minion.define("example", {
+	  
+	    Example : minion.extend("minion.Class", {
+
+	        exampleVar1: 1,
+	        exampleVar2: 2,
+
+  	        init: function(){
+	      
+	        },
+
+	        doSomething : function(something){
+	            //do something with something
+	        }
+	    })
+	    
+	});
+
+
+#### Using a Class:
+
+
+	minion.require("example.Example", function(Example) {
+	
+	    var instance = new Example();
+	    instance.doSomething();
+	  
+	})
+
+
+That's the core of Minion, it's that simple. There's a bit more you can do obviously, but we wanted to give you an idea of 
+what you can do with MinionJS in under 20 lines of code. See [Getting Started](https://github.com/gigafied/minion/blob/master/getting_started.md) to dive in deeper.
+
+
 ####Videos:
 - [Overview](http://www.screenr.com/wOas)
 - [Publish/Subscribe](http://www.screenr.com/cJ5s)
@@ -45,44 +84,6 @@ MinionJS handles all the nitty-gritty, so you can focus on the important stuff, 
 - MinionJS does not touch native JavaScript prototypes. I.E. no Object.prototype.someSuperAwesomeMethod___weThink();
 - Damage Control. No global pollution (by default). All classes reside under the minion namespace. This is good, trust us.
 
-
-## Examples
-
-
-#### Defining a Class:
-
-	minion.define("example", {
-	  
-	    Example : minion.extend("minion.Class", {
-
-	        exampleVar1: 1,
-	        exampleVar2: 2,
-
-  	        init: function(){
-	      
-	        },
-
-	        doSomething : function(something){
-	            //do something with something
-	        }
-	    })
-	    
-	});
-
-
-#### Using a Class:
-
-
-	minion.require("example.Example", function(Example) {
-	
-	    var instance = new Example();
-	    instance.doSomething();
-	  
-	})
-
-
-That's the core of Minion, it's that simple. There's a bit more you can do obviously, but we wanted to give you an idea of 
-what you can do with MinionJS in under 20 lines of code. See [Getting Started](https://github.com/gigafied/minion/blob/master/getting_started.md) to dive in deeper.
 
 ## Getting Started
 
