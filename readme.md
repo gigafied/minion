@@ -6,7 +6,7 @@ MinionJS enables you to easily namespace, create and extend custom classes.
 
 MinionJS handles all the nitty-gritty, so you can focus on the important stuff, like ironing out the final details of your plan for global domination.
 
-#####Videos:
+####Videos:
 - [Overview](http://www.screenr.com/wOas)
 - [Publish/Subscribe](http://www.screenr.com/cJ5s)
 
