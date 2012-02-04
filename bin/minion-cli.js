@@ -8,9 +8,9 @@
 
 	var method = argv._[0];
 
-	minion.provides("./minion.Client.js", "minion.Client");
+	minion.provides("./minion.Interface.js", "minion.Interface");
 
-	minion.require("minion.Client", function(Client){
+	minion.require("minion.Interface", function(Client){
 
 		var client = Client.getInstance();
 		client.setArgs(argv);

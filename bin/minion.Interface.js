@@ -5,7 +5,7 @@
 	var color = require("ansi-color").set;
 	var jshint = require("jshint").JSHINT;
 
-	minion.define("minion", {
+	module.exports = minion.define("minion", {
 		
 		Client : minion.extend("minion.Singleton", {
 
@@ -22,7 +22,7 @@
 				this._args = args;
 			},
 			
-			build : function () {
+			build : function (configFile, quiet) {
 
 				this._configObj = {};
 				this._currentBuildIndex = 0;
@@ -32,9 +32,9 @@
 				this._filesToWatch = [];
 				this._basePath = process.cwd();
 
-				var path, outputPath, configFile, configObj, includeMinion;
+				var path, outputPath, configObj, includeMinion;
 
-				configFile = this._parsePath(this._args.c, null);
+				configFile = this._parsePath(this._args.c, configFile);
 
 				// Load Config File
 				if(configFile){
@@ -88,7 +88,7 @@
 
 				if(configObj.build_groups.length >= 1){
 					this._currentBuildIndex = 0;
-					this._doBuild(this._configObj.build_groups[0]);
+					this._doBuild(this._configObj.build_groups[0], quiet);
 				}
 				else{
 					this._logError("No build group found!!!")
@@ -168,7 +168,13 @@
 								fs.writeFile(group.output, output);	
 							}
 							else{
-								this._logError("Please specify an output path for this build group...", _classes);
+								var err = "Please specify an output path for this build group..." + _classes.join(", ");
+								if(!quiet){
+									this._logError(err);
+								}
+								else{
+									return new Error(err);
+								}								
 							}
 
 							this._compressedFiles.push({
@@ -182,36 +188,45 @@
 								this._doBuild(this._configObj.build_groups[this._currentBuildIndex]);
 								return;
 							}
-
-							// Otherwise, we can now output all the minion.configure code...
-							this._log("");
-							this._log("");
-							this._log("*********************************** BUILD SUCCESSFUL ************************************");
-							this._log("");
-							this._log("");
-							this._log("----------------------------------------------------------------------------------------");
-							this._log("Copy and paste the following into your code, before the first minion.require() call:");
-							this._log("----------------------------------------------------------------------------------------");
-							this._log("");
-							this._log("minion.configure({paths: " + JSON.stringify(this._compressedFiles, null, 4) + "});");
-							this._log("");
-							this._log("----------------------------------------------------------------------------------------");
-							this._log("");
+							if(!quiet){
+								// Otherwise, we can now output all the minion.configure code...
+								this._log("");
+								this._log("");
+								this._log("*********************************** BUILD SUCCESSFUL ************************************");
+								this._log("");
+								this._log("");
+								this._log("----------------------------------------------------------------------------------------");
+								this._log("Copy and paste the following into your code, before the first minion.require() call:");
+								this._log("----------------------------------------------------------------------------------------");
+								this._log("");
+								this._log("minion.configure({paths: " + JSON.stringify(this._compressedFiles, null, 4) + "});");
+								this._log("");
+								this._log("----------------------------------------------------------------------------------------");
+								this._log("");
+							}
 						}
 
 						// If the watch flag was passed, set up watchers on all the loaded files, rebuilding whenever a file changes
 						if(this._configObj.watch){
-							this._log("");
-							this._log("****************************** WATCHING FOR CHANGES *********************************");							
-							this._watchFiles();
+							if(!quiet){
+								this._log("");
+								this._log("****************************** WATCHING FOR CHANGES *********************************");							
+								this._watchFiles();
+							}
 						}
 
-						return;
+						return "minion.configure({paths: " + JSON.stringify(this._compressedFiles, null, 4) + "});";
 
 					}));
 				}
 				catch(e){
-					this._logError("An unexpected error occured when trying to compile the following classes...", _classes);
+					var err = "An unexpected error occured when trying to compile the following classes..." + _classes.join(", ");
+					if(!quiet){
+						this._logError(err);
+					}
+					else{
+						return new Error(err);
+					}
 				}
 			},
 
