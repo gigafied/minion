@@ -4,7 +4,7 @@ var fs = require("fs");
 var color = require("ansi-color").set;
 var jshint = require("jshint").JSHINT;
 
-module.exports = minion.define("minion", {
+minion.define("minion", {
 	
 	Interface : minion.extend("minion.Singleton", {
 
@@ -21,7 +21,7 @@ module.exports = minion.define("minion", {
 			this._args = args;
 		},
 		
-		build : function (configFile, quiet) {
+		build : function (configFile, quiet, cb) {
 
 			if(typeof quiet == "undefined") {quiet = false;}
 
@@ -35,7 +35,7 @@ module.exports = minion.define("minion", {
 
 			var path, outputPath, configObj, includeMinion;
 
-			configFile = this._parsePath(this._args.c, configFile);
+			configFile = this._parsePath(this._args.c, this._parsePath(configFile, null));
 
 			// Load Config File
 			if(configFile){
@@ -89,14 +89,19 @@ module.exports = minion.define("minion", {
 
 			if(configObj.build_groups.length >= 1){
 				this._currentBuildIndex = 0;
-				this._doBuild(this._configObj.build_groups[0], quiet);
+				this._doBuild(this._configObj.build_groups[0], quiet, cb);
 			}
 			else{
-				this._logError("No build group found!!!")
+				if(!quiet){
+					this._logError("No build group found!!!");
+				}
+				else{
+					return new Error("No build group found!!!");
+				}
 			}
 		},
 
-		_doBuild : function (group, quiet) {
+		_doBuild : function (group, quiet, cb) {
 
 			var _classes = [];
 			var path = group.class_path || this._configObj.class_path;
@@ -118,7 +123,7 @@ module.exports = minion.define("minion", {
 
 			try{
 
-				minion.require(_classes, this.proxy(function(){
+				minion.require(_classes, this.proxy( function(){
 
 					var loadedClasses = this._getAllDependencies(_classes);
 
@@ -181,14 +186,14 @@ module.exports = minion.define("minion", {
 						this._compressedFiles.push({
 							file : this._outputPath(group.output, path, output_path),
 							classes: loadedClasses
-						})						
+						});				
 
 						// If there is another build group, let's build that one...
 						if(this._configObj.build_groups[this._currentBuildIndex+1]){
 							this._currentBuildIndex += 1;
-							this._doBuild(this._configObj.build_groups[this._currentBuildIndex]);
-							return;
+							this._doBuild(this._configObj.build_groups[this._currentBuildIndex], quiet, cb);
 						}
+
 						if(!quiet){
 							// Otherwise, we can now output all the minion.configure code...
 							this._log("");
@@ -205,6 +210,10 @@ module.exports = minion.define("minion", {
 							this._log("----------------------------------------------------------------------------------------");
 							this._log("");
 						}
+
+						if(cb){
+							cb(this._compressedFiles);
+						}
 					}
 
 					// If the watch flag was passed, set up watchers on all the loaded files, rebuilding whenever a file changes
@@ -215,8 +224,6 @@ module.exports = minion.define("minion", {
 							this._watchFiles();
 						}
 					}
-
-					return "minion.configure({paths: " + JSON.stringify(this._compressedFiles, null, 4) + "});";
 
 				}));
 			}
@@ -402,5 +409,6 @@ module.exports = minion.define("minion", {
 		}
 
 	})
-
 });
+
+module.exports = minion.get("minion.Interface");
