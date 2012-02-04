@@ -1,5 +1,4 @@
-
-var minion = require(__dirname + '/minion.js');
+minion = require('./minion.js');
 var fs = require("fs");
 var color = require("ansi-color").set;
 var jshint = require("jshint").JSHINT;
