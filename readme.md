@@ -1,4 +1,4 @@
-## MinionJS - Cross-Platform & Cross-Browser JavaScript Classical Inheritance
+### MinionJS - Cross-Platform & Cross-Browser Classical Inheritance
 
 MinionJS provides easy-to-use, easy-to-learn classical inheritance for JavaScript. Easily namespace, create and extend custom classes!
 
