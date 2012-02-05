@@ -38,12 +38,11 @@ That's the core of Minion, it's that simple.
 
 ## Getting Started
 
-https://github.com/gigafied/minion/blob/master/docs/getting_started.md
-n/docs/
-
-####Videos:
 - [Overview](http://www.screenr.com/wOas)
 - [Publish/Subscribe](http://www.screenr.com/cJ5s)
+
+https://github.com/gigafied/minion/blob/master/docs/getting_started.md
+
 
 
 ####Features:
