@@ -1,8 +1,8 @@
 ## MinionJS - Getting Started
 
-## Installation
+### Installation
 
-# Browser-based implementation:
+#### Browser-based implementation:
 
 Grab the latest version of Node.js [here](http://nodejs.org/)
 
@@ -24,7 +24,7 @@ To get the minified version of MinionJS.
 
 You can also just grab the src from the `dist` directory of this repo :)
 
-# node.js implementation:
+#### node.js implementation:
 
 	$ npm install minion
 
