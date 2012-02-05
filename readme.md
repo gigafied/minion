@@ -59,6 +59,7 @@ That's the core of Minion, it's that simple.
 - Build tool for easy deployment (for browser-based applications)
 - MinionJS does all this, all while sporting a tiny footprint of 3.8k (minified and gzipped).
 
+<br>
 
 ####Currently Supported:
 
@@ -71,6 +72,7 @@ That's the core of Minion, it's that simple.
 - Android
 - (Other browsers/platforms probably work, but have not been thoroughly tested).
 
+<br>
 
 ####Some other cool little factoids:
 
@@ -81,6 +83,9 @@ That's the core of Minion, it's that simple.
 - Very well documented, lots o' comments.
 - MinionJS does not touch native JavaScript prototypes. I.E. no Object.prototype.someSuperAwesomeMethod___weThink();
 - Damage Control. No global pollution (by default). All classes reside under the minion namespace. This is good, trust us.
+
+<br>
+<br>
 
 ## License
 
