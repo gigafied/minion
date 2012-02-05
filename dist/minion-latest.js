@@ -5,7 +5,7 @@
  * (c) 2011, Taka Kojima
  * Licensed under the MIT License
  *
- * Date: Sat Jan 21 23:51:10 2012 -0800
+ * Date: Sat Feb 4 07:13:18 2012 -0800
  */
  /**
 
@@ -1125,7 +1125,7 @@ var minion = (function (root) {
 		})
 	});
 
-})();	(function(){
+})();(function(){
 	
 	"use strict";
 

@@ -2,7 +2,7 @@
 
 OVERRIDING=default
 
-SRC_DIR = src
+SRC_DIR = lib
 TEST_DIR = test
 
 PREFIX = .
@@ -39,7 +39,7 @@ b=0
 
 all: core node
 
-core: min docs
+core: min
 	@@echo "minion build complete."
 
 minion: 
@@ -53,30 +53,21 @@ minion:
 		sed 's/@VERSION/'"${VER}"'/' > ${minion};
 
 	@@cp ${minion} ${minion_LATEST}
-	@@cp ${minion} ${PREFIX}/bin/minion.js;
 
 min: minion
 	@@${COMPILER} ${minion} > ${minion_MIN}
 
 	@@cat ${HEADER} ${minion_MIN} | \
 		sed 's/@DATE/'"${DATE}"'/' | \
-		sed 's/@VERSION/'"${VER}"'/' > bin/tmp
+		sed 's/@VERSION/'"${VER}"'/' > tmp
 
-	@@mv bin/tmp ${minion_MIN}
+	@@mv tmp ${minion_MIN}
 	@@cp ${minion_MIN} ${minion_LATEST_MIN}
-
-docs: minion
-	node_modules/jsdoc-toolkit/app/run.js -c=${SRC_DIR}/jsdoc-conf.json
 
 size: minion min
 	@@gzip -c ${minion_MIN} > ${minion_MIN}.gz; \
 	wc -c ${minion} ${minion_MIN} ${minion_MIN}.gz;
 	@@rm ${minion_MIN}.gz; \
-
-push_docs: docs
-	cd gh-pages; git add .; \
-	git commit -am "updated docs"; \
-	git push origin gh-pages
 
 node:
 	@@node make.js

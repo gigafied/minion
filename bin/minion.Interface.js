@@ -1,4 +1,3 @@
-minion = require('./minion.js');
 var fs = require("fs");
 var color = require("ansi-color").set;
 var jshint = require("jshint").JSHINT;
@@ -397,14 +396,14 @@ minion.define("minion", {
 						this.build();
 					}
 				}));
-			}	
+			}
 		},
 		// Cleans up any watchers on this._filesToWatch files.
-		_unwatchFiles : function(){
+		_unwatchFiles : function() {
 			for(var i = 0; i < this._filesToWatch.length; i ++) {
 				var file = this._filesToWatch[i];
 				fs.unwatchFile(file);
-			}	
+			}
 		}
 
 	})
