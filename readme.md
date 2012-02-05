@@ -1,13 +1,6 @@
 ## MinionJS - Cross-Platform & Cross-Browser JavaScript Classical Inheritance
 
-The goal of MinionJS is to provide easy-to-use, easy-to-learn classical inheritance for JavaScript.
-
-MinionJS enables you to easily namespace, create and extend custom classes.
-
-MinionJS handles all the nitty-gritty, so you can focus on the important stuff, like ironing out the final details of your plan for global domination.
-
-## Examples
-
+MinionJS provides easy-to-use, easy-to-learn classical inheritance for JavaScript. Easily namespace, create and extend custom classes!
 
 #### Defining a Class:
 
@@ -41,9 +34,12 @@ MinionJS handles all the nitty-gritty, so you can focus on the important stuff, 
 	})
 
 
-That's the core of Minion, it's that simple. There's a bit more you can do obviously, but we wanted to give you an idea of 
-what you can do with MinionJS in under 20 lines of code. See [Getting Started](https://github.com/gigafied/minion/blob/master/getting_started.md) to dive in deeper.
+That's the core of Minion, it's that simple. 
 
+## Getting Started
+
+https://github.com/gigafied/minion/blob/master/docs/getting_started.md
+n/docs/
 
 ####Videos:
 - [Overview](http://www.screenr.com/wOas)
@@ -62,7 +58,7 @@ what you can do with MinionJS in under 20 lines of code. See [Getting Started](h
 - MinionJS does all this, all while sporting a tiny footprint of 3.8k (minified and gzipped).
 
 
-#### Currently Supported:
+####Currently Supported:
 
 - Node.js
 - IE 7+
@@ -83,24 +79,6 @@ what you can do with MinionJS in under 20 lines of code. See [Getting Started](h
 - Very well documented, lots o' comments.
 - MinionJS does not touch native JavaScript prototypes. I.E. no Object.prototype.someSuperAwesomeMethod___weThink();
 - Damage Control. No global pollution (by default). All classes reside under the minion namespace. This is good, trust us.
-
-
-## Getting Started
-
-https://github.com/gigafied/minion/blob/master/getting_started.md
-
-## Documentation
-
-JSDocs available at: http://gigafied.github.com/minion/docs/
-
-
-## Contributing
-
-We want you to contribute. Fork the project, issue a pull request. Ideally, if you are adressing a specific issue, please create an issue in GitHub and reference that issue in your commits.
-Write a Unit Test for your fix, so that we can be sure any future updates don't undo all your hard work :)
-
-We'd love to support more platforms. There is very, very little platform detection in Minion's source code. (This is a good thing, we want to keep it this way).
-Getting it to work on other platforms should be relatively simple, so feel free to lend a hand!
 
 ## License
 
