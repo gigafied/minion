@@ -2,34 +2,37 @@
 
 ## Installation
 
-While you don't actually need to install MinionJS to use it, it's recommended, especially if you are developing for a browser-based application. MinionJS provides a very nifty build tool, that you will want to take advantage of.
+# Browser-based implementation:
 
 Grab the latest version of Node.js [here](http://nodejs.org/)
 
-Since Node.js now comes bundled with [npm](http://github.com/isaacs/npm), you no longer have to install it separately.
+Once you have Node.js installed, you can install MinionJS:
 
-Once you have Node.js installed, <code>cd</code> into the directory where you want to install MinionJS and do:
+	$ npm install minion -g
 
-	npm install minion
+Next, `cd` into the directory where your js files are and do:
 	
-This will install minion locally at <code>node_modules/minion</code>.
+	$ minion src minion.js
 
-You can also just clone this project via git:
+This will write the MinionJS src to `minion.js`
 
-	git clone git://github.com/gigafied/minion.git
-	git submodule init
-	git submodule update
-	make
-	sudo npm link
+You can also do:
+	
+	$ minion min minion.min.js
 
-If you're gonna be developing inside Node.js, put this at the top of all your .js files that will be using MinionJS:
+To get the minified version of MinionJS.
+
+You can also just grab the src from the `dist` directory of this repo :)
+
+# node.js implementation:
+
+	$ npm install minion
 
 	var minion = require("minion");
 
-If you're gonna be developing via the browser, copy <code>./dist/minion.1.4.1.js</code> to a place of your choosing and include it via a  &lt;script&gt; tag.
+To keep consistency between the browser-based version and node.js version of MinionJS (they are actually one and the same), MinionJS does introduce a single global variable of `minion`.
 
-If you just want to start playing around without installing anything grab the source [here](https://github.com/gigafied/minion/blob/master/dist/minion.1.4.1.js)
-(Yep, you only need one lousy .js file!)
+That's it though, it's the only global MinionJS introduces, it does NOT assign classes/namespaces into the global scope, it all resides under the global `minion` object.
 
 
 ## Defining a Class
