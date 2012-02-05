@@ -36,6 +36,9 @@ MinionJS provides easy-to-use, easy-to-learn classical inheritance for JavaScrip
 
 That's the core of Minion, it's that simple. 
 
+<br>
+
+
 #### Getting Started
 
 - [Documentation](https://github.com/gigafied/minion/blob/master/docs/getting_started.md)
