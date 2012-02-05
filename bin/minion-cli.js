@@ -1,12 +1,9 @@
 #!/usr/bin/env node
-
-minion = require("./minion.js");
-
 var argv = require('optimist').argv;
-
 var method = argv._[0];
+var minion = require("../lib/minion.js");
 
-minion.provides("./minion.Interface.js", "minion.Interface");
+require("./minion.Interface.js");
 
 minion.require("minion.Interface", function(Interface) {
 
