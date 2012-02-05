@@ -2,6 +2,9 @@ var fs = require("fs");
 var color = require("ansi-color").set;
 var jshint = require("jshint").JSHINT;
 
+var minion = require("../lib/minion.js");
+
+
 minion.define("minion", {
 	
 	Interface : minion.extend("minion.Singleton", {
@@ -60,19 +63,19 @@ minion.define("minion", {
 				var c = this._args._[1];
 
 				var buildGroup = {
-	            "class_path" : path,
-	            "output" : output,
-	            "classes" : [c],
-	            "prepend_files" : [],
-	            "append_files" : [],
-	            "include_minion" : includeMinion,
-	            "embed_provides" : false,
-	            "jshint" : this._args.jshint
-	        };
+		            "class_path" : path,
+		            "output" : output,
+		            "classes" : [c],
+		            "prepend_files" : [],
+		            "append_files" : [],
+		            "include_minion" : includeMinion,
+		            "embed_provides" : false,
+		            "jshint" : this._args.jshint
+		        };
 
-	        configObj = {build_groups: [buildGroup]};
+		        configObj = {build_groups: [buildGroup]};
 
-	        configObj.output_path = this._args.p;
+		        configObj.output_path = this._args.p;
 			}
 
 			if(this._args.w){
