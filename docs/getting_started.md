@@ -4,9 +4,9 @@
 
 #### Browser-based implementation:
 
-Grab the latest version of Node.js [here](http://nodejs.org/)
+Grab the latest version of node.js [here](http://nodejs.org/)
 
-Once you have Node.js installed, you can install MinionJS:
+Once you have node.js installed, you can install MinionJS:
 
 	$ npm install minion -g
 
@@ -185,13 +185,6 @@ You will then be able to access these methods and properties with <code>Example.
 NOTE: Static methods are not extendable. I.e. you can not call <code>this.\_\_super</code> from within a static method.
 
 
-####Static Classes
-
-If you want to create a completely static class, simply extend <code>minion.Static</code> instead of <code>minion.Class</code>
-
-NOTE: Methods on static classes have no concept of <code>this.\_\_super()</code>
-
-
 ####Singleton Classes
 
 You can implement Singleton's by extending <code>minion.Singleton</code> instead of <code>minion.Class</code>
@@ -201,11 +194,19 @@ Singleton's will not throw an error if you try to instantiate them more than onc
 Singleton's also have a static <code>.getInstance()</code> method that you can call at any time, even if the Class has not yet been instantiated anywhere. It will create a new instance and return that, or return an already existing instance.
 
 
+####Static Classes
+
+If you want to create a completely static class, simply extend <code>minion.Static</code> instead of <code>minion.Class</code>
+
+Static Classes are really just Singletons that get automatically instantiated. MinionJS does this so that you can call `this.__super()` on methods, if you are extending 
+another static class. You can put code into the `init()` method, which will get run when your static class is loaded for the first time. 
+
+
 ####Other Goodies
 
-- <code>this.proxy(fn)</code>. Binds the <code>fn</code> function to the scope of <code>this</code>.
-- <code>this.setTimeout(fn, delay)</code>. Automatically calls <code>this.proxy(fn)</code> for you on the <code>fn</code> argument.
-- <code>this.setInterval(fn, delay)</code>. Automatically calls <code>this.proxy(fn)</code> for you on the <code>fn</code> argument.
+- <code>this.proxy(fn)</code>. Binds the <code>fn</code> function to the scope of <code>this</code>. A cross-browser way of doing function(){}.bind(this).
+- <code>this.setTimeout(fn, delay)</code>. Alias to window.setTimeout that automatically calls <code>this.proxy(fn)</code> for you on the <code>fn</code> argument.
+- <code>this.setInterval(fn, delay)</code>. Alias to window.setInterval that automatically calls <code>this.proxy(fn)</code> for you on the <code>fn</code> argument.
 
 ## Using Your Classes
 
@@ -296,8 +297,9 @@ All Classes also have a <code>publish</code> method. To publish things, do this:
 		
 	});
 	
-<code>publish()</code> takes two arguments. The first is a String, representing the name of the Notification you are sending. The second is an Object, representing data you are passing along with the Notification.
+<code>publish()</code> takes three arguments. The first is a String, representing the name of the Notification you are sending. The second is an Object, representing data you are passing along with the Notification.
 
+The third (optional) argument, is a function, which is essentially a callback function used by `Notification.respond()` (see below).
 
 #### Notifications
 
@@ -313,9 +315,29 @@ Notification handler functions receive a <code>Notification</code> Object. <code
 
 Notifications also have these three methods:
 
+- <code>respond</code>. Invokes the callback function, if provided as the third argument to `publish()`
 - <code>hold</code>. Suspends any subsequent instances from receiving this Notification.
 - <code>release</code>. Releases a Notification. Called some point after <code>hold()</code>.
 - <code>cancel</code>. Cancels a Notification. Like <code>hold()</code>, but once cancelled Notifications can no longer be released.
+
+`respond()` provides an easy way to respond to Notifications, without having to create another Notification in response.
+
+			this.publish("something", {someVar: "someValue"}, function(){
+				//This will get called, when n.respond() gets called... see below.
+			});
+
+			...
+
+			init : function () {
+				this.subscribe("something", this._handleSomething);	
+			},
+
+			_handleSomething : function (n) {			
+				setTimeout(function(){
+					n.respond(some, args, here);
+				}, 2000)
+
+			}
 
 <code>hold()</code> and <code>release()</code> are very powerful and can be used to accomplish some pretty nifty things.
 
@@ -349,23 +371,11 @@ This will make it so that any other instances listening for this Notification, w
 
 If you are working inside Node.js this is unneccessary, however for browser-based development, you are going to need to combine all your classes into a nice neat little minified js file (or a couple minified js files) for deployment.
 
-To install the build tool, cd into <code>node_modules/minion</code> and run:
-
-	sudo npm link
-	
-What this does is create a symbolic link in your <code>/usr/local/bin</code> dir. Mapping <code>minion</code> to <code>node_modules/minion/bin/minion-cli.js</code>
-
-This step is only necessary if you want a way to easily reference the build script.
-
-Now, you can use the build script:
+You can build + minify a class and all of it's dependencies, by doing:
 
 	minion build example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js
 
-If you opted out of the <code>sudo npm link</code> step, you can just do this instead:
-
-	node_modules/minion/bin/minion-cli.js build example.Example -p /path/to/your/js -o /path/to/your/js/output.min.js
-
-It's that easy! What this does is compile a class (and all of it's dependencies) into one neat little minified js file (using UglifyJS for compression).
+Possible arguments you can pass to the `minion` cli:
 
 - <code>-p</code> The path to your class definitions.
 - <code>-o</code> This specifies the file you want MinionJS to write the minified contents to.
@@ -375,7 +385,7 @@ It's that easy! What this does is compile a class (and all of it's dependencies)
 
 #### Using a Config File
 
-There is a sample config file included in the repo under <code>bin/sample.conf.json</code>. It builds the Classes in the <code>test</code> dir.
+There is a sample config file included in the repo under <code>docs/sample.conf.json</code>. It builds the classes in the <code>test</code> dir.
 
 It looks like this:
 
@@ -464,7 +474,7 @@ By specifying any one of these properties, it will use that property over the co
 
 ####minion.provides()
 
-<code>minion.provides()</code> provides you with a way to explicitly specify where Classes are defined.
+<code>minion.provides()</code> gives you a way to explicitly specify where Classes are defined.
 
 For example:
 
@@ -487,7 +497,7 @@ Rather than throwing all Classes into one minified file, you can separate them o
 
 Just make sure all <code>minion.provides()</code> calls happen before the first <code>minion.require()</code> call.
 
-You can also pass paths to <code>minion.configure()</code> with the <code>paths</code> property, so intead of the above, you could do:
+You can also pass paths to <code>minion.configure()</code> with the <code>paths</code> property, so instead of the above, you could do:
 
 	minion.configure({paths: [
 	    {
@@ -512,7 +522,7 @@ This is the syntax the build script will output for you, that you can just copy 
 
 ## WOOT!!! 
 
-If you've made it here, you should now have a pretty solid understanding of MinionJS and how to use it. We also threw some [JSDocs](http://gigafied.github.com/minion/docs/) together, if you want to dive in even deeper.
+If you've made it here, you should now have a pretty solid understanding of MinionJS and how to use it.
 
 ## Documentation
 
