@@ -207,8 +207,8 @@ another static class. You can put code into the `init()` method, which will get 
 ####Other Goodies
 
 - <code>this.proxy(fn)</code>. Binds the <code>fn</code> function to the scope of <code>this</code>. A cross-browser way of doing `function(){}.bind(this)`.
-- <code>this.setTimeout(fn, delay)</code>. Alias to `window.setTimeout` that automatically calls <code>this.proxy(fn)</code> for you on the <code>fn</code> argument.
-- <code>this.setInterval(fn, delay)</code>. Alias to `window.setInterval` that automatically calls <code>this.proxy(fn)</code> for you on the <code>fn</code> argument.
+- <code>this.setTimeout(fn, delay)</code>. Alias to `window.setTimeout` that automatically calls <code>this.proxy(fn)</code> for you.
+- <code>this.setInterval(fn, delay)</code>. Alias to `window.setInterval` that automatically calls <code>this.proxy(fn)</code> for you.
 
 ## Using Your Classes
 
