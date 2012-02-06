@@ -16,10 +16,10 @@
     "dependencies": {
         "optimist": "0.3.x",
         "ansi-color": "0.2.x"
-    },
-    "devDependencies": {
         "uglify-js": "1.2.x",
         "jshint": "0.5.x"
+    },
+    "devDependencies": {
     },
     "repository": {
         "type": "git",
