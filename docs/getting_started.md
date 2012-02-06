@@ -24,6 +24,8 @@ To get the minified version of MinionJS.
 
 You can also just grab the src from the `dist` directory of this repo :)
 
+Now, include it in your html page, via a script tag.
+
 #### node.js implementation:
 
 	$ npm install minion
