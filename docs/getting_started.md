@@ -521,11 +521,3 @@ You can also pass paths to <code>minion.configure()</code> with the <code>paths<
 	]});
 	
 This is the syntax the build script will output for you, that you can just copy and paste into your application.
-
-## WOOT!!! 
-
-If you've made it here, you should now have a pretty solid understanding of MinionJS and how to use it.
-
-## Documentation
-
-JSDocs available at: http://gigafied.github.com/minion/docs/
