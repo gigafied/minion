@@ -1,6 +1,6 @@
 {
     "name": "minion",
-    "version": "1.5.1",
+    "version": "1.5.2",
     "description": "Cross-Platform & Cross-Browser JavaScript Inheritance.",
     "main": "./lib/minion.js",
     "directories": {
@@ -19,8 +19,7 @@
         "uglify-js": "1.2.x",
         "jshint": "0.5.x"
     },
-    "devDependencies": {
-    },
+    "devDependencies": {},
     "repository": {
         "type": "git",
         "url": "https://gigafied@github.com/gigafied/minion.git"

@@ -22,12 +22,15 @@
 
 		writeJSONFile(packageFile, packageObj);
 
-	var jshint_passed = jshint(fs.readFileSync('./dist/minion-' + version + ".js", "utf-8"), {node : true, browser: true});
+	var jshint_errors = [];
+
+	jshint(fs.readFileSync('./dist/minion-latest.js', "utf-8"), {node : true, browser: true});
+	jshint(fs.readFileSync('./lib/minion.js', "utf-8"), {node : true, browser: true});
 
 	console.log("");
 	console.log("");
 
-	if(!jshint_passed){
+	if(jshint.errors.length > 0){
 		console.log("JSHINT FAILED : ");
 		console.log("");
 		console.log("");
