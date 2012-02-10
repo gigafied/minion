@@ -5,7 +5,7 @@
  * (c) 2012, Taka Kojima (taka@gigafied.com)
  * Licensed under the MIT License
  *
- * Date: Mon Feb 6 13:08:50 2012 -0800
+ * Date: Fri Feb 10 00:58:43 2012 -0800
  */
  /**
 
@@ -683,6 +683,10 @@ var minion = (function (root) {
 					_notificationManager.publish.apply(_notificationManager, arguments);
 				};
 
+				_minion.publishNotification = function () {
+					_notificationManager.publishNotification.apply(_notificationManager, arguments);
+				};
+
 			
 				_minion.holdNotification = function () {
 					_notificationManager.holdNotification.apply(_notificationManager, arguments);
@@ -1163,14 +1167,14 @@ var minion = (function (root) {
 			*/
 
 			cancel : function() {
-				minion.cancelNotification(this);
-
 				this.data = {};
 				this.name = "";
 				this.status = 0;
 				this.pointer = 0;
 				this.dispatcher = null;
 				this.callback = null;
+
+				minion.cancelNotification(this);
 			},
 
 			/**
@@ -1225,11 +1229,13 @@ var minion = (function (root) {
 				priority = isNaN(priority) ? -1 : priority;
 				this._interests[name] = this._interests[name] || [];
 
-				if(priority <= -1 || priority >= this._interests[name].length){
-					this._interests[name].push(obj);
-				}
-				else{
-					this._interests[name].splice(priority, 0, obj);
+				if(obj.handleNotification) {
+					if(priority <= -1 || priority >= this._interests[name].length){
+						this._interests[name].push(obj);
+					}
+					else{
+						this._interests[name].splice(priority, 0, obj);
+					}
 				}
 			},
 
@@ -1254,14 +1260,14 @@ var minion = (function (root) {
 			},
 			
 			publish : function(notification, data, obj, callback){
+				notification = new this.__imports.Notification(notification, data, callback);
+				notification.status = 1;
+				notification.pointer = 0;
+				notification.dispatcher = obj;
+				this.publishNotification(notification);
+			},
 
-				if(!(notification instanceof this.__imports.Notification)){
-					notification = new this.__imports.Notification(notification, data, callback);
-					notification.status = 1;
-					notification.pointer = 0;
-					notification.dispatcher = obj;
-				}
-				
+			publishNotification : function(notification) {
 				var name = notification.name;
 
 				if(this._interests[name]){
@@ -1269,26 +1275,26 @@ var minion = (function (root) {
 					this._pendingNotificationNames.push(name);
 					this._notifyObjects(notification);
 				}
+				
 			},
 			
 			_notifyObjects : function(notification){
 
 				var name = notification.name;
+				var subs = this._interests[name];
+				var len = subs.length;
 
-				while(notification.pointer < this._interests[name].length) {
-					if(notification.status === 1){
-						if(this._interests[name][notification.pointer].handleNotification){
-							this._interests[name][notification.pointer].handleNotification(notification);
-						}
+				while(notification.pointer < len) {
+					if(notification.status == 1){
+						subs[notification.pointer].handleNotification(notification);
 						notification.pointer ++;
 					}
 					else{
 						return;
 					}
 				}
-
 				if(notification.status === 1 && !notification.callback) {
-					this.cancelNotification(notification);
+					notification.cancel();
 				}
 			},
 
@@ -1308,24 +1314,19 @@ var minion = (function (root) {
 			},
 			
 			cancelNotification : function(notification){
-				if(notification){
 
-					var name = notification.name;
-					
-					this._pendingNotifications.splice(this._pendingNotifications.indexOf(notification), 1);
+				var name = notification.name;
+				this._pendingNotifications.splice(this._pendingNotifications.indexOf(notification), 1);
 
-					notification.status = 0;
-
-					if(this._removeQueue[name]){
-						for(var i = 0; i < this._removeQueue.length; i ++){
-							this.unsubscribe(this._removeQueue[name][i], name);
-						}
-						this._removeQueue[name] = null;
-						delete this._removeQueue[name];
+				if(this._removeQueue[name]){
+					for(var i = 0; i < this._removeQueue.length; i ++){
+						this.unsubscribe(this._removeQueue[name][i], name);
 					}
-
-					notification = null;
+					this._removeQueue[name] = null;
+					delete this._removeQueue[name];
 				}
+
+				notification = null;
 			}
 
 		})
