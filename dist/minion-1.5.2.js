@@ -5,7 +5,7 @@
  * (c) 2012, Taka Kojima (taka@gigafied.com)
  * Licensed under the MIT License
  *
- * Date: Fri Feb 10 00:58:43 2012 -0800
+ * Date: Fri Feb 10 22:36:40 2012 -0800
  */
  /**
 
@@ -88,7 +88,7 @@ var minion = (function (root) {
 	var _waitID;
 	var _waitingForLoad = [];
 	var _loadedFiles = [];
-	var _notificationManager;
+	var _NotificationManager;
 	var _waitInterval = 500;
 
 	var _isNode = (typeof window === "undefined");
@@ -662,45 +662,42 @@ var minion = (function (root) {
 		return scope;		
 	};
 	
+	// Like jQuery .proxy, or ES5 .bind, just a way to make sure it's there cross-browser.
+	_minion.proxy = function (fn, scope) {
+		if(fn) {
+
+			var bind = function (context) {
+				if (!context) {return this;}
+				var this_ = this;
+				return function() {
+					return this_.apply(context, Array.prototype.slice.call(arguments));
+				};
+			};
+
+			if(Function.prototype.bind){
+				return fn.bind(scope);
+			}
+
+			return bind.call(fn, scope);
+		}
+		return fn;
+	};
+
 
 	_minion.enableNotifications = function () {
 		if (_minion.isDefined("minion.NotificationManager")) {
-			if (!_notificationManager) {
-				_notificationManager = new (minion.get("minion.NotificationManager"))();
+			if (!_NotificationManager) {
 
-			
-				_minion.subscribe = function () {
-					_notificationManager.subscribe.apply(_notificationManager, arguments);
-				};
+				var NM = _NotificationManager = (minion.get("minion.NotificationManager"));
 
-			
-				_minion.unsubscribe = function () {
-					_notificationManager.unsubscribe.apply(_notificationManager, arguments);
-				};
+				_minion.subscribe = _minion.proxy(NM.subscribe, NM);
+				_minion.unsubscribe = _minion.proxy(NM.unsubscribe, NM);
+				_minion.publish = _minion.proxy(NM.publish, NM);
+				_minion.publishNotification = _minion.proxy(NM.publishNotification, NM);
+				_minion.holdNotification = _minion.proxy(NM.holdNotification, NM);
+				_minion.releaseNotification = _minion.proxy(NM.releaseNotification, NM);
+				_minion.cancelNotification = _minion.proxy(NM.cancelNotification, NM);
 
-			
-				_minion.publish = function () {
-					_notificationManager.publish.apply(_notificationManager, arguments);
-				};
-
-				_minion.publishNotification = function () {
-					_notificationManager.publishNotification.apply(_notificationManager, arguments);
-				};
-
-			
-				_minion.holdNotification = function () {
-					_notificationManager.holdNotification.apply(_notificationManager, arguments);
-				};
-
-			
-				_minion.releaseNotification = function () {
-					_notificationManager.releaseNotification.apply(_notificationManager, arguments);
-				};
-
-			
-				_minion.cancelNotification = function () {
-					_notificationManager.cancelNotification.apply(_notificationManager, arguments);
-				};
 			}
 		}
 	};
@@ -935,7 +932,7 @@ var minion = (function (root) {
 		})()
 	});
 
-})();(function(){
+})();(function() {
 	
 	"use strict";
 
@@ -948,29 +945,27 @@ var minion = (function (root) {
 			__static : {
 				__isDefined: true
 			},
-			
+
 			/**		
 			* The base minion Class. All Classes are required to be descendants
 			* of this class, either directly, or indirectly.
 			*/
 
-			init: function(){
-				if(!this._interestHandlers){
-					this._interestHandlers = [];
-				}
+			init: function() {
+
 			},
 			
 			/** 
 			* Local version of window.setTimeout that keeps scope of <i>this</i>.<br>
 			*/
-			setTimeout : function(func, delay){
+			setTimeout : function(func, delay) {
 				return setTimeout(this.proxy(func), delay);
 			},
 
 			/** 
 			* Local version of window.setInterval that keeps scope of <i>this</i>.<br>
 			*/
-			setInterval : function(func, delay){
+			setInterval : function(func, delay) {
 				return setInterval(this.proxy(func), delay);
 			},
 
@@ -978,28 +973,22 @@ var minion = (function (root) {
 			* Shorthand for func.bind(this)
 			* or rather, $.proxy(func, this) in jQuery terms
 			*/
-			proxy : function(func){
-				var bind = function (context) {
-					if (!context) {return this;}
-					var this_ = this;
-					return function() {
-						return this_.apply(context, Array.prototype.slice.call(arguments));
-					};
-				};
-
-				return bind.call(func, this);
+			proxy : function(fn) {
+				return minion.proxy(fn, this);
 			},
 			
 			/** 
 			* Subscribes to a notification.
 			*/
 
-			subscribe : function(name, handler, priority){
-				if(!this._interestHandlers){
+			subscribe : function(name, handler, priority) {
+				if(!this._interestHandlers) {
 					this._interestHandlers = [];
 				}
-				if(handler && !this._interestHandlers[name]){
-					minion.subscribe(this, name, priority);
+
+				if(handler && !this._interestHandlers[name]) {
+					handler = this.proxy(handler);
+					minion.subscribe(handler, name, priority);
 					this._interestHandlers[name] = handler;
 				}
 			},
@@ -1008,21 +997,22 @@ var minion = (function (root) {
 			* Unsubscribes from a notification.
 			*/
 
-			unsubscribe : function(name){
-				if(this._interestHandlers && this._interestHandlers[name]){
+			unsubscribe : function(name) {
+				if(this._interestHandlers && this._interestHandlers[name]) {
+					var handler = this._interestHandlers[name];
 					this._interestHandlers[name] = null;
 					delete this._interestHandlers[name];
 				}
-				minion.unsubscribe(this, name);
+				minion.unsubscribe(handler, name);
 			},
 
 			/**
 			* Unsubscribes from all notifications registered via this.subscribe();
 			*/
 
-			unsubscribeAll : function(){
-				for(var interest in this._interestHandlers){
-					if(this._interestHandlers.hasOwnProperty(interest)){
+			unsubscribeAll : function() {
+				for(var interest in this._interestHandlers) {
+					if(this._interestHandlers.hasOwnProperty(interest)) {
 						this.unsubscribe(interest);
 					}
 				}
@@ -1033,16 +1023,10 @@ var minion = (function (root) {
 			* Publishes a notification with the specified data.
 			*/
 
-			publish : function(name, data, callback){
+			publish : function(name, data, callback) {
 				minion.publish(name, data, this, callback);
-			},
-			
-			handleNotification : function(n){
-				var handler = this._interestHandlers[n.name];
-				if(handler){
-					this.proxy(handler)(n);
-				}
 			}
+			
 
 		})
 	});
@@ -1123,88 +1107,56 @@ var minion = (function (root) {
 	
 	"use strict";
 
-	minion.define("minion", {
+	var Notification = function(name, data, callback) {
+		this.name = name;
+		this.data = data;
+		this.callback = callback;
+	}
 
-		Notification : minion.extend("minion.Class", {
+	Notification.prototype.data = {};
+	Notification.prototype.name = "";
+	Notification.prototype.dispatcher = null;
+	Notification.prototype.status = 0;
+	Notification.prototype.pointer = 0;
+	Notification.prototype.callback = null;
 
-			data : {},
-			name : "",
-			dispatcher : null,
-			status : 0, // 0 : Closed; 1 : Pending; 2 : Hold
-			pointer : 0,
-			callback : null,
+	Notification.prototype.hold = function() {
+		this.status = 2;
+	};
 
-			/**
-			*
-			* Notifications are the backbone of Minion's pub/sub model.
-			* You should not have to construct Notification's directly, as the publish() method does this for you.
-			*/
-			init : function(name, data, callback) {
-				this.name = name;
-				this.data = data;
-				this.callback = callback;
-			},
+	Notification.prototype.release = function() {
+		this.status = 1;
+		minion.releaseNotification(this);
+	};
 
-			/**
-			*
-			* Holds a notification. Useful if you want to do other things before other instances receive this Notification,
-			*/
-			hold : function() {
-				this.status = 2;
-			},
+	Notification.prototype.cancel = function() {
+		this.data = {};
+		this.name = "";
+		this.status = 0;
+		this.pointer = 0;
+		this.dispatcher = null;
+		this.callback = null;
 
-			/**
-			* Releases a Notification, call this at some point after hold();
-			*/
+		NotificationManager.cancelNotification(this);
+	};
 
-			release : function() {
-				this.status = 1;
-				minion.releaseNotification(this);
-			},
+	Notification.prototype.dispatch = function(obj) {
+		this.status = 1;
+		this.pointer = 0;
+		this.dispatcher = obj;
+		NotificationManager.publishNotification(this);
+	};
 
-			/**
-			* Cancels a Notification, any instances interested in this Notification higher up the chain will not receive it.
-			*/
 
-			cancel : function() {
-				this.data = {};
-				this.name = "";
-				this.status = 0;
-				this.pointer = 0;
-				this.dispatcher = null;
-				this.callback = null;
+	Notification.prototype.respond = function(obj) {
+		if(this.callback) {
+			this.callback.apply(this.dispatcher, arguments);
+			this.cancel();
+		}
+	};
 
-				minion.cancelNotification(this);
-			},
-
-			/**
-			* Dispatches a Notification. You will rarely ever construct or call dispatch() on Notifications directly, as the publish() method handles all of this.
-			*/
-
-			dispatch : function(obj) {
-				this.status = 1;
-				this.pointer = 0;
-				this.dispatcher = obj;
-
-				minion.publish(this);
-			},
-
-			/**
-			*
-			* Responds to a Notification. Pretty much just calls the callback function that is passed when constructing a new function.
-			*
-			* @public
-			*/
-
-			respond : function () {
-				if(this.callback) {
-					this.callback.apply(typeof this.dispatcher == "object" ? this.dispatcher : this, arguments);
-					this.callback = null;
-					this.cancel();
-				}
-			}
-		})
-	});
+	var pendingNotifications = [];
+	var interests = {};
 
 
 	minion.define("minion", {
@@ -1213,54 +1165,37 @@ var minion = (function (root) {
 			This Class handles all the nitty gritty Notification stuff.
 		*/
 
-		require : [
-			"minion.Notification"
-		],
+		NotificationManager : minion.extend("minion.Static", {
 
-		NotificationManager : minion.extend("minion.Singleton", {
-
-			_pendingNotifications: [],
-			_pendingNotificationNames : [],
-			_interests: {},
-			_removeQueue: [],
 			
-			subscribe : function(obj, name, priority) {
+			subscribe : function(fn, name, priority) {
 				
 				priority = isNaN(priority) ? -1 : priority;
-				this._interests[name] = this._interests[name] || [];
+				interests[name] = interests[name] || [];
 
-				if(obj.handleNotification) {
-					if(priority <= -1 || priority >= this._interests[name].length){
-						this._interests[name].push(obj);
-					}
-					else{
-						this._interests[name].splice(priority, 0, obj);
-					}
+				if(priority <= -1 || priority >= interests[name].length){
+					interests[name].push(fn);
+				}
+				else{
+					interests[name].splice(priority, 0, fn);
 				}
 			},
 
-			unsubscribe : function(obj, name){
+			unsubscribe : function(fn, name) {
 				if(name instanceof Array){
 					for(var i = 0; i < name.length; i ++){
-						this.unsubscribe(obj, name[i]);
+						this.unsubscribe(fn, name[i]);
 					}
 					return;
 				}
-				var objIndex = this._interests[name].indexOf(obj);
-				if(obj && objIndex > -1){
-
-					if(this._pendingNotificationNames.indexOf(name) > -1) {
-						var rq = this._removeQueue[name] = this._removeQueue[name] || [];
-						rq.push(obj);
-					}
-					else{
-						this._interests[name].splice(objIndex, 1);
-					}
+				var fnIndex = interests[name].indexOf(fn);
+				if(fnIndex > -1){
+					interests[name].splice(fnIndex, 1);
 				}
 			},
 			
-			publish : function(notification, data, obj, callback){
-				notification = new this.__imports.Notification(notification, data, callback);
+			publish : function(notification, data, obj, callback) {
+				notification = new Notification(notification, data, callback);
 				notification.status = 1;
 				notification.pointer = 0;
 				notification.dispatcher = obj;
@@ -1270,68 +1205,58 @@ var minion = (function (root) {
 			publishNotification : function(notification) {
 				var name = notification.name;
 
-				if(this._interests[name]){
-					this._pendingNotifications.push(notification);
-					this._pendingNotificationNames.push(name);
+				if(interests[name]){
+					pendingNotifications.push(notification);
 					this._notifyObjects(notification);
 				}
 				
 			},
 			
-			_notifyObjects : function(notification){
+			_notifyObjects : function(notification) {
 
 				var name = notification.name;
-				var subs = this._interests[name];
+				var subs = interests[name].splice(0);
 				var len = subs.length;
 
 				while(notification.pointer < len) {
 					if(notification.status == 1){
-						subs[notification.pointer].handleNotification(notification);
+						subs[notification.pointer](notification);
 						notification.pointer ++;
 					}
 					else{
 						return;
 					}
 				}
+
+				subs = null;
+
+				/*
+					Notified all subscribers, notification is no longer needed,
+					unless it has a callback to be called later via notification.respond()
+				*/
 				if(notification.status === 1 && !notification.callback) {
 					notification.cancel();
 				}
 			},
-
-			getNotification : function(name) {
-				for(var i = 0; i < this._pendingNotifications.length; i ++){
-					if(this._pendingNotifications[i].name === name){
-						return this._pendingNotifications[i];
-					}
-				}
-			},
 						
-			releaseNotification : function(notification){
+			releaseNotification : function(notification) {
 				notification.status = 1;
-				if(this._pendingNotifications.indexOf(notification) > -1){
+				if(pendingNotifications.indexOf(notification) > -1){
 					this._notifyObjects(notification);
 				}
 			},
 			
-			cancelNotification : function(notification){
-
+			cancelNotification : function(notification) {
 				var name = notification.name;
-				this._pendingNotifications.splice(this._pendingNotifications.indexOf(notification), 1);
-
-				if(this._removeQueue[name]){
-					for(var i = 0; i < this._removeQueue.length; i ++){
-						this.unsubscribe(this._removeQueue[name][i], name);
-					}
-					this._removeQueue[name] = null;
-					delete this._removeQueue[name];
-				}
-
+				pendingNotifications.splice(pendingNotifications.indexOf(notification), 1);
 				notification = null;
 			}
 
 		})
 
 	});
+
+	var NotificationManager = minion.get("minion.NotificationManager");
 
 	minion.enableNotifications();
 
