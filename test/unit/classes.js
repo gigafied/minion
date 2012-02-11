@@ -89,8 +89,6 @@
 
 				var Test = minion.get("minion.test.StaticTest");
 
-				console.log(Test);
-
 				ok(Test.someTestMethod(), "StaticTest.someTestMethod() exists statically and returns true.");
 				ok(Test.testPropBool, "StaticTest.testPropBool exists statically and === true");
 

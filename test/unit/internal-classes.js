@@ -44,6 +44,5 @@
 	minionRequireTest("minion.Singleton");
 	minionRequireTest("minion.Static");
 	minionRequireTest("minion.NotificationManager");
-	minionRequireTest("minion.Notification");
 
 })();
