@@ -1,7 +1,7 @@
 {
     "name": "minion",
     "version": "1.5.4",
-    "description": "Cross-Platform & Cross-Browser JavaScript Inheritance.",
+    "description": "Classical Inheritance in JavaScript.",
     "main": "./lib/minion.js",
     "directories": {
         "lib": "lib",
