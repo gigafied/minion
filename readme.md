@@ -37,7 +37,6 @@ It is only 3.6 kb minified and gzipped!
 	    instance.doSomething();
 	  
 	});
-
 <br>
 
 ####Features:
@@ -51,7 +50,6 @@ It is only 3.6 kb minified and gzipped!
 - Fully ECMAScript 5 Strict Mode compliant.
 - Unit tests included.
 
-<br>
 
 ####Currently Supported:
 
@@ -62,6 +60,10 @@ It is only 3.6 kb minified and gzipped!
 - Chrome 9+
 - iOS
 - Android
+
+<br>
+
+[Overview](http://www.screenr.com/wOas)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[Getting Started](https://github.com/gigafied/minion/blob/master/docs/getting_started.md)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[Publish/Subscribe](http://www.screenr.com/cJ5s)
 
 <br>
 
