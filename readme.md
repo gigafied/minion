@@ -44,7 +44,7 @@ It is only 3.6 kb minified and gzipped!
 - Classical inheritance in JavaScript
 - Robust publish/subscribe implementation
 - Dependency management
-- Intuitive build/minification tool for easy deployment
+- Build tool for easy deployment
 - super() method support 
 - Micro-sized. 3.6 kb minfied + gzipped.
 - Fully ECMAScript 5 Strict Mode compliant.
