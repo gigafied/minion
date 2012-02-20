@@ -1,6 +1,6 @@
 {
     "name": "minion",
-    "version": "1.5.4",
+    "version": "2.0.0-alpha\n",
     "description": "Classical Inheritance in JavaScript.",
     "main": "./lib/minion.js",
     "directories": {
