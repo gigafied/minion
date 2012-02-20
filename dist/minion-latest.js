@@ -1,439 +1,362 @@
 /*
- * minion.JS v1.5.4
+ * minion.JS v2.0.0-alpha
  * http://minion.org
  *
  * (c) 2012, Taka Kojima (taka@gigafied.com)
  * Licensed under the MIT License
  *
- * Date: Sat Feb 11 00:10:50 2012 -0800
+ * Date: Mon Feb 20 02:51:24 2012 -0800
  */
- /**
-
-@fileOverview
-
-<h4>MinionJS - Cross-Platform & Cross-Browser JavaScript Inheritance</h4>
-
-<p>Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:</p>
-
-<p>The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.</p>
-
-<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.</p>
-*/
-
-
-/**
-*	Global MinionJS Object with Static methods.
-*
-*	@namespace
-*/
-
-/*
+ /*
 	TODO:
 		- Multiple inheritance
 		- Independent library support, i.e. ability to do minion.require("minion.libs.jquery") to load jquery
 		- AMD Compliant?
 		- minion.provides("namespace.*");
-		- __preDefine method on Classes, takes 1 argument, a callback that gets called once __preDefine does all it needs to do
+		- setup() method on Classes, takes 1 argument, a callback that gets called once setup() does all it needs to do
 */
 
 var minion = (function (root) {
 
 	"use strict";
 
-	// If Array.indexOf is not defined, let's define it.
-	Array.prototype.indexOf = Array.prototype.indexOf || function (a, b) {
-		if (!this.length || !(this instanceof Array) || arguments.length < 1) {
-			return -1;
+	/*================= Array.indexOf(), and Function.bind() polyfills =================*/
+
+		if (!Array.prototype.indexOf) {
+			Array.prototype.indexOf = function (a, b) {
+				if (!this.length || !(this instanceof Array) || arguments.length < 1) {
+					return -1;
+				}
+
+				b = b || 0;
+
+				if (b >= this.length) {
+					return -1;
+				}
+
+				while (b < this.length) {
+					if (this[b] === a) {
+						return b;
+					}
+					b ++;
+				}
+				return -1;
+			};
 		}
 
-		b = b || 0;
+		if (!Function.prototype.bind) {
+			Function.prototype.bind = function (oThis) {
+				if (typeof this !== "function") {
+					// closest thing possible to the ECMAScript 5 internal IsCallable function
+					throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+				}
 
-		if (b >= this.length) {
-			return -1;
+				var aArgs = Array.prototype.slice.call(arguments, 1), 
+				fToBind = this, 
+				fNOP = function () {},
+				fBound = function () {
+					return fToBind.apply(this instanceof fNOP ? this : oThis || window,
+					aArgs.concat(Array.prototype.slice.call(arguments)));
+				};
+
+				fNOP.prototype = this.prototype;
+				fBound.prototype = new fNOP();
+				return fBound;
+			};
 		}
 
-		while (b < this.length) {
-			if (this[b] === a) {
-				return b;
-			}
-			b += 1;
-		}
-		return -1;
-	};
+	/*================= END OF Array.indexOf(), and Function.bind() polyfills =================*/
 	
-	var _classMappings = [];
-	var _aliases = ["minion"];
+	/*================= internal/private variables =================*/
 
-	var _separator = ".";
-	var _class_path = "";
-	var _file_suffix = "";
+		var _classMappings = [];
+		var _aliases = ["minion"];
 
-	var _initialized;
+		var _class_path = "";
+		var _file_suffix = "";
 
-	var _loadQueue = [];
-	var _extendQueue = [];
+		var _initialized;
 
-	var _waitID;
-	var _waitingForLoad = [];
-	var _loadedFiles = [];
-	var _NotificationManager;
-	var _waitInterval = 500;
+		var _loadQ = [];
+		var _extendQ = [];
 
-	var _isNode = (typeof window === "undefined");
+		var _waitID;
+		var _waitingForLoad = [];
+		var _loadedFiles = [];
+		var _NotificationManager;
+		var _waitInterval = 500;
 
-	var _root = root;
-	var _ns = {};
-	var _errorTimeout = 1e4;
+		var _isNode = (typeof window === "undefined");
 
-	var _minion = {};	
+		var _root = root;
+		var _ns = {};
+
+		var _pendingNotifications = [];
+		var _interests = {};
+
+
+	/*================= END OF internal/private variables =================*/
+
 
 	/*================= HELPER FUNCTIONS =================*/
 
-	var _isArray = Array._isArray || function (a) {
-		return a instanceof Array;
-	};
+		var _isArray = function (a) {
+			return a instanceof Array;
+		};
 
-	var _isObject = function (obj) {
-		return typeof obj === "object";
-	};
+		var _isObject = function (obj) {
+			return typeof obj === "object";
+		};
 
-	var _isString = function (s) {
-		return typeof s === 'string' || s instanceof String;
-	};
+		var _isFunction = function (fn) {
+			return typeof fn === "function";
+		};
 
-	var _isFunction = function (fn) {
-		return typeof fn === "function";
-	};
+		var _strToArray = function (s) {
+			return (!_isArray(s)) ? [s] : s;
+		};
 
-	var _strToArray = function (s) {
-		return (!_isArray(s)) ? [s] : s;
-	};
+		var _checkLoadQ = function () {
+			var i, j, q, classes, classesArray;
+			q = {};
+			classes = {};
+			classesArray = [];
 
-	var _concatArray = function (a, b, forceUnique) {		
-		b = b || [];
-		if(!forceUnique){
-			return a || [].concat(b);
-		}
+			for (i = _loadQ.length - 1; i >= 0; i --) {
 
-		// Force unique values
-		b = [].concat(b);
-		a = a || [];
-
-		for(var i = 0, l = a.length; i < l; i += 1){
-			if(b.indexOf(a[i]) < 0){
-				b[b.length] = a[i];
-			}
-		}
-
-		return b;
-	};
-
-	var _copyToNS = function(o1,o2){
-		for (var i in o1) {
-			if(o1.hasOwnProperty(i)){
-				o2[i] = o1[i];
-			}
-		}
-	};
-
-	var _removeFromNS = function(o1,o2){
-		for (var i in o1) {
-			if(o1.hasOwnProperty(i)){
-				o2[i] = null;
-				delete o2[i];
-			}
-		}
-	};
-
-
-	// Recursively checks dependencies
-
-	var _areDependenciesLoaded = function (o) {
-		o = _minion.get(o, false);
-		var i;
-
-		if (!o.__isDefined) {
-			return false;
-		}
-		if (o.__dependencies) {
-			for (i = 0; i < o.__dependencies.length; i += 1) {
-				if (!_areDependenciesLoaded(o.__dependencies[i])) {
-					return false;
+				q = _loadQ[i];
+				
+				for (var j = q.c.length-1; j >= 0; j --) {
+					console.log(q.c[j]);
+					if (!_minion.isDefined(q.c[j])) {
+						setTimeout(_checkLoadQ, 0);
+						return;
+					}
 				}
-			}
-		}
-		return true;
-	};
 
-
-	var _checkLoadQueue = function () {
-		var i, j, q, dependenciesLoaded, classes, classesArray;
-		q = {};
-		classes = {};
-		classesArray = [];
-
-		for (i = _loadQueue.length - 1; i >= 0; i --) {
-
-			q = _loadQueue[i];
-			dependenciesLoaded = true;
-
-			for (j = 0; j < q.c.length; j ++) {
-				dependenciesLoaded = _areDependenciesLoaded(q.c[j]);
-				if (!dependenciesLoaded) {
-					break;
-				}
-			}
-
-			if (dependenciesLoaded) {
 				if (q.cb) {
 					q.cb.apply(_root, _minion.get(q.c));
 				}
-				_loadQueue.splice(i, 1);
+				_loadQ.splice(i, 1);
 			}
-		}
-	};
+		};
 
 
-	var _checkExtendQueue = function () {
-		var eq = _extendQueue;
-		var i, superClass, ns, id;
+		var _checkExtendQ = function () {
+		
+			var eq = _extendQ;
+			var i, superClass, ns, id;
 
-		for (i = eq.length - 1; i >= 0; i --) {
+			for (i = eq.length - 1; i >= 0; i --) {
 
-			ns = eq[i].split(_separator);
-			id = ns.splice(ns.length - 1, 1)[0];
-			ns = _minion.get(ns.join(_separator), false);
+				ns = eq[i].split(minion.separator);
+				id = ns.splice(ns.length - 1, 1)[0];
+				ns = _minion.get(ns.join(minion.separator), false);
 
-			if (ns[id].__toExtend) {
-				superClass = _minion.get(ns[id].__extendedFrom, false);
-				if (superClass.__isDefined) {
+				if (ns[id].$$.toExtend) {
+					superClass = _minion.get(ns[id].$$.extendedFrom, false);
 
-					ns[id].__toExtend = false;
-					delete ns[id].__toExtend;
+					if (_minion.isDefined(superClass)) {
 
-					ns[id] = _minion.extend(ns[id].__extendedFrom, ns[id]);
+						ns[id].$$.toExtend = false;
+						delete ns[id].$$.toExtend;
 
-					eq.splice(i, 1);
-					setTimeout(_checkExtendQueue, 0);
-					return;
+						ns[id] = _minion.extend(ns[id].$$.extendedFrom, ns[id]);
+
+						eq.splice(i, 1);
+						setTimeout(_checkExtendQ, 0);
+						return;
+					}
 				}
 			}
-		}
-		_checkLoadQueue();
-	};
+			if (eq.length > 0) {
+				setTimeout(_checkExtendQ, 0);
+				return;
+			}
+			_checkLoadQ();
+		};
 
 
-	var _checkWaitQueue = function () {
+		var _checkWaitQ = function () {
 
-		var w = _waitingForLoad;
-		var i, o;
+			var w = _waitingForLoad;
+			var i, o;
 
-		if (_waitID) {
 			clearTimeout(_waitID);
-		}
 
-		for (i = 0; i < w.length; i += 1) {
-			o = w[i];
-			o.e += 50;
-			
-			if (_minion.isDefined(o.c)) {
-				o.s.onload();
-			}
-			
-			else if (o.e >= _errorTimeout) {
-				o.s.onerror();
-			}
-		}
-
-		if (w.length > 0) {
-			_waitID = setTimeout(_checkWaitQueue, _waitInterval);
-		}
-	};
-
-	/**
-	* Injects a Script tag into the DOM
-	*/
-
-	var _inject = function(f, c) {
-
-		var doc = document;
-		var body = "body";
-
-		var injectObj, script;
-
-		if (!doc[body]) {
-			return setTimeout(function(){
-				_inject(f,c);
-			}, 0);
-		}
-
-		script = doc.createElement("script");
-		script.async = true;
-	
-		injectObj = {
-			f : f,		// File
-			c : c,		// Class
-			e : 0,		// Elapsed Time
-			s : script	// Script
-		};
-
-		_waitingForLoad.push(injectObj);
-
-		script.onreadystatechange = /** @ignore */ script.onload = function (e) {
-			if (_minion.isDefined(c)) {
-				injectObj.s.onload = injectObj.s.onreadystatechange = null;
-				injectObj.s.onerror = null;
-				_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-			}
-		};
-
-		script.onerror = function (e) {
-			injectObj.s.onerror = null;
-			_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-			throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
-		};
-
-		script.src = f;
-		
-		// Append the script to the document body
-		doc[body].appendChild(script);
-	};
-
-	/**
-	* Does all the loading of JS files
-	*/
-
-	var _load = function (q) {
-
-		_loadQueue.push(q);
-
-		for (var i = 0; i < q.f.length; i += 1) {
-
-			if(_isNode){
-				require(q.f[i]);
-			}
-			else{
-				_inject(q.f[i], q.c[i]);
-			}
-		}
-
-		/*
-			If the load times out, fire onerror after the time defined by _errorTimeout (default is 10 seconds)
-			(can be changed through minion.config({minion.errorTimeout : ms});
-		*/
-		_waitID = setTimeout(_checkWaitQueue, _waitInterval);
-	};
-
-	/**
-	* Used by minion.get() and minion.define(). 
-	* Get the namespace/Class, or creates it if it does not exist. Also optionally creates Objects in the specified namepsace.
-	*/
-
-	var _namespace = function (id, autoCreate, definitions) {
-		id = id || "";
-		definitions = definitions || false;
-
-		var ns = _ns;
-		var i;
-
-		if (id && !_isObject(id) && !_isFunction(id)) {
-			var parts = id.split(_separator);
-
-			if (_aliases.indexOf(parts[0]) > -1) {
-				ns = _minion;
-				parts.splice(0,1);
-			}
-
-			for (i = 0; i < parts.length; i += 1) {
-				if (!ns[parts[i]]) {
-					if (autoCreate) {
-						ns[parts[i]] = {};
-					}
-					else{
-						return false;
-					}
+			for (i = 0; i < w.length; i += 1) {
+				o = w[i];
+				o.e += 50;
+				
+				if (o.e >= _minion.errorTimeout) {
+					o.s.onerror();
 				}
-				ns = ns[parts[i]];
 			}
-		}
 
-		else if (id !== "") {
-			ns = id;
-		}
-		else{
-			return false;
-		}
+			if (w.length > 0) {
+				_waitID = setTimeout(_checkWaitQ, _waitInterval);
+			}
+		};
 
-		if (definitions) {
-
-			definitions.require = _concatArray(definitions.require);
-			var cr = definitions.require;
 		
-			for (var className in definitions) {			
+		// Injects a Script tag into the DOM
 
-				if (className !== "require") {
+		var _inject = function (f, c) {
 
-					var qualifiedName = id + _separator + className;
-					var c = definitions[className];
+			var doc = document;
+			var body = "body";
 
-					if (c.__extendedFrom) {
-						cr.push(c.__extendedFrom);
-					}
+			var injectObj, script;
 
-					if (c.__toExtend) {				
-						if (_extendQueue.indexOf(qualifiedName) < 0) {
-							_extendQueue.push(qualifiedName);
+			if (!doc[body]) {
+				return setTimeout(function () {
+					_inject(f,c);
+				}, 0);
+			}
+
+			script = doc.createElement("script");
+			script.async = true;
+		
+			injectObj = {
+				f : f,		// File
+				c : c,		// Class
+				e : 0,		// Elapsed Time
+				s : script	// Script
+			};
+
+			_waitingForLoad.push(injectObj);
+
+			script.onreadystatechange = script.onload = function (e) {
+				injectObj.s.onload = injectObj.s.onreadystatechange = null;
+				injectObj.s.onerror = null;					
+				_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
+			};
+
+			script.onerror = function (e) {
+				injectObj.s.onload = injectObj.s.onreadystatechange = null;
+				injectObj.s.onerror = null;					
+				_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
+				throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
+			};
+
+			script.src = f;
+			
+			// Append the script to the document body
+			doc[body].appendChild(script);
+		};
+
+		// Does all the loading of JS files
+
+		var _load = function (q) {
+
+			_loadQ.push(q);
+
+			for (var i = 0; i < q.f.length; i += 1) {
+				_isNode ? require(q.f[i]) : _inject(q.f[i], q.c[i]);
+			}
+
+			/*
+				If the load times out, fire onerror after the time defined by errorTimeout (default is 10 seconds)
+				(can be changed through minion.config({errorTimeout : ms});
+			*/
+			_waitID = setTimeout(_checkWaitQ, _waitInterval);
+		};
+
+		/**
+		* Used by minion.get() and minion.define(). 
+		* Get the namespace/Class, or creates it if it does not exist. Also optionally creates Objects in the specified namepsace.
+		*/
+
+		var _namespace = function (id, autoCreate, definitions) {
+			id = id || "";
+			definitions = definitions || false;
+
+			var ns = _ns;
+			var i;
+
+			if (id && !_isObject(id) && !_isFunction(id)) {
+				var parts = id.split(minion.separator);
+
+				if (_aliases.indexOf(parts[0]) > -1) {
+					ns = _minion;
+					parts.splice(0,1);
+				}
+
+				for (i = 0; i < parts.length; i += 1) {
+					if (!ns[parts[i]]) {
+						if (autoCreate) {
+							ns[parts[i]] = {};
+						}
+						else{
+							return false;
 						}
 					}
+					ns = ns[parts[i]];
+				}
+			}
 
-					c.__static = c.__static || {};
-				
-					c.__nsID = id;
-					c.__ns = ns;
-					c.__class = className;
+			else if (id !== "") {
+				ns = id;
+			}
+			else{
+				return false;
+			}
 
-					if (cr.length > 0) {
-						c.__dependencies = _concatArray(c.__dependencies, cr, true);
-						_minion.require(cr);
-					}
+			if (definitions) {
+			
+				for (var className in definitions) {
 
-					if (_minion.isDefined(c) && c.prototype) {
-						var proto = c.prototype;
-						proto.__nsID = id;
-						proto.__ns = ns;
-						proto.__class = className;
+					var qualifiedName = id + minion.separator + className;
+					var c = definitions[className];
 
-						if (cr.length > 0) {
-							proto.__dependencies = _concatArray(proto.__dependencies, cr, true);
+					if (c.$$.toExtend) {				
+						if (_extendQ.indexOf(qualifiedName) < 0) {
+							_extendQ.push(qualifiedName);
 						}
 					}
 
 					ns[className] = c;
 				}
 			}
-		}
 
-		return ns;
-	};
+			return ns;
+		};
+
+		// used for pub/sub implementation
+
+		var _notifyObjects = function (notification) {
+
+			var name = notification.name;
+			var subs = _interests[name].splice(0);
+			var len = subs.length;
+
+			while(notification.pointer < len) {
+				if (notification.status == 1) {
+					subs[notification.pointer](notification);
+					notification.pointer ++;
+				}
+				else{
+					return;
+				}
+			}
+
+			subs = null;
+
+			/*
+				Notified all subscribers, notification is no longer needed,
+				unless it has a callback to be called later via notification.respond()
+			*/
+			if (notification.status === 1 && !notification.callback) {
+				notification.cancel();
+			}
+		};
 
 	/*================= END OF HELPER FUNCTIONS =================*/
 
+	var _minion = {};	
 
-	/**
-	* Configure minion.
-	*/
+	_minion.separator = ".";
+	_minion.errorTimeout = 2e4;
 
 	_minion.configure = function (configObj) {
 		
@@ -442,11 +365,11 @@ var minion = (function (root) {
 		_class_path = configObj.classPath || _class_path;
 		_class_path = (_class_path.lastIndexOf("/") === _class_path.length - 1) ? _class_path : _class_path + "/";
 
-		_separator = configObj.separator || _separator;
+		minion.separator = configObj.separator || minion.separator;
 		_file_suffix = configObj.fileSuffix || _file_suffix;
 
-		if(configObj.paths){
-			for(var i = 0; i < configObj.paths.length; i ++){
+		if (configObj.paths) {
+			for (var i = 0; i < configObj.paths.length; i ++) {
 				var m = configObj.paths[i];
 				_minion.provides(m.file, m.classes);
 			}
@@ -455,57 +378,31 @@ var minion = (function (root) {
 		_initialized = true;
 	};
 
-	/**
-	* Alias minion under a different namespace. I.e. var woot = minion.alias("woot");
-	*/
+	
+	// Defines Classes under the given namespace (id).
 
-	_minion.alias = function (alias) {
-		_aliases.push(alias);
-		return _minion;
-	};
-
-	_minion.getAliases = function () {
-		return _aliases;
-	};
-
-	_minion.separator = function () {
-		return _separator;
-	};
-
-	/**
-	* Gets the object by it's fully qualified identifier.
-	*/
-
-	_minion.get = function (id) {
-		if(!_isArray(id)){
-			return _namespace(id, false);
-		}
-		else{
-			var classes = _minion.use(id, {});
-			var classesArray = [];
-
-			for (var c in classes) {
-				if(classes.hasOwnProperty(c)) {
-					classesArray.push(classes[c]);
-				}	
-			}
-
-			return classesArray;
-		}
-	};
-
-	/**
-	* Defines Classes under the given namespace.
-	*/
 	_minion.define = function (id, definitions) {
 		var r = _namespace(id, true, definitions);
-		_checkExtendQueue();
+		_checkExtendQ();
 		return r;
 	};
 
-	/**
-	* Gets the URL for a given identifier.
-	*/
+	// Gets the object by it's fully qualified identifier.
+
+	_minion.get = function (id) {
+		if (!_isArray(id)) {
+			return _namespace(id, false);
+		}
+		else{
+			var classes = [];
+			for (var i = 0; i < id.length; i ++) {
+				classes.push(_minion.get(id[i]));
+			}
+			return classes;
+		}
+	};	
+
+	// Gets the URL for a given identifier.
 
 	_minion.getURL = function (id) {
 
@@ -515,36 +412,34 @@ var minion = (function (root) {
 
 		var isDir = id.indexOf("*") > -1;
 		id = isDir ? id.replace(".*", "") : id;
-		var url = _class_path + id.replace(new RegExp('\\' + _separator, 'g'), '/') + (isDir ? "" : '.js') + ((_file_suffix) ? "?" + _file_suffix : "");
+		var url = _class_path + id.replace(new RegExp('\\' + minion.separator, 'g'), '/') + (isDir ? "" : '.js') + ((_file_suffix) ? "?" + _file_suffix : "");
 
 		return url;
 	};
 
-	/**
-	* Checks to see whether the given fully qualified name or Object is defined as a minion class. (Checks for .__isDefined)
-	* NOTE: Classes that have not yet loaded all of their dependencies, will return FALSE for this check.
-	*/
+	// Checks to see whether the given fully qualified name or Object is defined as a minion class. (Checks for $$.isDefined)
 
 	_minion.isDefined = function (id) {
 		id = (!_isObject(id) && !_isFunction(id)) ? _namespace(id, false) : id;
-		return (id) ? id.__isDefined : false;
+		return (id) ? id.$$.isDefined : false;
 	};
 
-	/**
-	* Extends a given class asynchronously.
-	*/ 
+	// Extends a given class asynchronously.
 
 	_minion.extend = function (id, obj) {
+		
+		obj.$$ = obj.$$ || {};
 	
 		// If the Class exists and is a minion class, then return the extended object.
 		if (_minion.isDefined(id)) {
-			obj = _minion.get(id).__extend(obj);
+			obj = _minion.get(id).extend(obj);
 		}
 		else{
-			obj.__toExtend = true;
+			obj.$$.toExtend = true;
+			_minion.require(id);
 		}
 
-		obj.__extendedFrom = id;
+		obj.$$.extendedFrom = id;
 
 		return obj;
 	};
@@ -560,7 +455,7 @@ var minion = (function (root) {
 		definitions = _strToArray(definitions);
 
 		// If the file is not absolute, prepend the _class_path
-		//file = (!new RegExp("(http://|/)[^ :]+").test(file)) ? _class_path + file : file;
+		// file = (!new RegExp("(http://|/)[^ :]+").test(file)) ? _class_path + file : file;
 
 		for (var i = 0; i < definitions.length; i += 1) {
 			_classMappings[definitions[i]] = file;
@@ -568,11 +463,12 @@ var minion = (function (root) {
 	};
 
 	/**
-	* Asyncrhonously loads in js files for the classes specified.
+	* Asynchronously loads in js files for the classes specified.
 	* If the classes have already been loaded, or are already defined, the callback function is invoked immediately.
 	*/
 
 	_minion.require = function (ids, callback) {
+
 		if (!_initialized) {
 			_minion.configure();
 		}
@@ -603,9 +499,8 @@ var minion = (function (root) {
 				c	: classList,
 				cb : callback
 			};
-									
-			//_load(q);
-			setTimeout(function(){_load(q);}, 0);
+
+			setTimeout(function () {_load(q);}, 0);
 		}
 
 		else if (callback) {
@@ -613,338 +508,215 @@ var minion = (function (root) {
 		}
 	};
 
-	/**
-	* Copies an array of classes (by their fully qualified names) to the specified object/scope.
-	*
-	* By calling minion.use("test.Example", obj), you will be able to refer to test.Example as just obj.Example.
-	* 
-	* Identifiers can contain the* wildcard character as its last segment (eg: test.*) 
-	* which will import all Classes under the given namespace.
-	*/
+	// Like $.proxy(), or Function.bind(), just a way to make sure it is there cross-browser.
+	_minion.proxy = function (fn, scope) {
+		return fn ? fn.bind(scope) : fn;
+	};
 
-	_minion.use = function (ids, scope) {
+	/*================= pub/sub =================*/
 
-		ids = ids || [];
-		ids = _strToArray(ids);
-		scope = scope || _ns;
-
-		if (scope === _ns) {
-			_minion.unuse();
+		var Notification = function (name, data, callback) {
+			this.name = name;
+			this.data = data;
+			this.callback = callback;
 		}
 
-		var i, id, obj, ns, n;
+		Notification.prototype.data = {};
+		Notification.prototype.name = "";
+		Notification.prototype.dispatcher = null;
+		Notification.prototype.status = 0;
+		Notification.prototype.pointer = 0;
+		Notification.prototype.callback = null;
 
-		for (i = 0; i < ids.length; i += 1) {
+		Notification.prototype.hold = function () {
+			this.status = 2;
+		};
 
-			id = ids[i];
+		Notification.prototype.release = function () {
+			this.status = 1;
+			_minion.releaseNotification(this);
+		};
 
-			obj = _minion.get(id, true);
-			ns = id.split(_separator);
-			id = ns.splice(ns.length - 1, 1)[0];
-			ns = _minion.get(ns.join(_separator), false);
+		Notification.prototype.cancel = function () {
+			this.data = {};
+			this.name = "";
+			this.status = 0;
+			this.pointer = 0;
+			this.dispatcher = null;
+			this.callback = null;
 
-			if (id === '*') {
-				// injects all ids under namespace into the root namespace
-				for (n in ns) {
-					if(ns.hasOwnProperty(n)){
-						scope[n] = ns[n];
-					}
-				}
+			_minion.cancelNotification(this);
+		};
+
+		Notification.prototype.dispatch = function (obj) {
+			this.status = 1;
+			this.pointer = 0;
+			this.dispatcher = obj;
+			_minion.publishNotification(this);
+		};
+
+
+		Notification.prototype.respond = function (obj) {
+			if (this.callback) {
+				this.callback.apply(this.dispatcher, arguments);
+				this.cancel();
+			}
+		};
+
+		_minion.subscribe = function (fn, name, priority) {
+			
+			priority = isNaN(priority) ? -1 : priority;
+			_interests[name] = _interests[name] || [];
+
+			if (priority <= -1 || priority >= _interests[name].length) {
+				_interests[name].push(fn);
 			}
 			else{
-				// injects this id into the root namespace
-				if (ns[id]) {
-					scope[id] = ns[id];
-				}
+				_interests[name].splice(priority, 0, fn);
 			}
-		}
+		};
 
-		return scope;		
-	};
-	
-	// Like jQuery .proxy, or ES5 .bind, just a way to make sure it's there cross-browser.
-	_minion.proxy = function (fn, scope) {
-		if(fn) {
-
-			var bind = function (context) {
-				if (!context) {return this;}
-				var this_ = this;
-				return function() {
-					return this_.apply(context, Array.prototype.slice.call(arguments));
-				};
-			};
-
-			if(Function.prototype.bind){
-				return fn.bind(scope);
+		_minion.unsubscribe = function (fn, name) {
+			var fnIndex = _interests[name].indexOf(fn);
+			if (fnIndex > -1) {
+				_interests[name].splice(fnIndex, 1);
 			}
+		};
+		
+		_minion.publish = function (notification, data, obj, callback) {
+			notification = new Notification(notification, data, callback);
+			notification.status = 1;
+			notification.pointer = 0;
+			notification.dispatcher = obj;
+			_minion.publishNotification(notification);
+		};
 
-			return bind.call(fn, scope);
-		}
-		return fn;
-	};
-
-
-	_minion.enableNotifications = function () {
-		if (_minion.isDefined("minion.NotificationManager")) {
-			if (!_NotificationManager) {
-
-				var NM = _NotificationManager = (minion.get("minion.NotificationManager"));
-
-				_minion.subscribe = _minion.proxy(NM.subscribe, NM);
-				_minion.unsubscribe = _minion.proxy(NM.unsubscribe, NM);
-				_minion.publish = _minion.proxy(NM.publish, NM);
-				_minion.publishNotification = _minion.proxy(NM.publishNotification, NM);
-				_minion.holdNotification = _minion.proxy(NM.holdNotification, NM);
-				_minion.releaseNotification = _minion.proxy(NM.releaseNotification, NM);
-				_minion.cancelNotification = _minion.proxy(NM.cancelNotification, NM);
-
+		_minion.publishNotification = function (notification) {
+			var name = notification.name;
+			_pendingNotifications.push(notification);
+			_notifyObjects(notification);
+		};
+					
+		_minion.releaseNotification = function (notification) {
+			notification.status = 1;
+			if (_pendingNotifications.indexOf(notification) > -1) {
+				_notifyObjects(notification);
 			}
-		}
-	};
+		};
+		
+		_minion.cancelNotification = function (notification) {
+			var name = notification.name;
+			_pendingNotifications.splice(_pendingNotifications.indexOf(notification), 1);
+			notification = null;
+		};
 
-	/*
-	Define minion as an AMD module, if define is defined (and has .amd as a property)
-	*/
-	if (typeof _root.define === "function" && _root.define.amd) {
-		_root.define([], function () {
-			return _minion;
-		});
-	}
+	/*================= END OF pub/sub =================*/
+
+
+	// Define minion as an AMD module
+	_root.define && _root.define.amd ? _root.define(_minion) : "";
 
 	// Export for node
-	if (_isNode){
-		module.exports = _minion;
-	}
+	_isNode ? module.exports = _minion : "";
 
 	return _minion;
 
-})(this);(function(){
+})(this);(function () {
 
 	"use strict";
 
-	//* @ignore */
-	minion.define("minion", {
+	/*=========================== HELPER FUNCTIONS ===========================*/
 
-		/**
-			The minion Base Class
-			Classical JavaScript Inheritance (or an attempt thereof)
-			minion.Class is the ONLY Class to extend this directly, do not directly extend this Class.
-			Largely taken from: http://ejohn.org/blog/simple-javascript-inheritance/
+		var _createSuperFunction = function (fn, superFn) {
+			return function() {
+				var tmp = this.sup || null;
+
+				// Reference the prototypes method, as super temporarily
+				this.sup = superFn;
+
+				var r = fn.apply(this, arguments);
+
+				// Reset this.sup
+				this.sup = tmp;
+				return r;
+			};
+		};
+
+		var _copyTo = function (obj) {
+			while(arguments.length > 1) {
+				var obj2 = Array.prototype.splice.call(arguments, 1, 1)[0];
+				for (var prop in obj2) {
+					obj[prop] = obj2[prop];
+				}
+			}
+			return obj;
+		};
+
+		/*
+			If Function.toString() works as expected, return a regex that checks for `sup()`
+			otherwise return a regex that passes everything.
 		*/
 
-		__BaseClass__ : (function() {
+		var _doesCallSuper = /xyz/.test(function(){var xyz;}) ? /\bthis\.sup\b/ : /.*/;
 
-			/*
-				Attempts to shallow copy objects, so as to not have a bunch of references lying around in object instances
-				Otherwise, it is bad news bears doing something like this.nArray.push() in a Class method
-				because it modifies nArray on prototype, and thus any other instances of said Class
-			*/
-			var _copy = function (obj) {
-				var i, attr, c;
+	/*=========================== END OF HELPER FUNCTIONS ===========================*/
 
-				// Null, undefined, number, boolean, string, function all get returned immediately, no need to copy them.
-				if (!obj || typeof obj !== "object") {
-					return obj;
+
+	minion.define("minion", {
+
+		BaseClass : (function() {
+
+			// Setup a dummy constructor for prototype-chaining without any overhead.
+			var dummy = function () {};
+			var Class = function () {};
+			// $$ is an object where any minion specific properties/values reside.
+			Class.$$ = {isDefined: true};
+
+			Class.extend = function (props, staticProps) {
+
+				var p;
+
+				dummy.prototype = this.prototype;
+				var proto = _copyTo(new dummy(), props);
+
+				function SubClass () {
+					var fn = this.preInit || this.init || this.prototype.constructor;
+					return fn.apply(this, arguments);
 				}
 
-				if (obj instanceof Date) {
-					return new Date().setTime(obj.getTime());
-				}
-
-				if (obj instanceof Array) {
-					return obj.concat();
-				}
-
-				if (typeof obj === "object") {
-					c = {};
-					for (attr in obj) {
-						if (obj.hasOwnProperty(attr)) {
-							c[attr] = obj[attr];
-						}
-					}
-					return c;
-				}
-				// If it fails, just return the original object.
-				return obj;
-			};
-
-			var _createSuperFunction = function (fn, superFn) {
-				return function() {
-					var tmp = this.__super || null;
-
-					// Reference the prototypes method, as super temporarily
-					this.__super = superFn;
-
-					var ret = fn.apply(this, arguments);
-
-					// Reset this.__super
-					if(tmp){this.__super = tmp;}
-					else{this.__super = null; delete this.__super;}
-					return ret;
-				};
-			};
-
-			// Checks the function contents to see if it has a reference to __super
-			var _doesCallSuper = /xyz/.test(function(){var xyz;}) ? /\b__super\b/ : /.*/;
-
-			var _baseClass = function(){};
-
-			_baseClass.__isDefined = true;
-
-			_baseClass.__extend = function(obj) {
-
-				// By passing "__no_init__" as the first argument, we skip calling the constructor and other initialization;
-				var This = this;
-				var _proto = new This("__no_init__");
-				var _perInstanceProps = {};
-				var _this = this;
-
-				// Copy the object's properties onto the prototype
-				for(var name in obj) {
-
-					if(obj.hasOwnProperty(name)) {
-
-						if(name !== "__static"){
-							// If we're overwriting an existing function that calls this.__super, do a little super magic.
-							if(typeof obj[name] === "function" && typeof _proto[name] === "function" && _doesCallSuper.test(obj[name])){
-								_proto[name] = _createSuperFunction(obj[name], _proto[name]);
-							}
-							else{
-								_proto[name] = obj[name];
-							}
-						}
-
-						/*
-							If it's an array or an object, we need to make a per instance copy of these values, so as to not affect other
-							instances when dealing with Arrays or Objects.
-						*/
-						else if (typeof obj[name] === "object" && name.indexOf("__") !== 0) {
-							_perInstanceProps[name] = obj[name];
-						}
+				for(var p in props) {
+					if (
+						p !== "static" 
+						&& typeof props[p] === "function" 
+						&& typeof this.prototype[p] === "function" 
+						&& _doesCallSuper.test(props[p])
+					) {
+						proto[p] = _createSuperFunction(props[p], this.prototype[p]);
 					}
 				}
 
-				var _class = function() {
-					
-					if(arguments[0] !== "__no_init__"){
+				SubClass.prototype = proto;
 
-						/*
-							Handy for referencing dependencies. If a Class requires example.Test, then you can reference said class
-							in any method by this.__imports.Test;
+				_copyTo(SubClass, this, props.static, staticProps);
 
-						*/
-						if(!_class.prototype.hasOwnProperty("__imports")){
-							_class.prototype.__imports = minion.use(this.__dependencies, {});
-						}
+				SubClass.prototype.constructor = SubClass.prototype.static = SubClass;
 
-						if(!this.__preInit){
-
-							for (var attr in _perInstanceProps) {
-								if (_perInstanceProps.hasOwnProperty(attr)) {
-									this[attr] = _copy(_perInstanceProps[attr]);
-								}
-							}
-
-							// All real construction is actually done in the init method
-							return this.init.apply(this, arguments);
-						}
-						
-						else{
-							return this.__preInit.apply(this, arguments);
-						}
-
-					}
-				};
-
-				// Set the prototype and Constructor accordingly.
-				_class.prototype = _proto;
-				//* @ignore */
-				_class.prototype.constructor = _class;
-
-				// Expose the extend method
-				//* @ignore */
-				_class.__extend = _baseClass.__extend;
-
-				_class.prototype.__extend = (function(scope, fn){
-					return function(){
-						return fn.apply(scope, arguments);
-					};
-				})(_class, _class.__extend);
-
-				/*
-					Custom minion properties, anything beginning with an __ on a Class or instance, is populated and used by minion.
-					The "__" prefix is used to avoid naming conflictions with developers, and allows
-					us to not have to impose a list of reserved words on developers.
-				*/
-
-				_class.__ns = obj.__ns || "";
-				_class.__nsID = obj.__nsID || "";
-				_class.__class = obj.__class || "";
-				_class.__dependencies = obj.__dependencies || [];
-
-				/*
-					Add all static methods and properties that are defined in the __static object.
-					Only write to it if it doesn't already exist, to disable overwriting things we actually need for minion by malicious or
-					plain bad code.
-				*/
-				var prop;
-
-				if(obj.__static){
-					_class.__static = _class.__static || {};
-					for(prop in obj.__static){
-						if(!_class[prop]){
-							_class[prop] = obj.__static[prop];
-							_class.__static[prop] = obj.__static[prop];
-						}
-					}
-					_class.__static = obj.__static;
-				}
-
-				if(this.__static){
-					_class.__static = _class.__static || {};				
-					for(prop in this.__static){
-						if(!_class[prop]){
-							_class[prop] = this.__static[prop];
-							_class.__static[prop] = this.__static[prop];
-						}
-					}
-				}
-
-				if(_class.__static.__isStatic){
-					
-					var StaticClass = _class;
-					var s = new StaticClass();
-
-					s.__static = _class.__static;
-
-					for(prop in _class.__static){
-						s[prop] = _class.__static[prop];
-					}
-
-					return s;
-				}
-
-				return _class;
+				return SubClass;
 			};
 			
-			return _baseClass;
+			return Class;
 
 		})()
+
 	});
 
-})();(function() {
+})();(function () {
 	
 	"use strict";
 
 	minion.define("minion", {
 
-		/** @lends minion.Class# */ 
-
-		Class : minion.extend("minion.__BaseClass__", {
-
-			__static : {
-				__isDefined: true
-			},
+		Class : minion.extend("minion.BaseClass", {
 
 			/**		
 			* The base minion Class. All Classes are required to be descendants
@@ -982,9 +754,8 @@ var minion = (function (root) {
 			*/
 
 			subscribe : function(name, handler, priority) {
-				if(!this._interestHandlers) {
-					this._interestHandlers = [];
-				}
+
+				this._interestHandlers = this._interestHandlers || [];
 
 				if(handler && !this._interestHandlers[name]) {
 					handler = this.proxy(handler);
@@ -1031,7 +802,7 @@ var minion = (function (root) {
 		})
 	});
 
-})();(function(){
+})();(function () {
 	
 	"use strict";
 
@@ -1042,219 +813,35 @@ var minion = (function (root) {
 			/**
 			* A way to easily implement Singletons.
 			*/
-			init : function(){
+			init : function () {
 
 			},
 			
-			__preInit : function(){
-				if(this.constructor.__instance){
-					return this.constructor.__instance;
+			preInit : function () {
+				if (!this.static.$$.instance) {
+					this.init.apply(this, arguments);
+					this.static.$$.instance = this;
 				}
-				
-				this.init.apply(this, arguments);
-
-				this.constructor.__instance = this;
-				return this.constructor.__instance;
+				return this.static.$$.instance;
 			},
 
-			__static : {
-
-				__isSingleton: true,
+			static : {
 
 				/**
-				*
-				* Returns the instance of this Singleton. If this Class has not yet been instantiated, creates a new instance and returns that.
-				* Otherwise, it returns the already existing reference.
+				* Returns the instance of this Singleton. If this Class has not yet been instantiated,
+				* creates a new instance and returns that. Otherwise, it returns the already existing reference.
 				*/
-				getInstance : function(){
-					if(!this.__instance){
+
+				getInstance : function () {
+					if(!this.$$.instance) {
 						var This = this;
-						this.__instance =  new This();
-						return this.__instance;
+						this.$$.instance = new This();
 					}
-					return this.__instance;
+					return this.$$.instance;
 				}
 			}
 
 		})
 	});
 	
-})();(function(){
-		
-	"use strict";
-
-	minion.define("minion", {
-
-		Static : minion.extend("minion.Singleton", {
-
-			__static : {
-				__isDefined : true,
-				__isStatic : true
-				
-			},
-
-			/**
-			* A way to easily implement Static Classes.
-			*/
-			init : function(){
-
-			}
-
-		})
-	});
-	
-})();(function(){
-	
-	"use strict";
-
-	var Notification = function(name, data, callback) {
-		this.name = name;
-		this.data = data;
-		this.callback = callback;
-	}
-
-	Notification.prototype.data = {};
-	Notification.prototype.name = "";
-	Notification.prototype.dispatcher = null;
-	Notification.prototype.status = 0;
-	Notification.prototype.pointer = 0;
-	Notification.prototype.callback = null;
-
-	Notification.prototype.hold = function() {
-		this.status = 2;
-	};
-
-	Notification.prototype.release = function() {
-		this.status = 1;
-		minion.releaseNotification(this);
-	};
-
-	Notification.prototype.cancel = function() {
-		this.data = {};
-		this.name = "";
-		this.status = 0;
-		this.pointer = 0;
-		this.dispatcher = null;
-		this.callback = null;
-
-		NotificationManager.cancelNotification(this);
-	};
-
-	Notification.prototype.dispatch = function(obj) {
-		this.status = 1;
-		this.pointer = 0;
-		this.dispatcher = obj;
-		NotificationManager.publishNotification(this);
-	};
-
-
-	Notification.prototype.respond = function(obj) {
-		if(this.callback) {
-			this.callback.apply(this.dispatcher, arguments);
-			this.cancel();
-		}
-	};
-
-	var pendingNotifications = [];
-	var interests = {};
-
-
-	minion.define("minion", {
-
-		/*
-			This Class handles all the nitty gritty Notification stuff.
-		*/
-
-		NotificationManager : minion.extend("minion.Static", {
-
-			
-			subscribe : function(fn, name, priority) {
-				
-				priority = isNaN(priority) ? -1 : priority;
-				interests[name] = interests[name] || [];
-
-				if(priority <= -1 || priority >= interests[name].length){
-					interests[name].push(fn);
-				}
-				else{
-					interests[name].splice(priority, 0, fn);
-				}
-			},
-
-			unsubscribe : function(fn, name) {
-				if(name instanceof Array){
-					for(var i = 0; i < name.length; i ++){
-						this.unsubscribe(fn, name[i]);
-					}
-					return;
-				}
-				var fnIndex = interests[name].indexOf(fn);
-				if(fnIndex > -1){
-					interests[name].splice(fnIndex, 1);
-				}
-			},
-			
-			publish : function(notification, data, obj, callback) {
-				notification = new Notification(notification, data, callback);
-				notification.status = 1;
-				notification.pointer = 0;
-				notification.dispatcher = obj;
-				this.publishNotification(notification);
-			},
-
-			publishNotification : function(notification) {
-				var name = notification.name;
-
-				pendingNotifications.push(notification);
-				this._notifyObjects(notification);
-			},
-			
-			_notifyObjects : function(notification) {
-
-				var name = notification.name;
-				var subs = interests[name].splice(0);
-				var len = subs.length;
-
-				while(notification.pointer < len) {
-					if(notification.status == 1){
-						subs[notification.pointer](notification);
-						notification.pointer ++;
-					}
-					else{
-						return;
-					}
-				}
-
-				subs = null;
-
-				/*
-					Notified all subscribers, notification is no longer needed,
-					unless it has a callback to be called later via notification.respond()
-				*/
-				if(notification.status === 1 && !notification.callback) {
-					notification.cancel();
-				}
-			},
-						
-			releaseNotification : function(notification) {
-				notification.status = 1;
-				if(pendingNotifications.indexOf(notification) > -1){
-					this._notifyObjects(notification);
-				}
-			},
-			
-			cancelNotification : function(notification) {
-				var name = notification.name;
-				pendingNotifications.splice(pendingNotifications.indexOf(notification), 1);
-				notification = null;
-			}
-
-		})
-
-	});
-
-	var NotificationManager = minion.get("minion.NotificationManager");
-
-	minion.enableNotifications();
-
 })();

@@ -5,7 +5,7 @@
  * (c) 2012, Taka Kojima (taka@gigafied.com)
  * Licensed under the MIT License
  *
- * Date: Sun Feb 12 20:18:22 2012 -0800
+ * Date: Mon Feb 20 02:51:24 2012 -0800
  */
  /*
 	TODO:
@@ -90,15 +90,17 @@ var minion = (function (root) {
 
 		var _root = root;
 		var _ns = {};
-		var _errorTimeout = 1e4;
+
+		var _pendingNotifications = [];
+		var _interests = {};
+
 
 	/*================= END OF internal/private variables =================*/
 
 
 	/*================= HELPER FUNCTIONS =================*/
 
-
-		var _isArray = Array._isArray || function (a) {
+		var _isArray = function (a) {
 			return a instanceof Array;
 		};
 
@@ -114,7 +116,6 @@ var minion = (function (root) {
 			return (!_isArray(s)) ? [s] : s;
 		};
 
-
 		var _checkLoadQ = function () {
 			var i, j, q, classes, classesArray;
 			q = {};
@@ -124,6 +125,14 @@ var minion = (function (root) {
 			for (i = _loadQ.length - 1; i >= 0; i --) {
 
 				q = _loadQ[i];
+				
+				for (var j = q.c.length-1; j >= 0; j --) {
+					console.log(q.c[j]);
+					if (!_minion.isDefined(q.c[j])) {
+						setTimeout(_checkLoadQ, 0);
+						return;
+					}
+				}
 
 				if (q.cb) {
 					q.cb.apply(_root, _minion.get(q.c));
@@ -134,6 +143,7 @@ var minion = (function (root) {
 
 
 		var _checkExtendQ = function () {
+		
 			var eq = _extendQ;
 			var i, superClass, ns, id;
 
@@ -145,7 +155,8 @@ var minion = (function (root) {
 
 				if (ns[id].$$.toExtend) {
 					superClass = _minion.get(ns[id].$$.extendedFrom, false);
-					if (superClass.$$.isDefined) {
+
+					if (_minion.isDefined(superClass)) {
 
 						ns[id].$$.toExtend = false;
 						delete ns[id].$$.toExtend;
@@ -158,6 +169,10 @@ var minion = (function (root) {
 					}
 				}
 			}
+			if (eq.length > 0) {
+				setTimeout(_checkExtendQ, 0);
+				return;
+			}
 			_checkLoadQ();
 		};
 
@@ -167,19 +182,13 @@ var minion = (function (root) {
 			var w = _waitingForLoad;
 			var i, o;
 
-			if (_waitID) {
-				clearTimeout(_waitID);
-			}
+			clearTimeout(_waitID);
 
 			for (i = 0; i < w.length; i += 1) {
 				o = w[i];
 				o.e += 50;
 				
-				if (_minion.isDefined(o.c)) {
-					o.s.onload();
-				}
-				
-				else if (o.e >= _errorTimeout) {
+				if (o.e >= _minion.errorTimeout) {
 					o.s.onerror();
 				}
 			}
@@ -189,11 +198,10 @@ var minion = (function (root) {
 			}
 		};
 
-		/**
-		* Injects a Script tag into the DOM
-		*/
+		
+		// Injects a Script tag into the DOM
 
-		var _inject = function(f, c) {
+		var _inject = function (f, c) {
 
 			var doc = document;
 			var body = "body";
@@ -201,7 +209,7 @@ var minion = (function (root) {
 			var injectObj, script;
 
 			if (!doc[body]) {
-				return setTimeout(function(){
+				return setTimeout(function () {
 					_inject(f,c);
 				}, 0);
 			}
@@ -218,16 +226,15 @@ var minion = (function (root) {
 
 			_waitingForLoad.push(injectObj);
 
-			script.onreadystatechange = /** @ignore */ script.onload = function (e) {
-				if (_minion.isDefined(c)) {
-					injectObj.s.onload = injectObj.s.onreadystatechange = null;
-					injectObj.s.onerror = null;
-					_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
-				}
+			script.onreadystatechange = script.onload = function (e) {
+				injectObj.s.onload = injectObj.s.onreadystatechange = null;
+				injectObj.s.onerror = null;					
+				_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 			};
 
 			script.onerror = function (e) {
-				injectObj.s.onerror = null;
+				injectObj.s.onload = injectObj.s.onreadystatechange = null;
+				injectObj.s.onerror = null;					
 				_waitingForLoad.splice(_waitingForLoad.indexOf(injectObj), 1);
 				throw new Error(injectObj.c + " failed to load. Attempted to load from file: " + injectObj.f);
 			};
@@ -238,27 +245,19 @@ var minion = (function (root) {
 			doc[body].appendChild(script);
 		};
 
-		/**
-		* Does all the loading of JS files
-		*/
+		// Does all the loading of JS files
 
 		var _load = function (q) {
 
 			_loadQ.push(q);
 
 			for (var i = 0; i < q.f.length; i += 1) {
-
-				if(_isNode){
-					require(q.f[i]);
-				}
-				else{
-					_inject(q.f[i], q.c[i]);
-				}
+				_isNode ? require(q.f[i]) : _inject(q.f[i], q.c[i]);
 			}
 
 			/*
-				If the load times out, fire onerror after the time defined by _errorTimeout (default is 10 seconds)
-				(can be changed through minion.config({minion.errorTimeout : ms});
+				If the load times out, fire onerror after the time defined by errorTimeout (default is 10 seconds)
+				(can be changed through minion.config({errorTimeout : ms});
 			*/
 			_waitID = setTimeout(_checkWaitQ, _waitInterval);
 		};
@@ -323,15 +322,41 @@ var minion = (function (root) {
 			return ns;
 		};
 
+		// used for pub/sub implementation
+
+		var _notifyObjects = function (notification) {
+
+			var name = notification.name;
+			var subs = _interests[name].splice(0);
+			var len = subs.length;
+
+			while(notification.pointer < len) {
+				if (notification.status == 1) {
+					subs[notification.pointer](notification);
+					notification.pointer ++;
+				}
+				else{
+					return;
+				}
+			}
+
+			subs = null;
+
+			/*
+				Notified all subscribers, notification is no longer needed,
+				unless it has a callback to be called later via notification.respond()
+			*/
+			if (notification.status === 1 && !notification.callback) {
+				notification.cancel();
+			}
+		};
+
 	/*================= END OF HELPER FUNCTIONS =================*/
 
 	var _minion = {};	
 
 	_minion.separator = ".";
-
-	/**
-	* Configure minion.
-	*/
+	_minion.errorTimeout = 2e4;
 
 	_minion.configure = function (configObj) {
 		
@@ -343,8 +368,8 @@ var minion = (function (root) {
 		minion.separator = configObj.separator || minion.separator;
 		_file_suffix = configObj.fileSuffix || _file_suffix;
 
-		if(configObj.paths){
-			for(var i = 0; i < configObj.paths.length; i ++){
+		if (configObj.paths) {
+			for (var i = 0; i < configObj.paths.length; i ++) {
 				var m = configObj.paths[i];
 				_minion.provides(m.file, m.classes);
 			}
@@ -353,18 +378,31 @@ var minion = (function (root) {
 		_initialized = true;
 	};
 
-	/**
-	* Defines Classes under the given namespace.
-	*/
+	
+	// Defines Classes under the given namespace (id).
+
 	_minion.define = function (id, definitions) {
 		var r = _namespace(id, true, definitions);
 		_checkExtendQ();
 		return r;
 	};
 
-	/**
-	* Gets the URL for a given identifier.
-	*/
+	// Gets the object by it's fully qualified identifier.
+
+	_minion.get = function (id) {
+		if (!_isArray(id)) {
+			return _namespace(id, false);
+		}
+		else{
+			var classes = [];
+			for (var i = 0; i < id.length; i ++) {
+				classes.push(_minion.get(id[i]));
+			}
+			return classes;
+		}
+	};	
+
+	// Gets the URL for a given identifier.
 
 	_minion.getURL = function (id) {
 
@@ -379,18 +417,14 @@ var minion = (function (root) {
 		return url;
 	};
 
-	/**
-	* Checks to see whether the given fully qualified name or Object is defined as a minion class. (Checks for $$.isDefined)
-	*/
+	// Checks to see whether the given fully qualified name or Object is defined as a minion class. (Checks for $$.isDefined)
 
 	_minion.isDefined = function (id) {
 		id = (!_isObject(id) && !_isFunction(id)) ? _namespace(id, false) : id;
 		return (id) ? id.$$.isDefined : false;
 	};
 
-	/**
-	* Extends a given class asynchronously.
-	*/ 
+	// Extends a given class asynchronously.
 
 	_minion.extend = function (id, obj) {
 		
@@ -402,6 +436,7 @@ var minion = (function (root) {
 		}
 		else{
 			obj.$$.toExtend = true;
+			_minion.require(id);
 		}
 
 		obj.$$.extendedFrom = id;
@@ -420,7 +455,7 @@ var minion = (function (root) {
 		definitions = _strToArray(definitions);
 
 		// If the file is not absolute, prepend the _class_path
-		//file = (!new RegExp("(http://|/)[^ :]+").test(file)) ? _class_path + file : file;
+		// file = (!new RegExp("(http://|/)[^ :]+").test(file)) ? _class_path + file : file;
 
 		for (var i = 0; i < definitions.length; i += 1) {
 			_classMappings[definitions[i]] = file;
@@ -428,7 +463,7 @@ var minion = (function (root) {
 	};
 
 	/**
-	* Asyncrhonously loads in js files for the classes specified.
+	* Asynchronously loads in js files for the classes specified.
 	* If the classes have already been loaded, or are already defined, the callback function is invoked immediately.
 	*/
 
@@ -464,9 +499,8 @@ var minion = (function (root) {
 				c	: classList,
 				cb : callback
 			};
-									
-			_load(q);
-			//setTimeout(function(){_load(q);}, 0);
+
+			setTimeout(function () {_load(q);}, 0);
 		}
 
 		else if (callback) {
@@ -474,42 +508,116 @@ var minion = (function (root) {
 		}
 	};
 
-	// Like $.proxy(), or Function.bind, just a way to make sure it is there cross-browser.
+	// Like $.proxy(), or Function.bind(), just a way to make sure it is there cross-browser.
 	_minion.proxy = function (fn, scope) {
-		return fn.bind(scope);
+		return fn ? fn.bind(scope) : fn;
 	};
 
-	_minion.enableNotifications = function () {
-		if (_minion.isDefined("minion.NotificationManager")) {
-			if (!_NotificationManager) {
+	/*================= pub/sub =================*/
 
-				var NM = _NotificationManager = (minion.get("minion.NotificationManager"));
-
-				_minion.subscribe = _minion.proxy(NM.subscribe, NM);
-				_minion.unsubscribe = _minion.proxy(NM.unsubscribe, NM);
-				_minion.publish = _minion.proxy(NM.publish, NM);
-				_minion.publishNotification = _minion.proxy(NM.publishNotification, NM);
-				_minion.holdNotification = _minion.proxy(NM.holdNotification, NM);
-				_minion.releaseNotification = _minion.proxy(NM.releaseNotification, NM);
-				_minion.cancelNotification = _minion.proxy(NM.cancelNotification, NM);
-
-			}
+		var Notification = function (name, data, callback) {
+			this.name = name;
+			this.data = data;
+			this.callback = callback;
 		}
-	};
 
-	/*
-	Define minion as an AMD module, if define is defined (and has .amd as a property)
-	*/
-	if (typeof _root.define === "function" && _root.define.amd) {
-		_root.define([], function () {
-			return _minion;
-		});
-	}
+		Notification.prototype.data = {};
+		Notification.prototype.name = "";
+		Notification.prototype.dispatcher = null;
+		Notification.prototype.status = 0;
+		Notification.prototype.pointer = 0;
+		Notification.prototype.callback = null;
+
+		Notification.prototype.hold = function () {
+			this.status = 2;
+		};
+
+		Notification.prototype.release = function () {
+			this.status = 1;
+			_minion.releaseNotification(this);
+		};
+
+		Notification.prototype.cancel = function () {
+			this.data = {};
+			this.name = "";
+			this.status = 0;
+			this.pointer = 0;
+			this.dispatcher = null;
+			this.callback = null;
+
+			_minion.cancelNotification(this);
+		};
+
+		Notification.prototype.dispatch = function (obj) {
+			this.status = 1;
+			this.pointer = 0;
+			this.dispatcher = obj;
+			_minion.publishNotification(this);
+		};
+
+
+		Notification.prototype.respond = function (obj) {
+			if (this.callback) {
+				this.callback.apply(this.dispatcher, arguments);
+				this.cancel();
+			}
+		};
+
+		_minion.subscribe = function (fn, name, priority) {
+			
+			priority = isNaN(priority) ? -1 : priority;
+			_interests[name] = _interests[name] || [];
+
+			if (priority <= -1 || priority >= _interests[name].length) {
+				_interests[name].push(fn);
+			}
+			else{
+				_interests[name].splice(priority, 0, fn);
+			}
+		};
+
+		_minion.unsubscribe = function (fn, name) {
+			var fnIndex = _interests[name].indexOf(fn);
+			if (fnIndex > -1) {
+				_interests[name].splice(fnIndex, 1);
+			}
+		};
+		
+		_minion.publish = function (notification, data, obj, callback) {
+			notification = new Notification(notification, data, callback);
+			notification.status = 1;
+			notification.pointer = 0;
+			notification.dispatcher = obj;
+			_minion.publishNotification(notification);
+		};
+
+		_minion.publishNotification = function (notification) {
+			var name = notification.name;
+			_pendingNotifications.push(notification);
+			_notifyObjects(notification);
+		};
+					
+		_minion.releaseNotification = function (notification) {
+			notification.status = 1;
+			if (_pendingNotifications.indexOf(notification) > -1) {
+				_notifyObjects(notification);
+			}
+		};
+		
+		_minion.cancelNotification = function (notification) {
+			var name = notification.name;
+			_pendingNotifications.splice(_pendingNotifications.indexOf(notification), 1);
+			notification = null;
+		};
+
+	/*================= END OF pub/sub =================*/
+
+
+	// Define minion as an AMD module
+	_root.define && _root.define.amd ? _root.define(_minion) : "";
 
 	// Export for node
-	if (_isNode){
-		module.exports = _minion;
-	}
+	_isNode ? module.exports = _minion : "";
 
 	return _minion;
 
@@ -526,29 +634,22 @@ var minion = (function (root) {
 				// Reference the prototypes method, as super temporarily
 				this.sup = superFn;
 
-				var ret = fn.apply(this, arguments);
+				var r = fn.apply(this, arguments);
 
-				// Reset this.__super
-				if(tmp){this.sup = tmp;}
-				else{this.sup = null; delete this.sup;}
-				return ret;
+				// Reset this.sup
+				this.sup = tmp;
+				return r;
 			};
 		};
 
 		var _copyTo = function (obj) {
-
-			for(var i = 1; i < arguments.length; i ++) {
-
-				var obj2 = arguments[i];
-
-				if (obj2) {
-					for (var p in obj2) {
-						obj[p] = obj2[p];
-					}
+			while(arguments.length > 1) {
+				var obj2 = Array.prototype.splice.call(arguments, 1, 1)[0];
+				for (var prop in obj2) {
+					obj[prop] = obj2[prop];
 				}
-
 			}
-			return obj;		
+			return obj;
 		};
 
 		/*
@@ -567,51 +668,43 @@ var minion = (function (root) {
 
 			// Setup a dummy constructor for prototype-chaining without any overhead.
 			var dummy = function () {};
-			var baseClass = function () {};
+			var Class = function () {};
 			// $$ is an object where any minion specific properties/values reside.
-			baseClass.$$ = {isDefined: true};
+			Class.$$ = {isDefined: true};
 
-			baseClass.extend = function (props, staticProps) {
+			Class.extend = function (props, staticProps) {
 
-				var subClass;
-				var parentClass = this;
 				var p;
 
-				if (props && props.hasOwnProperty("init")) {
-					if (props && props.hasOwnProperty("preInit")) {
-						subClass = props.preInit;
-					}
-					else{
-						subClass = props.init;
-					}
+				dummy.prototype = this.prototype;
+				var proto = _copyTo(new dummy(), props);
+
+				function SubClass () {
+					var fn = this.preInit || this.init || this.prototype.constructor;
+					return fn.apply(this, arguments);
 				}
 
-				else{
-					subClass = function () {
-						parentClass.apply(this, arguments);
-					};
-				}
-
-				dummy.prototype = parentClass.prototype;
-				subClass.prototype = new dummy();
-
-				_copyTo(subClass.prototype, props);
-
-				for(p in props) {			
-					if(p !== "static" && typeof props[p] === "function" && typeof subClass.prototype[p] === "function" && _doesCallSuper.test(props[p])){
-						subClass.prototype[p] = _createSuperFunction(props[p], subClass.prototype[p]);
+				for(var p in props) {
+					if (
+						p !== "static" 
+						&& typeof props[p] === "function" 
+						&& typeof this.prototype[p] === "function" 
+						&& _doesCallSuper.test(props[p])
+					) {
+						proto[p] = _createSuperFunction(props[p], this.prototype[p]);
 					}
 				}
 
-				subClass.prototype.constructor = subClass;
-				subClass.prototype.static = subClass;
+				SubClass.prototype = proto;
 
-				_copyTo(subClass, props.static, staticProps, parentClass);
+				_copyTo(SubClass, this, props.static, staticProps);
 
-				return subClass;
+				SubClass.prototype.constructor = SubClass.prototype.static = SubClass;
+
+				return SubClass;
 			};
 			
-			return baseClass;
+			return Class;
 
 		})()
 
@@ -623,7 +716,7 @@ var minion = (function (root) {
 
 	minion.define("minion", {
 
-		Class : minion.extend("minion.__BaseClass__", {
+		Class : minion.extend("minion.BaseClass", {
 
 			/**		
 			* The base minion Class. All Classes are required to be descendants
@@ -709,7 +802,7 @@ var minion = (function (root) {
 		})
 	});
 
-})();(function(){
+})();(function () {
 	
 	"use strict";
 
@@ -720,19 +813,16 @@ var minion = (function (root) {
 			/**
 			* A way to easily implement Singletons.
 			*/
-			init : function(){
+			init : function () {
 
 			},
 			
-			preInit : function(){
-				if(this.constructor.__instance){
-					return this.constructor.__instance;
+			preInit : function () {
+				if (!this.static.$$.instance) {
+					this.init.apply(this, arguments);
+					this.static.$$.instance = this;
 				}
-				
-				this.init.apply(this, arguments);
-
-				this.constructor.__instance = this;
-				return this.constructor.__instance;
+				return this.static.$$.instance;
 			},
 
 			static : {
@@ -742,188 +832,16 @@ var minion = (function (root) {
 				* creates a new instance and returns that. Otherwise, it returns the already existing reference.
 				*/
 
-				getInstance : function(){
-					if(!this.__instance){
+				getInstance : function () {
+					if(!this.$$.instance) {
 						var This = this;
-						return this.__instance =  new This();
+						this.$$.instance = new This();
 					}
-					return this.__instance;
+					return this.$$.instance;
 				}
 			}
 
 		})
 	});
 	
-})();(function(){
-		
-	"use strict";
-
-	minion.define("minion", {
-
-		Static : minion.extend("minion.Singleton", {
-
-			/**
-			* A way to easily implement Static Classes.
-			*/
-			init : function(){
-
-			}
-
-		})
-	});
-	
-})();(function(){
-	
-	"use strict";
-
-	var Notification = function(name, data, callback) {
-		this.name = name;
-		this.data = data;
-		this.callback = callback;
-	}
-
-	Notification.prototype.data = {};
-	Notification.prototype.name = "";
-	Notification.prototype.dispatcher = null;
-	Notification.prototype.status = 0;
-	Notification.prototype.pointer = 0;
-	Notification.prototype.callback = null;
-
-	Notification.prototype.hold = function() {
-		this.status = 2;
-	};
-
-	Notification.prototype.release = function() {
-		this.status = 1;
-		minion.releaseNotification(this);
-	};
-
-	Notification.prototype.cancel = function() {
-		this.data = {};
-		this.name = "";
-		this.status = 0;
-		this.pointer = 0;
-		this.dispatcher = null;
-		this.callback = null;
-
-		NotificationManager.cancelNotification(this);
-	};
-
-	Notification.prototype.dispatch = function(obj) {
-		this.status = 1;
-		this.pointer = 0;
-		this.dispatcher = obj;
-		NotificationManager.publishNotification(this);
-	};
-
-
-	Notification.prototype.respond = function(obj) {
-		if(this.callback) {
-			this.callback.apply(this.dispatcher, arguments);
-			this.cancel();
-		}
-	};
-
-	var pendingNotifications = [];
-	var interests = {};
-
-
-	minion.define("minion", {
-
-		/*
-			This Class handles all the nitty gritty Notification stuff.
-		*/
-
-		NotificationManager : minion.extend("minion.Static", {
-
-			
-			subscribe : function(fn, name, priority) {
-				
-				priority = isNaN(priority) ? -1 : priority;
-				interests[name] = interests[name] || [];
-
-				if(priority <= -1 || priority >= interests[name].length){
-					interests[name].push(fn);
-				}
-				else{
-					interests[name].splice(priority, 0, fn);
-				}
-			},
-
-			unsubscribe : function(fn, name) {
-				if(name instanceof Array){
-					for(var i = 0; i < name.length; i ++){
-						this.unsubscribe(fn, name[i]);
-					}
-					return;
-				}
-				var fnIndex = interests[name].indexOf(fn);
-				if(fnIndex > -1){
-					interests[name].splice(fnIndex, 1);
-				}
-			},
-			
-			publish : function(notification, data, obj, callback) {
-				notification = new Notification(notification, data, callback);
-				notification.status = 1;
-				notification.pointer = 0;
-				notification.dispatcher = obj;
-				this.publishNotification(notification);
-			},
-
-			publishNotification : function(notification) {
-				var name = notification.name;
-
-				pendingNotifications.push(notification);
-				this._notifyObjects(notification);
-			},
-			
-			_notifyObjects : function(notification) {
-
-				var name = notification.name;
-				var subs = interests[name].splice(0);
-				var len = subs.length;
-
-				while(notification.pointer < len) {
-					if(notification.status == 1){
-						subs[notification.pointer](notification);
-						notification.pointer ++;
-					}
-					else{
-						return;
-					}
-				}
-
-				subs = null;
-
-				/*
-					Notified all subscribers, notification is no longer needed,
-					unless it has a callback to be called later via notification.respond()
-				*/
-				if(notification.status === 1 && !notification.callback) {
-					notification.cancel();
-				}
-			},
-						
-			releaseNotification : function(notification) {
-				notification.status = 1;
-				if(pendingNotifications.indexOf(notification) > -1){
-					this._notifyObjects(notification);
-				}
-			},
-			
-			cancelNotification : function(notification) {
-				var name = notification.name;
-				pendingNotifications.splice(pendingNotifications.indexOf(notification), 1);
-				notification = null;
-			}
-
-		})
-
-	});
-
-	var NotificationManager = minion.get("minion.NotificationManager");
-
-	minion.enableNotifications();
-
 })();
