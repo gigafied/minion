@@ -28,6 +28,8 @@
 
 		minion.require(["minion.test.TestPublisher", "minion.test.TestSubscriber"], function(TestPublisher, TestSubscriber) {
 
+			console.log(TestPublisher, TestSubscriber);
+
 			var publisher = new TestPublisher();
 			var subscriber = new TestSubscriber();
 

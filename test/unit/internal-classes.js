@@ -39,10 +39,8 @@
 
 	module("minion internal classes");
 
-	minionRequireTest("minion.__BaseClass__");
+	minionRequireTest("minion.BaseClass");
 	minionRequireTest("minion.Class");
 	minionRequireTest("minion.Singleton");
-	minionRequireTest("minion.Static");
-	minionRequireTest("minion.NotificationManager");
 
 })();

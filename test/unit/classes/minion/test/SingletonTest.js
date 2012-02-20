@@ -8,7 +8,7 @@ minion.define("minion.test", {
 		testPropArr : ["yay", "awesome"],
 
 		init : function(){
-
+			this.sup();
 		},
 
 		someTestMethod : function(){
