@@ -1,6 +1,11 @@
-### MinionJS - Cross-Platform & Cross-Browser Classical Inheritance
+### MinionJS - Classical Inheritance for JavaScript
 
-MinionJS provides easy-to-use, easy-to-learn classical inheritance for JavaScript. Easily namespace, create and extend classes!
+A micro-framework that provides classical inheritance for JavaScript. Easily namespace, create and extend classes.
+
+It is only 3.6 kb minified and gzipped!
+
+[Overview](http://www.screenr.com/wOas)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[Getting Started](https://github.com/gigafied/minion/blob/master/docs/getting_started.md)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[Publish/Subscribe](http://www.screenr.com/cJ5s)
+
 
 #### Defining a Class:
 
@@ -31,58 +36,34 @@ MinionJS provides easy-to-use, easy-to-learn classical inheritance for JavaScrip
 	    var instance = new Example();
 	    instance.doSomething();
 	  
-	})
-
-
-That's the core of Minion, it's that simple. 
-
-<br>
-
-
-#### Getting Started
-
-- [Documentation](https://github.com/gigafied/minion/blob/master/docs/getting_started.md)
-- [Overview](http://www.screenr.com/wOas)
-- [Publish/Subscribe](http://www.screenr.com/cJ5s)
-
-
+	});
 <br>
 
 ####Features:
 
-- Classical Inheritance in JavaScript
+- Classical inheritance in JavaScript
+- Robust publish/subscribe implementation
 - Dependency management
-- Singleton classes
-- Static classes, methods and properties
-- Intuitive publish/subscribe model
-- this.__super() method support 
-- Build tool for easy deployment (for browser-based applications)
-- MinionJS does all this, all while sporting a tiny footprint of 3.8k (minified and gzipped).
+- Build tool for easy deployment
+- super() method support 
+- Micro-sized. 3.6 kb minfied + gzipped.
+- Fully ECMAScript 5 Strict Mode compliant.
+- Unit tests included.
 
-<br>
 
 ####Currently Supported:
 
 - Node.js
-- IE 7+
+- IE 6+
 - Safari 3+
 - Opera 9+ 
 - Chrome 9+
 - iOS
 - Android
-- (Other browsers/platforms probably work, but have not been thoroughly tested).
 
 <br>
 
-####Some other cool little factoids:
-
-- Fully ECMAScript 5 Strict Mode compliant.
-- Passes [JSHint](http://www.jshint.com) with flying colors (with Assume : Browser, NodeJS).
-- See no evil, do no evil. Zero use of eval, with and Function();
-- Tests, tests, tests. You can be sure it works.
-- Very well documented, lots o' comments.
-- MinionJS does not touch native JavaScript prototypes. I.E. no Object.prototype.someSuperAwesomeMethod___weThink();
-- Damage Control. No global pollution (by default). All classes reside under the minion namespace. This is good, trust us.
+[Overview](http://www.screenr.com/wOas)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[Getting Started](https://github.com/gigafied/minion/blob/master/docs/getting_started.md)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[Publish/Subscribe](http://www.screenr.com/cJ5s)
 
 <br>
 
