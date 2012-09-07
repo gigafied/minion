@@ -1,4 +1,16 @@
-### MinionJS - Classical Inheritance for JavaScript
+
+## IMPORTANT NOTE
+
+I have personally switched from Minion (and contributed heavily) to [Rosy](https://github.com/ff0000/rosy).
+
+Rosy is an AMD framework that implements Classical Inheritance, much like Minion does. In fact, I ported a decent amount of code from Minion over to Rosy.
+
+I highly recommend taking a look at Rosy, if you're at all interested in Minion. It solves several shortcomings of Minion and offloads the dependency management onto AMD/RequireJS.
+
+With that being said, I will do my best to still fix any bugs/issues in Minion and answer any questions you might have.
+<br><br>
+
+## MinionJS - Classical Inheritance for JavaScript
 
 A micro-framework that provides classical inheritance for JavaScript. Easily namespace, create and extend classes.
 
